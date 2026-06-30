@@ -1,0 +1,11 @@
+tidyverse
+DBI
+RPostgres
+shiny
+magick
+png
+writexl
+ggimage
+crayon
+httr
+jsonlite
