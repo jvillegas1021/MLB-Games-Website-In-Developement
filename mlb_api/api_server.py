@@ -6,7 +6,7 @@ api = FastAPI()
 
 @api.get("/")
 def get_matchups_today():
-    return {"message": "hello world"}
+    return {"message": ""}
 
 
 api.include_router(matchups_router)
