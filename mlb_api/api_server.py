@@ -1,0 +1,12 @@
+from fastapi import FastAPI
+from mlb_api.api_endpoints.matchups import router as matchups_router
+
+
+api = FastAPI()
+
+@api.get("/")
+def get_matchups_today():
+    return {"message": "hello world"}
+
+
+api.include_router(matchups_router)
