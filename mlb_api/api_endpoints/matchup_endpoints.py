@@ -5,6 +5,9 @@ router = APIRouter()
 
 @router.get("/matchups")
 def get_matchups_today():
+    if x_api_key != os.getenv("API_KEY"):
+        raise HTTPException(status_code=401, detail="Invalid API Key")
+        
     connection = get_connection()
     cursor = connection.cursor()
 
@@ -24,6 +27,8 @@ def get_matchups_today():
 
 @router.get("/pitcher_stats")
 def get_pitcher_stats():
+    if x_api_key != os.getenv("API_KEY"):
+        raise HTTPException(status_code=401, detail="Invalid API Key")
 
     connection = get_connection()
     cursor = connection.cursor()
@@ -44,6 +49,8 @@ def get_pitcher_stats():
 
 @router.get("/pitcher_stats_current_year")
 def get_pitcher_stats_current_year():
+    if x_api_key != os.getenv("API_KEY"):
+        raise HTTPException(status_code=401, detail="Invalid API Key")
 
     connection = get_connection()
     cursor = connection.cursor()
@@ -64,6 +71,8 @@ def get_pitcher_stats_current_year():
 
 @router.get("/team_batting_stats")
 def get_team_batting_stats():
+    if x_api_key != os.getenv("API_KEY"):
+        raise HTTPException(status_code=401, detail="Invalid API Key")
 
     connection = get_connection()
     cursor = connection.cursor()
@@ -84,6 +93,8 @@ def get_team_batting_stats():
 
 @router.get("/team_pitching_stats")
 def get_team_batting_stats():
+    if x_api_key != os.getenv("API_KEY"):
+        raise HTTPException(status_code=401, detail="Invalid API Key")
 
     connection = get_connection()
     cursor = connection.cursor()
