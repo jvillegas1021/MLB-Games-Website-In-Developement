@@ -1,12 +1,21 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+
 from mlb_api.api_endpoints.matchup_endpoints import router as matchups_router
 
+app = FastAPI()
 
-api = FastAPI()
+# CORS so React / Shiny / Render can call your API
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
-@api.get("/")
-def get_matchups_today():
-    return {"message": ""}
+@app.get("/")
+def root():
+    return {"status": "mlb_api running"}
 
-
-api.include_router(matchups_router)
+# include your matchups endpoint
+app.include_router(matchups_router)
