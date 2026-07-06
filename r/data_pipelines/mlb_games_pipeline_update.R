@@ -71,6 +71,9 @@ mlb_games_pipeline <- function(game_date = as.Date(format(Sys.time(), tz = "Amer
   #################### CHANGE PITCHER ID TO CHARACTERS ####################################
   starting_pitcher_filtered_df <- starting_pitcher_filtered_df %>%
     mutate(xMLBAMID = as.character(xMLBAMID))
+  
+  starting_pitcher_current_year_filtered_df <- starting_pitcher_current_year_filtered_df %>%
+    mutate(xMLBAMID = as.character(xMLBAMID))
   ################### ADD BATTING LINEUPS LIST PLUS HYDRATION STATUS ###################################
   
   matchup_df <- assign_batting_lineups_with_hydration_status(matchup_df, team_batting_df, hist_team_batting_df)
