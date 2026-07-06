@@ -48,7 +48,7 @@ def get_pitcher_stats_current_year(x_api_key: str = Header(None)):
     connection = get_connection()
     cursor = connection.cursor()
 
-    cursor.execute("SELECT * FROM matchup_starting_pitcher_stats_current_year_")
+    cursor.execute("SELECT * FROM matchup_starting_pitcher_stats_current_year")
     rows = cursor.fetchall()
     colnames = [desc[0] for desc in cursor.description]
 
