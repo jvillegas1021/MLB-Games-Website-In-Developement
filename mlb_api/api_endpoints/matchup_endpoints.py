@@ -37,7 +37,7 @@ def get_pitcher_stats(x_api_key: str = Header(None)):
     cursor.close()
     connection.close()
 
-    return {"matchups": [dict(zip(colnames, row)) for row in rows]}
+    return {"pitcher_stats": [dict(zip(colnames, row)) for row in rows]}
 
 
 @router.get("/pitcher_stats_current_year")
@@ -55,7 +55,7 @@ def get_pitcher_stats_current_year(x_api_key: str = Header(None)):
     cursor.close()
     connection.close()
 
-    return {"matchups": [dict(zip(colnames, row)) for row in rows]}
+    return {"pitcher_stats": [dict(zip(colnames, row)) for row in rows]}
 
 
 @router.get("/team_batting_stats")
@@ -73,7 +73,7 @@ def get_team_batting_stats(x_api_key: str = Header(None)):
     cursor.close()
     connection.close()
 
-    return {"matchups": [dict(zip(colnames, row)) for row in rows]}
+    return {"team_battings_stats": [dict(zip(colnames, row)) for row in rows]}
 
 
 @router.get("/team_pitching_stats")
@@ -91,4 +91,4 @@ def get_team_pitching_stats(x_api_key: str = Header(None)):
     cursor.close()
     connection.close()
 
-    return {"matchups": [dict(zip(colnames, row)) for row in rows]}
+    return {"team_pitching_stats": [dict(zip(colnames, row)) for row in rows]}
