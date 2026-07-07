@@ -1509,7 +1509,7 @@ calculate_power_boost_score <- function(matchup_df,
     left_join(
       trimmed_team_batting_df,
       by=c('Home_Team_ID' = 'team_id'),
-      relationship='one-to-one',
+      relationship='many-to-one',
       suffix=c('_pitcher', '_batting')
     ) %>%
     mutate(
@@ -1535,7 +1535,7 @@ calculate_power_boost_score <- function(matchup_df,
     left_join(
       trimmed_team_batting_df,
       by=c('Away_Team_ID' = 'team_id'),
-      relationship='one-to-one',
+      relationship='many-to-one',
       suffix=c('_pitcher', '_batting')
     ) %>%
     mutate(
@@ -1661,7 +1661,7 @@ calculate_team_split_score <- function(matchup_df,
     left_join(
       trimmed_team_batting_df,
       by=c('Home_Team_ID' = 'team_id'),
-      relationship='one-to-one'
+      relationship='many-to-one'
     ) %>%
     mutate(
       xBA_league_split    = if_else(Away_Pitcher_Hand == "L", league_split_dict$xBA$L, league_split_dict$xBA$R),
@@ -1703,7 +1703,7 @@ calculate_team_split_score <- function(matchup_df,
     left_join(
       trimmed_team_batting_df,
       by=c('Away_Team_ID' = 'team_id'),
-      relationship='one-to-one'
+      relationship='many-to-one'
     ) %>%
     mutate(
       xBA_league_split    = if_else(Home_Pitcher_Hand == "L", league_split_dict$xBA$L, league_split_dict$xBA$R),
