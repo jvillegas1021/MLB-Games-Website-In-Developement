@@ -1634,7 +1634,7 @@ calculate_team_split_score <- function(matchup_df,
       LHP_xBABIP
     )
   
-  trimmed_starting_pitcher_df <- starting_pitcher_filtered_df %>%
+  trimmed_starting_pitcher_df <- starting_pitcher_df %>%
     mutate(xMLBAMID = as.character(xMLBAMID)) %>%
     select(
       xMLBAMID,
