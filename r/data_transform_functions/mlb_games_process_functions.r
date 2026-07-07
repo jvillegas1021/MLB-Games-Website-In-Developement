@@ -2111,7 +2111,8 @@ create_final_display_matchup_df <- function(matchup_df) {
             Home_Lineup_Hydrated,
             Away_Lineup_Hydrated,
             Prediction_Status
-        )
+        ) %>%
+     arrange(Game_Time, ascending=TRUE)
     return(matchup_display_df)
     }
 
