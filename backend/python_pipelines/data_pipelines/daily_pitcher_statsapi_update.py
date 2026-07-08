@@ -1,5 +1,5 @@
-from data_extract_functions.extract_mlb_games_info import get_current_pitcher_ids, get_pitcher_info_and_stats_season
-from data_load_functions.load_data_to_database import push_pitcher_data_to_sql_upsert
+from backend.python_pipelines.data_extract_functions.extract_mlb_games_info import get_current_pitcher_ids, get_pitcher_info_and_stats_season
+from backend.python_pipelines.data_load_functions.load_data_to_database import push_pitcher_data_to_sql_upsert
 import pandas as pd
 from datetime import datetime
 import pytz
