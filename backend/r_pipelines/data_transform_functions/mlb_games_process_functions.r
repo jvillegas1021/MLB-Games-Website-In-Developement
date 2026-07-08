@@ -2049,7 +2049,42 @@ round_display_columns_for_pitcher_df <- function(pitcher_df) {
     pitcher_df$`BB%` <- round(pitcher_df$`BB%` * 100, 2)
 
     return(pitcher_df)
-    }
+}
+
+################## CREATE HISTORICAL MATCHUP DF ######################
+create_historical_matchup_df <- function(matchup_df, historical_matchup_df) {
+  
+  
+  historical_game_id_list <- historical_matchup_df$Game_ID
+  
+  
+  historical_matchup_final_df<- matchup_df %>%
+    filter((!(Game_ID %in% historical_game_id_list)) &
+             Prediction_Status == 'Full Prediction')
+  return(historical_matchup_final_df)
+  
+}
+
+################## CREATE Active MATCHUP DF ######################
+create_active_matchup_df <- function(matchup_df, historical_matchup_df) {
+  
+  historical_game_id_list <- historical_matchup_df$Game_ID
+  current_game_id_list <- matchup_df$Game_ID
+  
+  
+  current_matchup_filtered_df <- matchup_df %>%
+    filter(!(Game_ID %in% historical_game_id_list))
+  
+  historical_matchup_filtered_df <- historical_matchup_df %>%
+    filter(Game_ID %in% current_game_id_list)
+  
+  
+  current_matchup_final_df <- rbind(historical_matchup_filtered_df, current_matchup_filtered_df) %>%
+    arrange(Game_Time, ascending=TRUE)
+  
+  return(current_matchup_final_df)
+  
+}
 
 #################### FINAL DISPLAY MATCHUP DF (SELECT) ######################
 create_final_display_matchup_df <- function(matchup_df) {
@@ -2112,7 +2147,8 @@ create_final_display_matchup_df <- function(matchup_df) {
             Away_Lineup_Hydrated,
             Prediction_Status
         ) %>%
-     arrange(Game_Time, ascending=TRUE)
+      mutate(update_date = Sys.time()) %>%
+      arrange(Game_Time, ascending=TRUE)
     return(matchup_display_df)
     }
 
