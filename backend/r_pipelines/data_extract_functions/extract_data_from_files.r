@@ -1,4 +1,4 @@
-load_csv <- function(name, folder = "data") {
+load_csv <- function(name, folder = "backend/r_pipelines/data") {
   file_path <- file.path(folder, paste0(name, ".csv"))
   
   if (!file.exists(file_path)) {
