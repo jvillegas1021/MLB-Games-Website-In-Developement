@@ -1,6 +1,6 @@
-from data_extract_functions.extract_mlb_games_info import get_mlb_team_record_info
-from data_transform_functions.data_process_functions import process_mlb_team_record_info
-from data_load_functions.load_data_to_database import push_mlb_team_record_info
+from backend.python_pipelines.data_extract_functions.extract_mlb_games_info import get_mlb_team_record_info
+from backend.python_pipelines.data_transform_functions.data_process_functions import process_mlb_team_record_info
+from backend.python_pipelines.data_load_functions.load_data_to_database import push_mlb_team_record_info
 from datetime import datetime
 import pandas as pd
 import pytz
