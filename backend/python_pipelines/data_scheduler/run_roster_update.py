@@ -1,5 +1,5 @@
-from pipelines.daily_roster_update import run_daily_roster_update
-from pipelines.daily_pitcher_recent_form_update import run_starting_pitchers_recent_form_update
+from backend.python_pipelines.data_pipelines.daily_roster_update import run_daily_roster_update
+from backend.python_pipelines.data_pipelines.daily_pitcher_recent_form_update import run_starting_pitchers_recent_form_update
 
 def roster_update ():
   
