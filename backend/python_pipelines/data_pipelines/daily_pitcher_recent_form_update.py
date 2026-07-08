@@ -3,10 +3,10 @@ from datetime import datetime
 import pytz
 
 
-from data_extract_functions.extract_mlb_games_info import games_today_with_probable_pitchers_ids
-from data_extract_functions.extract_player_data import extract_pitcher_recent_form
+from backend.python_pipelines.data_extract_functions.extract_mlb_games_info import games_today_with_probable_pitchers_ids
+from backend.python_pipelines.data_extract_functions.extract_player_data import extract_pitcher_recent_form
 
-from data_load_functions.load_data_to_database import push_data_to_sql_replace
+from backend.python_pipelines.data_load_functions.load_data_to_database import push_data_to_sql_replace
 
 def run_starting_pitchers_recent_form_update(game_date=None):
     
