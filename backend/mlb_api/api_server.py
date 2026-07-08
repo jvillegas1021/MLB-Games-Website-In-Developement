@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from backend.mlb_api.api_endpoints.matchup_endpoints import router as matchups_router
+from api_endpoints.matchup_endpoints import router as matchups_router
 
 app = FastAPI()
 
