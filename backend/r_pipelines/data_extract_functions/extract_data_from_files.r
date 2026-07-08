@@ -8,7 +8,7 @@ load_csv <- function(name, folder = "backend/r_pipelines/data") {
   read.csv(file_path, stringsAsFactors = FALSE)
 }
 
-load_rds <- function(name, folder = "data") {
+load_rds <- function(name, folder = "backend/r_pipelines/data") {
   file_path <- file.path(folder, paste0(name, ".rds"))
   
   if (!file.exists(file_path)) {
