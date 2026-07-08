@@ -2,7 +2,7 @@ from sqlalchemy import MetaData, Table
 from sqlalchemy.dialects.postgresql import insert
 import pandas as pd
 
-from data_load_functions.utility_functions import get_engine
+from backend.python_pipelines.data_load_functions.utility_functions import get_engine
 
 
 def push_active_team_data_to_sql(table_name: str, team_data_df: pd.DataFrame):
