@@ -1,4 +1,26 @@
 fastapi
 uvicorn
+
+--Python--
 psycopg2-binary
 python-dotenv
+pandas
+numpy
+requests
+MLB-StatsAPI
+SQLAlchemy
+pytz
+pybaseball
+
+-- R--
+tidyverse
+DBI
+RPostgres
+shiny
+magick
+png
+writexl
+ggimage
+crayon
+httr
+jsonlite
