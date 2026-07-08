@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Header, HTTPException
 import os
-from mlb_api.database import get_connection
+from backend.mlb_api.database import get_connection
 
 router = APIRouter()
 
