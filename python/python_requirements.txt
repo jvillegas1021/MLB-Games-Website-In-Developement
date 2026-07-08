@@ -1,9 +1,0 @@
-pandas
-numpy
-requests
-MLB-StatsAPI
-SQLAlchemy
-psycopg2-binary
-python-dotenv
-pytz
-pybaseball

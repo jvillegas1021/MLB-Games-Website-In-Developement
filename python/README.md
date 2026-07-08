@@ -1,2 +1,0 @@
-# Baseball_Database_Update_Pipeline
-Updates database
