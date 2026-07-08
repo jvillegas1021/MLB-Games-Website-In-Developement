@@ -2,13 +2,13 @@ from datetime import datetime
 from sqlalchemy import text
 import pandas as pd
 
-from data_extract_functions.extract_mlb_games_info import extract_todays_games_schedule
-from data_extract_functions.extract_data_from_files import team_venue_data
+from backend.python_pipelines.data_extract_functions.extract_mlb_games_info import extract_todays_games_schedule
+from backend.python_pipelines.data_extract_functions.extract_data_from_files import team_venue_data
 
-from data_transform_functions.utility_functions import compute_travel_distance_around_earth
-from data_load_functions.utility_functions import get_engine
+from backend.python_pipelines.data_transform_functions.utility_functions import compute_travel_distance_around_earth
+from backend.python_pipelines.data_load_functions.utility_functions import get_engine
 
-from data_load_functions.load_data_to_database import push_data_to_sql_replace
+from backend.python_pipelines.data_load_functions.load_data_to_database import push_data_to_sql_replace
 
 
 
