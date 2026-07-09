@@ -157,17 +157,26 @@ mlb_games_pipeline <- function(game_date = as.Date(format(Sys.time(), tz = "Amer
   
   starting_pitcher_stats_df <- round_display_columns_for_pitcher_df(starting_pitcher_stats_df)
   
-  ############################### final table display (select) ############################
+  ###############################  display (select) ############################
   
   matchup_display_df <- create_final_display_matchup_df(matchup_df)
-  ############################# PUSH DATA TO SQL ##################################
   
+  ############################# create historical matchup df ##################################
   
-  write_df_to_sql('matchup_df', matchup_display_df)
-  write_df_to_sql('matchup_starting_pitcher_stats', starting_pitcher_filtered_df)
-  write_df_to_sql('matchup_starting_pitcher_stats_current_year_', starting_pitcher_current_year_filtered_df)
-  write_df_to_sql('matchup_team_batting_stats', team_batting_df)
-  write_df_to_sql('matchup_team_pitching_stats', team_pitching_df)
+  historical_matchup_final_df <- create_historical_matchup_df(matchup_display_df, historical_matchup_df)
+  
+  ############################ create final active matchup df #################################
+  
+  active_matchup_final_df <- create_active_matchup_df(matchup_display_df, historical_matchup_df)
+  
+  ########################### push to sql ####################################
+  
+  write_df_to_sql_replace('matchup_df', active_matchup_final_df)
+  write_df_to_sql_append('historical_matchup_df', historical_matchup_final_df)
+  write_df_to_sql_replace('matchup_starting_pitcher_stats', starting_pitcher_filtered_df)
+  write_df_to_sql_replace('matchup_starting_pitcher_stats_current_year', starting_pitcher_current_year_filtered_df)
+  write_df_to_sql_replace('matchup_team_batting_stats', team_batting_df)
+  write_df_to_sql_replace('matchup_team_pitching_stats', team_pitching_df)
   
   return(invisible((TRUE)))
 }
