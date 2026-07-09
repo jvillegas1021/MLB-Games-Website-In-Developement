@@ -34,7 +34,7 @@ jobs:
           python-version: "3.11"
 
       - name: Install dependencies
-        run: pip install -r python_requirements.txt
+        run: pip install -r backend/python_pipelines/python_requirements.txt
 
       - name: Add repo root to PYTHONPATH
         run: echo "PYTHONPATH=$PYTHONPATH:$(pwd)" >> $GITHUB_ENV
