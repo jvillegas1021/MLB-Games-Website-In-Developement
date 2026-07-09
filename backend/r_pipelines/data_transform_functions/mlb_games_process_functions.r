@@ -2040,7 +2040,7 @@ round_display_columns_for_matchup_df <- function(matchup_df) {
     # round display columns
     matchup_df <- matchup_df %>%
     mutate(
-      across(all_of(cols_to_round), ~ round(.x, 2))
+      across(all_of(cols_to_round), ~ round(.x, 4))
     )
 
     return(matchup_df)
