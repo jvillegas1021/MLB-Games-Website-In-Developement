@@ -4,7 +4,7 @@ import pytz
 import numpy as np
 
 
-from backend/python_pipelines/data_transform_functions.utility_functions import safe_div, safe_div_series, convert_ip
+from backend.python_pipelines.data_transform_functions.utility_functions import safe_div, safe_div_series, convert_ip
 
 def process_starting_pitcher_stats(pitcher_statsapi_df, pitcher_statcast_df):
 
