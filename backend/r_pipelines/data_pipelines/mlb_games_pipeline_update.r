@@ -41,6 +41,8 @@ mlb_games_pipeline <- function(game_date = as.Date(format(Sys.time(), tz = "Amer
   espn_mlb_odds_table_df <- get_espn_mlb_odds(game_date)
   # probability model
   prob_model <- load_rds("win_prob_model")
+  # historical matchup df table
+  historical_matchup_df <- get_data_from_database('historical_matchup_df')
   
   ###### create matchup df #############
   
