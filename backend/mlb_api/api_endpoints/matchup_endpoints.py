@@ -55,7 +55,7 @@ def get_pitcher_stats_current_year(x_api_key: str = Header(None)):
     cursor.close()
     connection.close()
 
-    return {"pitcher_stats": [dict(zip(colnames, row)) for row in rows]}
+    return {"pitcher_stats_current_year": [dict(zip(colnames, row)) for row in rows]}
 
 
 @router.get("/team_batting_stats")
