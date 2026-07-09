@@ -29,7 +29,7 @@ function App() {
   const [pitcher_stats, setPitcherStats] = useState([]);
   
   useEffect(() => {
-  fetch('https://mlb-games-website.onrender.com/pitcher_stats_current_year', {
+  fetch('https://mlb-games-website.onrender.com/pitcher_stats', {
     headers: { 'x-api-key': 'mlb_games_api_key' },
   })
     .then((res) => {
