@@ -92,3 +92,20 @@ def get_team_pitching_stats(x_api_key: str = Header(None)):
     connection.close()
 
     return {"team_pitching_stats": [dict(zip(colnames, row)) for row in rows]}
+
+@router.get("/pitcher_league_averages")
+def get_team_pitching_stats(x_api_key: str = Header(None)):
+    if x_api_key != os.getenv("API_KEY"):
+        raise HTTPException(status_code=401, detail="Invalid API Key")
+
+    connection = get_connection()
+    cursor = connection.cursor()
+
+    cursor.execute("SELECT * FROM mlb_pitcher_league_averages")
+    rows = cursor.fetchall()
+    colnames = [desc[0] for desc in cursor.description]
+
+    cursor.close()
+    connection.close()
+
+    return {"pitcher_league_averages": [dict(zip(colnames, row)) for row in rows]}

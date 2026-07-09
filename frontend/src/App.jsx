@@ -43,7 +43,18 @@ function App() {
     .catch(err => console.log("FETCH ERROR:", err));
   }, []);
 
+  const [pitcher_league_averages, setPitcherLeagueAverages] = useState([])
 
+  useEffect(() => {
+    fetch('https://mlb-games-website.onrender.com/pitcher_league_averages', {
+      headers: {'x-api-key': 'mlb_games_api_kep'},
+    })
+    .then((data) => {
+      console.log("DATA:", data);
+      setPitcherLeagueAverages(data.pitcher_league_averages);
+    })
+    .catch(err => console.log("FETCH ERROR:", err));
+  }, []);
 
   const [tab, setTab] = useState("matchups");
   const [selectedMatchup, setSelectedMatchup] = useState(null);
