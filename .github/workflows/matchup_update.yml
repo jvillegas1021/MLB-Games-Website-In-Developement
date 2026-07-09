@@ -1,0 +1,36 @@
+name: Run MLB Matchup Update (R)
+
+on:
+  schedule:
+    - cron: "0 12 * * *"   # 8 AM ET
+    - cron: "0 15 * * *"   # 11 AM ET
+    - cron: "0 18 * * *"   # 2 PM ET
+    - cron: "0 20 * * *"   # 4 PM ET
+    - cron: "0 22 * * *"   # 6 PM ET
+  workflow_dispatch:
+
+jobs:
+  run-r--mlb-matchup-update:
+    runs-on: ubuntu-latest
+
+    env:
+      DB_HOST: ${{ secrets.DB_HOST }}
+      DB_NAME: ${{ secrets.DB_NAME }}
+      DB_USER: ${{ secrets.DB_USER }}
+      DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+      DB_PORT: ${{ secrets.DB_PORT }}
+      DB_SSLMODE: ${{ secrets.DB_SSLMODE }}
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up R
+        uses: r-lib/actions/setup-r@v2
+
+      - name: Install R packages
+        run: |
+          Rscript -e 'install.packages(c("tidyverse", "DBI", "RPostgres"))'
+
+      - name: Run MLB matchup update
+        run: Rscript backend/r_pipelines/scripts/update_mlb_game_matchups_script.r
