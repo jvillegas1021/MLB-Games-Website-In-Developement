@@ -15,11 +15,11 @@ run_mlb_benchmarks_update_pipeline <- function() {
     mlb_team_league_batting_splits_df <- mlb_team_league_batting_splits(team_batting_df)
     
     # load
-    write_df_to_sql('pitcher_benchmark_v2', pitcher_benchmark_df)
-    write_df_to_sql('team_batting_benchmark_v2', team_batting_benchmark_df)
-    write_df_to_sql('team_pitching_benchmark_v2', team_pitching_benchmark_df)
-    write_df_to_sql('mlb_team_record_benchmark', mlb_team_record_benchmark_df)
-    write_df_to_sql('mlb_pitcher_league_averages', mlb_pitcher_league_averages_df)
-    write_df_to_sql('mlb_team_league_batting_averages', mlb_team_league_batting_averages_df)
-    write_df_to_sql('mlb_team_league_batting_splits', mlb_team_league_batting_splits_df)
+    write_df_to_sql_replace('pitcher_benchmark_v2', pitcher_benchmark_df)
+    write_df_to_sql_replace('team_batting_benchmark_v2', team_batting_benchmark_df)
+    write_df_to_sql_replace('team_pitching_benchmark_v2', team_pitching_benchmark_df)
+    write_df_to_sql_replace('mlb_team_record_benchmark', mlb_team_record_benchmark_df)
+    write_df_to_sql_replace('mlb_pitcher_league_averages', mlb_pitcher_league_averages_df)
+    write_df_to_sql_replace('mlb_team_league_batting_averages', mlb_team_league_batting_averages_df)
+    write_df_to_sql_replace('mlb_team_league_batting_splits', mlb_team_league_batting_splits_df)
     }
