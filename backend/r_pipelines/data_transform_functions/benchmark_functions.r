@@ -105,7 +105,7 @@ pitcher_benchmark <- function(pitcher_data) {
     arrange(
         desc(quantile_rank)
         ) %>%
-    mutate(update_date = Sys.Date())
+    mutate(update_date = Sys.time())
     
     return(pitcher_benchmark_df)
 }
@@ -217,7 +217,7 @@ team_batting_benchmark <- function(team_batting_df) {
     arrange(
         desc(quantile_rank)
         ) %>%
-    mutate(update_date = Sys.Date())
+    mutate(update_date = Sys.time())
                                            
     return(team_batting_benchmark_df)
 
@@ -332,7 +332,7 @@ team_pitching_benchmark <- function(team_pitching_df) {
     arrange(
         desc(quantile_rank)
         ) %>%
-    mutate(update_date = Sys.Date())
+    mutate(update_date = Sys.time())
     
     return(team_pitching_benchmark_df)
     
@@ -432,7 +432,7 @@ mlb_team_record_benchmark <- function(mlb_team_record_df) {
     arrange(
         desc(quantile_rank)
         ) %>%
-    mutate(update_date = Sys.Date())
+    mutate(update_date = Sys.time())
     
     return(mlb_team_benchmark_df)
 }
@@ -470,7 +470,7 @@ mlb_pitcher_league_averages <- function(starting_pitcher_stats_df) {
       names_from = metric,
       values_from = value
     ) %>%
-    mutate(update_date = Sys.Date())
+    mutate(update_date = Sys.time())
   
   return(league_pitcher_averages_df)
 }
@@ -510,7 +510,7 @@ mlb_team_league_batting_averages <- function(team_batting_df) {
       names_from = metric,
       values_from = value
     ) %>%
-    mutate(update_date = Sys.Date())
+    mutate(update_date = Sys.time())
   
   return(league_batting_averages_df)
 }
@@ -583,7 +583,7 @@ mlb_team_league_batting_splits <- function(team_batting_df) {
     relocate(split_stat, .before=average_right) %>%
     rename(split_right = average_right,
            split_left = average_left) %>%
-    mutate(update_date = Sys.Date())
+    mutate(update_date = Sys.time())
   
   return(splits_df)
 }
