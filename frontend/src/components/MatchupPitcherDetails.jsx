@@ -24,6 +24,9 @@ export default function MatchupPitcherDetails({ matchup, pitcher_stats }) {
     "Unknown"
   ];
 
+  const current_year = new Date().getFullYear();
+  const last_year = current_year - 1;
+
   const home_pitcher_stats = pitcher_stats.find(
     p => p.xMLBAMID === matchup.Home_Pitcher_ID
   );
@@ -173,6 +176,7 @@ export default function MatchupPitcherDetails({ matchup, pitcher_stats }) {
             <div style={{ marginLeft: "10px" }}>{u.value}%</div>
           </div>
         ))}
+        <h3> {matchup.Home_Pitcher} {last_year} - {current_year} Stats</h3>
         <h3> Expected </h3>
         <div>xBA - {home_pitcher_xba}</div>
         <div>xSLG - {home_pitcher_xslg}</div>
@@ -254,6 +258,7 @@ export default function MatchupPitcherDetails({ matchup, pitcher_stats }) {
             <div style={{ marginLeft: "10px" }}>{u.value}%</div>
           </div>
         ))}
+        <h3> {matchup.Away_Pitcher} {last_year} - {current_year} Stats</h3>
         <h3> Expected </h3>
         <div>xBA - {away_pitcher_xba}</div>
         <div>xSLG - {away_pitcher_xslg}</div>

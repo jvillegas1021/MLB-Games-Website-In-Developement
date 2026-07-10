@@ -12,8 +12,8 @@ export function edge_color(edge) {
   }
 
   export function era_color(era) {
-    if (era <= 4) return "green";
-    if (era > 4) return "red";
+    if (era <= 4.25) return "green";
+    if (era > 4.25) return "red";
     return "black";
   }
 
