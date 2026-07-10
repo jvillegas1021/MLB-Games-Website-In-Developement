@@ -25,10 +25,10 @@ jobs:
           python-version: "3.11"
 
       - name: Install dependencies
-        run: pip install -r requirements.txt
+        run: pip install -r backend/python_pipelines/python_requirements.txt
 
       - name: Add repo root to PYTHONPATH
         run: echo "PYTHONPATH=$PYTHONPATH:$(pwd)" >> $GITHUB_ENV
 
       - name: Run Pre-Update Script
-        run: python data_scheduler/run_daily_morning_update.py
+        run: python backend/python_pipelines/data_scheduler/run_daily_morning_update.py
