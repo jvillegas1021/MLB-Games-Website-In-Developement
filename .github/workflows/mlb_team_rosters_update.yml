@@ -12,6 +12,7 @@ on:
     - cron: "0 21 * * *"   # 5 PM ET
     - cron: "0 22 * * *"   # 6 PM ET
     - cron: "0 23 * * *"   # 7 PM ET
+    - cron: "0 00 * * *"   # 8 PM ET
   workflow_dispatch:
 
 jobs:
