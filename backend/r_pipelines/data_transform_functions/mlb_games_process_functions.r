@@ -2030,10 +2030,10 @@ calculate_model_odds_and_edge <- function(matchup_df) {
 
 ################## ROUND DISPLAY COLUMNS FOR MATCHUP #######################
 round_display_columns_for_matchup_df <- function(matchup_df) {
-    cols_to_round <- c('Home_Team_Total_Score', 'Home_Pitcher_Score', 'Home_Batting_Score',
+    cols_to_round <- c('Home_Pitcher_ERA', 'Home_Team_Total_Score', 'Home_Pitcher_Score', 'Home_Batting_Score',
     'Home_Pitching_Score', 'Home_Team_Split_Score', 'Home_Pitcher_vs_Away_Batting_Score',
     'Home_Power_Score', 'Home_Team_Record_Score', 'Home_Context_Score',
-    'Away_Team_Total_Score', 'Away_Pitcher_Score', 'Away_Batting_Score',
+    'Away_Pitcher_ERA', 'Away_Team_Total_Score', 'Away_Pitcher_Score', 'Away_Batting_Score',
     'Away_Pitching_Score', 'Away_Team_Split_Score', 'Away_Pitcher_vs_Home_Batting_Score',
     'Away_Power_Score', 'Away_Team_Record_Score', 'Away_Context_Score')
 
