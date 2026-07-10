@@ -2,8 +2,8 @@ name: Run MLB Matchup Update (R)
 
 on:
   schedule:
-    - cron: "0 12 * * *"   # 8 AM ET
-    - cron: "0 15 * * *"   # 11 AM ET
+    - cron: "0 14 * * *"   # 10 AM ET
+    - cron: "0 16 * * *"   # 12 PM ET
     - cron: "0 18 * * *"   # 2 PM ET
     - cron: "0 20 * * *"   # 4 PM ET
     - cron: "0 22 * * *"   # 6 PM ET
