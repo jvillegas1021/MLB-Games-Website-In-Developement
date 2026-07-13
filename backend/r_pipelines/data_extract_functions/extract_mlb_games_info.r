@@ -1,15 +1,30 @@
 ################# mlb games ################################
 get_mlb_games <- function(game_date = as.Date(format(Sys.time(), tz = "America/New_York"))) {
-    url <- paste0("https://statsapi.mlb.com/api/v1/schedule?sportId=1&date=", game_date, "&hydrate=probablePitcher(note)")
+
+    url <- paste0(
+        "https://statsapi.mlb.com/api/v1/schedule?sportId=1&date=",
+        game_date,
+        "&hydrate=probablePitcher(note)"
+    )
+
     games_df <- GET(url)
     parsed <- jsonlite::fromJSON(content(games_df, "text"), flatten = TRUE)
+
+    # If no games exist for this date, return NULL early
+    if (length(parsed$dates) == 0 || length(parsed$dates$games[[1]]) == 0) {
+        message("No MLB games for this date.")
+        return(NULL)
+    }
+
     games_table <- parsed$dates$games[[1]]
 
+    # Filter out All-Star and Exhibition
     games_table <- games_table %>%
         filter(!gameType %in% c('A', 'E'))
 
     return(games_table)
-    }
+}
+
 
 #################### CREATE ODDS TABLE ####################################
 get_espn_mlb_odds <- function(game_date = as.Date(format(Sys.time(), tz = "America/New_York"))) {
