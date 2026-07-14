@@ -1881,7 +1881,7 @@ calculate_total_scores <- function(matchup_df) {
   
   matchup_df <- matchup_df %>%
     mutate(
-      Home_Pitcher_Score = Home_Pitcher_Score * 1.2
+      Home_Pitcher_Score = Home_Pitcher_Score * 1.2,
       Home_Batting_Score = Home_Batting_Score * 0.1,
       Home_Pitching_Score = Home_Pitching_Score * 0.1,
       Home_Context_Score = Home_Context_Score * 0.4,
