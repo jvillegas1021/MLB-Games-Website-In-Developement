@@ -1881,21 +1881,22 @@ calculate_total_scores <- function(matchup_df) {
   
   matchup_df <- matchup_df %>%
     mutate(
-      Home_Batting_Score = Home_Batting_Score * 0.8,
-      Home_Pitching_Score = Home_Pitching_Score * 0.2,
-      Home_Context_Score = Home_Context_Score * 0.25,
-      Home_Team_Record_Score = Home_Team_Record_Score * 0.25,
-      Home_Pitcher_vs_Away_Team_Batting_Score = Home_Pitcher_vs_Away_Batting_Score * 0.25,
-      Home_Team_Split_Score = Home_Team_Split_Score * 0.25,
-      Home_Power_Score = Home_Power_Score * 0.25,
-      
-      Away_Batting_Score = Away_Batting_Score * 0.8,
-      Away_Pitching_Score = Away_Pitching_Score * 0.2,
-      Away_Context_Score = Away_Context_Score * 0.25,
-      Away_Team_Record_Score = Away_Team_Record_Score * 0.25,
-      Away_Pitcher_vs_Away_Team_Batting_Score = Away_Pitcher_vs_Home_Batting_Score * 0.25,
-      Away_Team_Split_Score = Away_Team_Split_Score * 0.25,
-      Away_Power_Score = Away_Power_Score * 0.25
+      Home_Pitcher_Score = Home_Pitcher_Score * 1.2
+      Home_Batting_Score = Home_Batting_Score * 0.1,
+      Home_Pitching_Score = Home_Pitching_Score * 0.1,
+      Home_Context_Score = Home_Context_Score * 0.4,
+      Home_Team_Record_Score = Home_Team_Record_Score * 3.9,
+      Home_Pitcher_vs_Away_Team_Batting_Score = Home_Pitcher_vs_Away_Batting_Score * 0.1,
+      Home_Team_Split_Score = Home_Team_Split_Score * 0.6,
+      Home_Power_Score = Home_Power_Score * 3.9,
+      Away_Pitcher_Score = Away_Pitcher_Score * 1.2,
+      Away_Batting_Score = Away_Batting_Score * 0.1,
+      Away_Pitching_Score = Away_Pitching_Score * 0.1,
+      Away_Context_Score = Away_Context_Score * 0.4,
+      Away_Team_Record_Score = Away_Team_Record_Score * 3.9,
+      Away_Pitcher_vs_Away_Team_Batting_Score = Away_Pitcher_vs_Home_Batting_Score * 0.1,
+      Away_Team_Split_Score = Away_Team_Split_Score * 0.6,
+      Away_Power_Score = Away_Power_Score * 3.9
     )
   
   home_scoring_columns <- str_subset(names(matchup_df), '^Home_.*_Score$')
