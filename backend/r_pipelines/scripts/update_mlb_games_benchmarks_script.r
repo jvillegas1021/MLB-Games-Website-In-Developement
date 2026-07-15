@@ -7,4 +7,4 @@ source("backend/r_pipelines/data_transform_functions/mlb_games_benchmark_functio
 source("backend/r_pipelines/data_load_functions/load_data_to_database.r")
 source("backend/r_pipelines/data_pipelines/mlb_games_benchmarks_pipeline_update.r")
 
-mlb_benchmarks_update_pipeline()
+mlb_games_benchmarks_update_pipeline()
