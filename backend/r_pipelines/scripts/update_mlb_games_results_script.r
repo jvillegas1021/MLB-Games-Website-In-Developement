@@ -9,4 +9,4 @@ source("backend/r_pipelines/data_transform_functions/mlb_games_process_functions
 source("backend/r_pipelines/data_load_functions/load_data_to_database.r")
 source("backend/r_pipelines/data_pipelines/mlb_games_results_pipeline.r")
 
-mlb_games_results_pipeline(check_date)
+mlb_games_results_pipeline()
