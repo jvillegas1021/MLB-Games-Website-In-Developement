@@ -3,7 +3,7 @@ A full‑stack baseball analytics platform that generates daily MLB matchup pred
 
 This project is the next evolution of the original R Shiny application, rebuilt as a modern React + FastAPI web application backed by a PostgreSQL analytics database and fully automated ETL pipelines.
 
-🚀 Overview
+ Overview
 The MLB Matchup Prediction Engine evaluates daily baseball games using only information available before first pitch.
 
 Instead of relying on season-long team stats, the system builds a game-specific environment using:
@@ -24,7 +24,7 @@ Dynamic league benchmarks
 
 The result is an explainable prediction system where every matchup score can be broken down into individual components.
 
-🧠 System Architecture
+ System Architecture
 Data Sources → ETL Pipelines → PostgreSQL → Benchmark Engine → Matchup Engine → FastAPI → React Frontend
 
 Key Components
@@ -76,7 +76,7 @@ Batting analysis
 
 Scoring breakdowns
 
-📊 Prediction Model
+ Prediction Model
 Each matchup is scored using weighted components:
 
 Starting Pitcher Score
@@ -91,7 +91,7 @@ Park & Contextual Adjustments
 
 Scores are converted into win probabilities and displayed in the frontend.
 
-🔄 Automated Pipelines
+ Automated Pipelines
 Daily and hourly GitHub Actions workflows:
 
 Daily ingestion of MLB data
@@ -106,7 +106,7 @@ Game environment generation
 
 All predictions use only pre-game data to ensure accurate historical evaluation.
 
-🖥️ FastAPI Endpoints
+ FastAPI Endpoints
 Current endpoints include:
 
 /matchups — daily matchup predictions
@@ -117,7 +117,7 @@ Current endpoints include:
 
 /historical — stored matchup environments (in development)
 
-🎨 React Frontend
+ React Frontend
 Features:
 
 Daily matchup dashboard
@@ -132,7 +132,7 @@ Data export
 
 Historical browsing (in development)
 
-🛠️ Tech Stack
+ Tech Stack
 Data Engineering: Python, Pandas, SQLAlchemy, PostgreSQL
 Analysis: R, statistical modeling, benchmark generation
 Backend: FastAPI, REST APIs
