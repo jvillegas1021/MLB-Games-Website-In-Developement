@@ -2240,3 +2240,19 @@ create_results_df <- function(games_table_df) {
   return(results_df)
   
 }
+
+################### CHECK VALID OR NEW GAME IDS FOR REULTS DF ################
+check_valid_results_df <- function(results_df, historical_results_df) {
+  
+  historical_game_ids <- historical_results_df$Game_ID
+  not_finished_games <- c('Postponed', 'Cancelled')
+  
+  results_final_df <- results_df %>%
+    filter(
+      (!(Game_ID %in% historical_game_ids)),
+      (!(Game_Status %in% not_finished_games))
+    )
+  
+  return(results_final_df)
+  
+}
