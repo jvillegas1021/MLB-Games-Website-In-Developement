@@ -1,4 +1,4 @@
-name: Run MLB Benchmarks Update (R)
+name: Run MLB Game Results Update (R)
 
 on:
   schedule:
