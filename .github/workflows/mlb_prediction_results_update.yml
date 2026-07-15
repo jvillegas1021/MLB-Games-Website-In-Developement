@@ -28,5 +28,5 @@ jobs:
         run: |
           Rscript -e 'install.packages(c("tidyverse", "DBI", "RPostgres"))'
 
-      - name: Run MLB benchmarks update
-        run: Rscript backend/r_pipelines/scripts/update_mlb_games_predictions_results_script.r
+      - name: Run MLB Prediction Results Update
+        run: Rscript backend/r_pipelines/scripts/update_mlb_games_prediction_results_script.r
