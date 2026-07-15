@@ -2259,3 +2259,136 @@ check_valid_results_df <- function(results_df, historical_results_df) {
   return(results_final_df)
   
 }
+
+##################### create currated results df ########################
+create_curated_results_df <- function(mlb_games_results_df, historical_matchup_df) {
+  
+  mlb_games_results_df <- mlb_games_results_df %>%
+    select(
+      Game_ID,
+      Home_Team,
+      Home_Team_Runs,
+      Home_Team_Is_Winner,
+      Away_Team,
+      Away_Team_Runs,
+      Away_Team_Is_Winner)
+  
+  curated_results_df <- historical_matchup_df %>%
+    left_join(
+      mlb_games_results_df,
+      by=c('Game_ID', 'Home_Team', 'Away_Team'),
+      relationship='many-to-many'
+    ) %>%
+    mutate(
+      Winner = if_else(
+        Home_Team_Is_Winner == TRUE, Home_Team, Away_Team
+      ),
+      Correct_Prediction = if_else(
+        Predicted_Winner == Winner, TRUE, FALSE
+      ),
+      Predicted_Winner_Betting_Edge = if_else(
+        Predicted_Winner == Home_Team, Home_Team_Betting_Edge, Away_Team_Betting_Edge
+      )
+    ) %>%
+    drop_na(Correct_Prediction) %>%
+    mutate(
+      Predicted_Winner_Betting_Edge = replace_na(Predicted_Winner_Betting_Edge, 0)
+    )
+  
+  return(curated_results_df)
+  
+}
+
+############## calcualte overall pick accuracy ###############
+calculate_overall_pick_accuracy <- function(curated_results_df, final_results_df) {
+  
+  total_overall_picks <- nrow(curated_results_df)
+  total_correct_picks <- sum(curated_results_df$Correct_Prediction)
+  
+  correct_pick_percentage <- round((total_correct_picks / total_overall_picks) * 100, 2)
+  
+  final_results_df$overall_accuracy <- correct_pick_percentage
+  
+  return(final_results_df)
+}
+
+################ calculate betting accuracy picks ##############
+calculate_overall_betting_accuracy <- function(curated_results_df, final_results_df) {
+  betting_edge_df <- curated_results_df %>%
+    drop_na(Home_Team_Betting_Edge,
+            Away_Team_Betting_Edge) %>%
+    mutate(
+      Bet = if_else(
+        Predicted_Winner_Betting_Edge > 0, TRUE, FALSE
+      )
+    ) %>%
+    filter(
+      Bet == TRUE
+    ) %>%
+    mutate(
+      Correct_Bet = if_else(
+        (Correct_Prediction== TRUE) & (Bet == TRUE), TRUE, FALSE
+      )
+    )
+  
+  total_bets_placed <- nrow(betting_edge_df)
+  total_correct_bets <- sum(betting_edge_df$Correct_Bet)
+  
+  correct_bet_percentage <- round((total_correct_bets / total_bets_placed) * 100, 2)
+  correct_bet_percentage
+  
+  final_results_df$betting_accuracy <- correct_bet_percentage
+  
+  return(final_results_df)
+}
+
+################### calculate win prob accuracy ##################
+calculate_win_probability_accuracy <- function(curated_results_df, final_results_df) {
+  
+  win_probability_df <- curated_results_df %>%
+    mutate(
+      WinProb_Bucket = case_when(
+        Win_Probability < 50 ~ "Win_Prob_Under_50",
+        Win_Probability >= 50 & Win_Probability < 55 ~ "Win_Prob_50_55",
+        Win_Probability >= 55 & Win_Probability < 60 ~ "Win_Prob_55_60",
+        Win_Probability >= 60 & Win_Probability < 65 ~ "Win_Prob_60_65",
+        Win_Probability >= 65 ~ "Win_Prob_65+"
+      )
+    )
+  
+  win_probabilty_bucket_df <- win_probability_df %>%
+    group_by(WinProb_Bucket) %>%
+    summarise(
+      total = n(),
+      correct = sum(Correct_Prediction),
+      accuracy = round(correct / total * 100, 2)
+    ) %>%
+    select(WinProb_Bucket, accuracy) %>% 
+    pivot_wider(
+      names_from = WinProb_Bucket,
+      values_from = accuracy
+    )
+  
+  final_results_df <- bind_cols(final_results_df, win_probabilty_bucket_df)
+  
+  return(final_results_df)
+  
+}
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
