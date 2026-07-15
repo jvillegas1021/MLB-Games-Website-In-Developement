@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  run-r--mlb-benchmarks-update:
+  run-r--mlb-games-prediction-results-update:
     runs-on: ubuntu-latest
 
     env:
