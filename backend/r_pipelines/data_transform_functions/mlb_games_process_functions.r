@@ -2061,10 +2061,13 @@ round_display_columns_for_pitcher_df <- function(pitcher_df) {
 create_historical_matchup_df <- function(matchup_df, historical_matchup_df) {
   
   
-  historical_game_id_list <- historical_matchup_df$Game_ID
+  historical_game_id_list <- as.numeric(historical_matchup_df$Game_ID)
   
   
   historical_matchup_final_df<- matchup_df %>%
+    mutate(
+      Game_ID = as.numeric(Game_ID)
+    ) %>%
     filter((!(Game_ID %in% historical_game_id_list)) &
              Prediction_Status == 'Full Prediction')
   return(historical_matchup_final_df)
@@ -2074,8 +2077,8 @@ create_historical_matchup_df <- function(matchup_df, historical_matchup_df) {
 ################## CREATE Active MATCHUP DF ######################
 create_active_matchup_df <- function(matchup_df, historical_matchup_df) {
   
-  historical_game_id_list <- historical_matchup_df$Game_ID
-  current_game_id_list <- matchup_df$Game_ID
+  historical_game_id_list <- as.numeric(historical_matchup_df$Game_ID)
+  current_game_id_list <- as.numeric(matchup_df$Game_ID)
   
   
   current_matchup_filtered_df <- matchup_df %>%
