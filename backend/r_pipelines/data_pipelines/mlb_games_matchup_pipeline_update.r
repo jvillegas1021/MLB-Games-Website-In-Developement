@@ -157,6 +157,9 @@ mlb_games_matchup_pipeline <- function(game_date = as.Date(format(Sys.time(), tz
   
   starting_pitcher_stats_df <- round_display_columns_for_pitcher_df(starting_pitcher_stats_df)
   
+  ############################### add betting logic / columns ####################
+  matchup_df <- calculate_betting_logic(matchup_df)
+  
   ###############################  display (select) ############################
   
   matchup_display_df <- create_final_display_matchup_df(matchup_df)
