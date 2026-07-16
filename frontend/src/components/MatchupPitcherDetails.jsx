@@ -38,9 +38,6 @@ export default function MatchupPitcherDetails({ matchup, pitcher_stats, pitcher_
   const current_year = new Date().getFullYear();
   const last_year = current_year - 1;
 
-  const home_pitcher_score_color = compare_stat_general_color(matchup.Home_Pitcher_Score, matchup.Away_Pitcher_Score)
-  const away_pitcher_score_color = compare_stat_general_color(matchup.Away_Pitcher_Score, matchup.Home_Pitcher_Score)
-
   const home_pitcher_stats = pitcher_stats.find(
     p => p.xMLBAMID === matchup.Home_Pitcher_ID
   );
@@ -231,16 +228,20 @@ export default function MatchupPitcherDetails({ matchup, pitcher_stats, pitcher_
       <div style={{ width: "30%", textAlign: "center" }}>
         <h3>Starting Pitchers Breakdown</h3>
 
-        <div style={{ fontSize: "22px", fontWeight: 600 }}>
-          <span style={{ fontSize: "32px", fontWeight: 700, color: home_pitcher_score_color }}>
+        <div 
+          style={{ 
+            display: "flex", 
+            justifyContent: "space-between", 
+            fontSize: "32px", 
+            fontWeight: 700,
+            marginTop: "10px"
+          }}
+        >
+          <span style={{ color: compare_stat_general_color(matchup.Home_Pitcher_Score, matchup.Away_Pitcher_Score) }}>
             {matchup.Home_Pitcher_Score}
           </span>
 
-          <span style={{ margin: "0 10px", fontSize: "20px", color: "#555" }}>
-            — - —
-          </span>
-
-          <span style={{ fontSize: "32px", fontWeight: 700, color: away_pitcher_score_color }}>
+          <span style={{ color: compare_stat_general_color(matchup.Away_Pitcher_Score, matchup.Home_Pitcher_Score) }}>
             {matchup.Away_Pitcher_Score}
           </span>
         </div>
