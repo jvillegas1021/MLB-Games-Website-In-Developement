@@ -2028,7 +2028,33 @@ calculate_model_odds_and_edge <- function(matchup_df) {
   
   return(matchup_df)
 }
-
+################## betting logic ##############################
+calculate_betting_logic <- function(matchup_df) {
+  betting_df <- matchup_df %>%
+    mutate(
+      Home_Team_ESPN_Odds = as.numeric(Home_Team_ESPN_Odds),
+      Away_Team_ESPN_Odds = as.numeric(Away_Team_ESPN_Odds),
+      Home_Team_ESPN_Odds = replace_na(Home_Team_ESPN_Odds, 0),
+      Away_Team_ESPN_Odds = replace_na(Away_Team_ESPN_Odds, 0),
+      Home_Team_Betting_Edge = replace_na(Home_Team_Betting_Edge, 0),
+      Away_Team_Betting_Edge = replace_na(Away_Team_Betting_Edge, 0),
+      Bet_Team = Predicted_Winner,
+      Favorite = if_else(
+        Home_Team_ESPN_Odds <= Away_Team_ESPN_Odds, Home_Team, Away_Team
+      ),
+      Underdog = if_else(
+        Home_Team_ESPN_Odds > Away_Team_ESPN_Odds, Home_Team, Away_Team
+      ),
+      Bet_Team_Favorite_Underdog = if_else(
+        Bet_Team == Favorite, "Favorite", "Underdog"
+      ),
+      Betting_Edge = if_else(
+        Predicted_Winner == Home_Team, Home_Team_Betting_Edge, Away_Team_Betting_Edge
+      ),
+      Place_Bet = Betting_Edge >= 0
+    )
+  return(betting_df)
+}
 ################## ROUND DISPLAY COLUMNS FOR MATCHUP #######################
 round_display_columns_for_matchup_df <- function(matchup_df) {
     cols_to_round <- c('Home_Pitcher_ERA', 'Home_Team_Total_Score', 'Home_Pitcher_Score', 'Home_Batting_Score',
@@ -2056,44 +2082,6 @@ round_display_columns_for_pitcher_df <- function(pitcher_df) {
     pitcher_df$`BB%` <- round(pitcher_df$`BB%` * 100, 2)
 
     return(pitcher_df)
-}
-
-################## CREATE HISTORICAL MATCHUP DF ######################
-create_historical_matchup_df <- function(matchup_df, historical_matchup_df) {
-  
-  
-  historical_game_id_list <- as.numeric(historical_matchup_df$Game_ID)
-  
-  
-  historical_matchup_final_df<- matchup_df %>%
-    mutate(
-      Game_ID = as.numeric(Game_ID)
-    ) %>%
-    filter((!(Game_ID %in% historical_game_id_list)) &
-             Prediction_Status == 'Full Prediction')
-  return(historical_matchup_final_df)
-  
-}
-
-################## CREATE Active MATCHUP DF ######################
-create_active_matchup_df <- function(matchup_df, historical_matchup_df) {
-  
-  historical_game_id_list <- as.numeric(historical_matchup_df$Game_ID)
-  current_game_id_list <- as.numeric(matchup_df$Game_ID)
-  
-  
-  current_matchup_filtered_df <- matchup_df %>%
-    filter(!(Game_ID %in% historical_game_id_list))
-  
-  historical_matchup_filtered_df <- historical_matchup_df %>%
-    filter(Game_ID %in% current_game_id_list)
-  
-  
-  current_matchup_final_df <- rbind(historical_matchup_filtered_df, current_matchup_filtered_df) %>%
-    arrange(Game_Time, ascending=TRUE)
-  
-  return(current_matchup_final_df)
-  
 }
 
 #################### FINAL DISPLAY MATCHUP DF (SELECT) ######################
@@ -2155,13 +2143,56 @@ create_final_display_matchup_df <- function(matchup_df) {
             Win_Probability,
             Home_Lineup_Hydrated,
             Away_Lineup_Hydrated,
-            Prediction_Status
+            Prediction_Status,
+            Bet_Team,
+            Favorite,
+            Underdog,
+            Bet_Team_Favorite_Underdog,
+            Betting_Edge,
+            Place_Bet
         ) %>%
       mutate(update_date = Sys.time()) %>%
       arrange(Game_Time, ascending=TRUE)
     return(matchup_display_df)
     }
 
+################## CREATE HISTORICAL MATCHUP DF ######################
+create_historical_matchup_df <- function(matchup_df, historical_matchup_df) {
+  
+  
+  historical_game_id_list <- as.numeric(historical_matchup_df$Game_ID)
+  
+  
+  historical_matchup_final_df<- matchup_df %>%
+    mutate(
+      Game_ID = as.numeric(Game_ID)
+    ) %>%
+    filter((!(Game_ID %in% historical_game_id_list)) &
+             Prediction_Status == 'Full Prediction')
+  return(historical_matchup_final_df)
+  
+}
+
+################## CREATE Active MATCHUP DF ######################
+create_active_matchup_df <- function(matchup_df, historical_matchup_df) {
+  
+  historical_game_id_list <- as.numeric(historical_matchup_df$Game_ID)
+  current_game_id_list <- as.numeric(matchup_df$Game_ID)
+  
+  
+  current_matchup_filtered_df <- matchup_df %>%
+    filter(!(Game_ID %in% historical_game_id_list))
+  
+  historical_matchup_filtered_df <- historical_matchup_df %>%
+    filter(Game_ID %in% current_game_id_list)
+  
+  
+  current_matchup_final_df <- rbind(historical_matchup_filtered_df, current_matchup_filtered_df) %>%
+    arrange(Game_Time, ascending=TRUE)
+  
+  return(current_matchup_final_df)
+  
+}
 #################### CHECK COLOR FOR SPLITS ###################
 check_color_for_platoon_splits <- function(platoon_splits, opposing_pitcher_hand) {
 
