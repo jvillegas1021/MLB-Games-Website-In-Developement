@@ -34,3 +34,15 @@ export function compare_stat_low_color(stat, compare_stat) {
   if (stat > compare_stat) return "red";
   return "orange"
 }
+
+export function compare_stat_high_color(stat, compare_stat) {
+  if (stat > compare_stat) return "green";
+  if (stat < compare_stat) return "red";
+  return "orange"
+}
+
+export function compare_stat_general_color(stat, compare_stat) {
+  if (stat > compare_stat) return "green";
+  if (stat < compare_stat) return "red";
+  return "orange"
+}

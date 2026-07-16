@@ -1,7 +1,18 @@
-import { compare_stat_low_color } from "../utility_functions/color_functions.js"
+import { compare_stat_low_color, compare_stat_high_color, compare_stat_general_color } from "../utility_functions/color_functions.js"
 import { safe_fixed, safe_percent } from "../utility_functions/safe_functions.js"
 
-export default function MatchupPitcherDetails({ matchup, pitcher_stats }) {
+export default function MatchupPitcherDetails({ matchup, pitcher_stats, pitcher_league_averages }) {
+
+  if (!pitcher_league_averages || pitcher_league_averages.length === 0) {
+    return <div>Loading pitcher league averages...</div>;
+  }
+
+  // Build dictionary safely
+  const leagueAvg = Object.fromEntries(
+    pitcher_league_averages.map(r => [r.stat, r.average])
+  );
+
+
   const pitch_types = [
     "2_Seam_Fastball",
     "4_Seam_Fastball",
@@ -26,6 +37,9 @@ export default function MatchupPitcherDetails({ matchup, pitcher_stats }) {
 
   const current_year = new Date().getFullYear();
   const last_year = current_year - 1;
+
+  const home_pitcher_score_color = compare_stat_general_color(matchup.Home_Pitcher_Score, matchup.Away_Pitcher_Score)
+  const away_pitcher_score_color = compare_stat_general_color(matchup.Away_Pitcher_Score, matchup.Home_Pitcher_Score)
 
   const home_pitcher_stats = pitcher_stats.find(
     p => p.xMLBAMID === matchup.Home_Pitcher_ID
@@ -215,11 +229,23 @@ export default function MatchupPitcherDetails({ matchup, pitcher_stats }) {
 
       {/* CENTER COLUMN — whatever you want */}
       <div style={{ width: "30%", textAlign: "center" }}>
-        <h3>MLB Matchup</h3>
-        <div>{matchup.Home_Team} vs {matchup.Away_Team}</div>
-        <div>Game ID: {matchup.Game_ID}</div>
-        {/* Add anything else here */}
+        <h3>Starting Pitchers Breakdown</h3>
+
+        <div style={{ fontSize: "22px", fontWeight: 600 }}>
+          <span style={{ fontSize: "32px", fontWeight: 700, color: home_pitcher_score_color }}>
+            {matchup.Home_Pitcher_Score}
+          </span>
+
+          <span style={{ margin: "0 10px", fontSize: "20px", color: "#555" }}>
+            — - —
+          </span>
+
+          <span style={{ fontSize: "32px", fontWeight: 700, color: away_pitcher_score_color }}>
+            {matchup.Away_Pitcher_Score}
+          </span>
+        </div>
       </div>
+
 
       {/* RIGHT COLUMN — Away Pitch Mix */}
       <div style={{ width: "30%", textAlign: "center" }}>

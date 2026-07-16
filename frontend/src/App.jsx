@@ -47,7 +47,11 @@ function App() {
 
   useEffect(() => {
     fetch('https://mlb-games-website.onrender.com/pitcher_league_averages', {
-      headers: {'x-api-key': 'mlb_games_api_kep'},
+      headers: {'x-api-key': 'mlb_games_api_key'},
+    })
+    .then((res) => {
+      console.log("STATUS:", res.status);
+      return res.json();
     })
     .then((data) => {
       console.log("DATA:", data);
@@ -113,7 +117,8 @@ function App() {
             {/* Extra info section */}
             <MatchupPitcherDetails 
             matchup={selectedMatchup}
-            pitcher_stats={pitcher_stats} />
+            pitcher_stats={pitcher_stats}
+            pitcher_league_averages={pitcher_league_averages} />
           </>
         )}
 
