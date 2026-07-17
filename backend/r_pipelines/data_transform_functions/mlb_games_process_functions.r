@@ -34,7 +34,10 @@ create_matchup_df <- function(games_table) {
         Away_Team_ID = teams.away.team.id,
         Away_Pitcher = teams.away.probablePitcher.fullName,
         Away_Pitcher_ID = teams.away.probablePitcher.id
-      )
+      ) %>%
+       dplyr::mutate(
+         Game_ID = as.integer(Game_ID)
+       )
     
     time <- matchup_df$Game_Time
     dt_utc <- ymd_hms(time, tz = 'UTC')
@@ -2181,13 +2184,10 @@ create_final_display_matchup_df <- function(matchup_df) {
 create_historical_matchup_df <- function(matchup_df, historical_matchup_df) {
   
   
-  historical_game_id_list <- as.numeric(historical_matchup_df$Game_ID)
+  historical_game_id_list <- historical_matchup_df$Game_ID
   
   
   historical_matchup_final_df<- matchup_df %>%
-    mutate(
-      Game_ID = as.numeric(Game_ID)
-    ) %>%
     filter((!(Game_ID %in% historical_game_id_list)) &
              Prediction_Status == 'Full Prediction')
   return(historical_matchup_final_df)
@@ -2197,8 +2197,8 @@ create_historical_matchup_df <- function(matchup_df, historical_matchup_df) {
 ################## CREATE Active MATCHUP DF ######################
 create_active_matchup_df <- function(matchup_df, historical_matchup_df) {
   
-  historical_game_id_list <- as.numeric(historical_matchup_df$Game_ID)
-  current_game_id_list <- as.numeric(matchup_df$Game_ID)
+  historical_game_id_list <- historical_matchup_df$Game_ID
+  current_game_id_list <- matchup_df$Game_ID
   
   
   current_matchup_filtered_df <- matchup_df %>%
@@ -2290,6 +2290,7 @@ create_results_df <- function(games_table_df) {
       Away_Team_Is_Winner = teams.away.isWinner
     ) %>%
     mutate(
+      Game_ID = as.integer(Game_ID),
       update_date = Sys.time()
     )
   
