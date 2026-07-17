@@ -2020,18 +2020,11 @@ calculate_model_odds_and_edge <- function(matchup_df) {
         round(Away_Odds_Num) * 1
       ),
       
-      # convert ESPN odds to numeric
-      Home_ESPN_Num = as.integer(Home_Team_ESPN_Odds),
-      Away_ESPN_Num = as.integer(Away_Team_ESPN_Odds),
       
       # compute edge using numeric odds
-      Home_Team_Betting_Edge = Home_ESPN_Num - round(Home_Odds_Num),
-      Away_Team_Betting_Edge = Away_ESPN_Num - round(Away_Odds_Num),
-      
-      Home_Team_ESPN_Odds = as.integer(Home_Team_ESPN_Odds),
-      Away_Team_ESPN_Odds = as.integer(Away_Team_ESPN_Odds),
-      Home_Team_Model_Odds = as.integer(Home_Team_Model_Odds),
-      Away_Team_Model_Odds = as.integer(Away_Team_Model_Odds)
+      Home_Team_Betting_Edge = Home_Team_ESPN_Odds - round(Home_Odds_Num),
+      Away_Team_Betting_Edge = Away_Team_ESPN_Odds - round(Away_Odds_Num),
+
     )
   
   return(matchup_df)
