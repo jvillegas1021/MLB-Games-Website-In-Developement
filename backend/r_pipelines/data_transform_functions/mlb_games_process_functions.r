@@ -2037,35 +2037,43 @@ calculate_model_odds_and_edge <- function(matchup_df) {
 calculate_betting_logic <- function(matchup_df) {
   betting_df <- matchup_df %>%
     mutate(
+      
       Home_Team_ESPN_Odds = replace_na(Home_Team_ESPN_Odds, 0),
       Away_Team_ESPN_Odds = replace_na(Away_Team_ESPN_Odds, 0),
       Home_Team_Model_Odds = replace_na(Home_Team_Model_Odds, 0),
       Away_Team_Model_Odds = replace_na(Away_Team_Model_Odds, 0),
       Home_Team_Betting_Edge = replace_na(Home_Team_Betting_Edge, 0),
       Away_Team_Betting_Edge = replace_na(Away_Team_Betting_Edge, 0),
+      
       Bet_Team = Predicted_Winner,
-      Favorite = if_else(
-        Home_Team_ESPN_Odds <= Away_Team_ESPN_Odds, Home_Team, Away_Team
+      
+      Favorite = case_when(
+        Home_Team_ESPN_Odds < Away_Team_ESPN_Odds ~ Home_Team,
+        Home_Team_ESPN_Odds > Away_Team_ESPN_Odds ~ Away_Team,
+        TRUE ~ NA_character_
       ),
-      Underdog = if_else(
-        Home_Team_ESPN_Odds > Away_Team_ESPN_Odds, Home_Team, Away_Team
+      
+      Underdog = case_when(
+        Home_Team_ESPN_Odds > Away_Team_ESPN_Odds ~ Home_Team,
+        Home_Team_ESPN_Odds < Away_Team_ESPN_Odds ~ Away_Team,
+        TRUE ~ NA_character_
       ),
+      
       Bet_Team_Favorite_Underdog = case_when(
         Bet_Team == Favorite ~ "Favorite",
         Bet_Team == Underdog ~ "Underdog",
-        Bet_Team == 'No Prediction' ~ 'No Prediction'
+        Bet_Team == "No Prediction" ~ "No Prediction",
+        TRUE ~ NA_character_
       ),
+      
       Betting_Edge = case_when(
         Predicted_Winner == Home_Team ~ Home_Team_Betting_Edge,
         Predicted_Winner == Away_Team ~ Away_Team_Betting_Edge,
-        Predicted_Winner == "No Prediction" ~ NA_real_
+        TRUE ~ NA_real_
       ),
-      Place_Bet = if_else(
-        !is.na(Betting_Edge) & Betting_Edge > 0,
-        TRUE,
-        FALSE
+      
+      Place_Bet = !is.na(Betting_Edge) & Betting_Edge > 0
       )
-    )
   return(betting_df)
 }
 ################## ROUND DISPLAY COLUMNS FOR MATCHUP #######################
