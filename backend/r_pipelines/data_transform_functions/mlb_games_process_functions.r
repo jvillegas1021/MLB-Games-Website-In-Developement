@@ -2339,6 +2339,8 @@ calculate_overall_pick_accuracy <- function(curated_results_df, final_results_df
   
   correct_pick_percentage <- round((total_correct_picks / total_overall_picks) * 100, 2)
   
+  final_results_df$overall_picks <- total_overall_picks
+  final_results_df$overall_correct_picks <- total_correct_picks
   final_results_df$overall_accuracy <- correct_pick_percentage
   
   return(final_results_df)
@@ -2349,11 +2351,14 @@ calculate_underdog_accuracy <- function(curated_results_df, final_results_df) {
   underdog_df <- curated_results_df %>%
     filter(Bet_Team_Favorite_Underdog == 'Underdog')
   
-  total_overall_underdog_picks <- nrow(underdog_df)
+  total_underdog_picks <- nrow(underdog_df)
   total_correct_underdog_picks <- sum(underdog_df$Correct_Prediction)
   
-  underdog_correct_pick_percentage <- correct_pick_percentage <- round((total_correct_underdog_picks / total_overall_underdog_picks) * 100, 2)
+  underdog_correct_pick_percentage <- round((total_correct_underdog_picks / total_underdog_picks) * 100, 2)
   
+  
+  final_results_df$underdog_picks <- total_underdog_picks
+  final_results_df$correct_underdog_picks <- total_correct_underdog_picks
   final_results_df$underdog_accuracy <- underdog_correct_pick_percentage
   
   return(final_results_df)
@@ -2379,11 +2384,12 @@ calculate_overall_betting_accuracy <- function(curated_results_df, final_results
     )
   
   total_bets_placed <- nrow(betting_edge_df)
-  total_correct_bets <- sum(betting_edge_df$Correct_Bet)
+  total_correct_bets_placed <- sum(betting_edge_df$Correct_Bet)
   
-  correct_bet_percentage <- round((total_correct_bets / total_bets_placed) * 100, 2)
-  correct_bet_percentage
+  correct_bet_percentage <- round((total_correct_bets_placed / total_bets_placed) * 100, 2)
   
+  final_results_df$bets_placed <- total_bets_placed
+  final_results_df$correct_bets_placed <- total_correct_bets_placed
   final_results_df$betting_accuracy <- correct_bet_percentage
   
   return(final_results_df)
