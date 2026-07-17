@@ -2344,6 +2344,21 @@ calculate_overall_pick_accuracy <- function(curated_results_df, final_results_df
   return(final_results_df)
 }
 
+################## calculate underdog accuracy picks ###############
+calculate_underdog_accuracy <- function(curated_results_df, final_results_df) {
+  underdog_df <- curated_results_df %>%
+    filter(Bet_Team_Favorite_Underdog == 'Underdog')
+  
+  total_overall_underdog_picks <- nrow(underdog_df)
+  total_correct_underdog_picks <- sum(underdog_df$Correct_Prediction)
+  
+  underdog_correct_pick_percentage <- correct_pick_percentage <- round((total_correct_underdog_picks / total_overall_underdog_picks) * 100, 2)
+  
+  final_results_df$underdog_accuracy <- underdog_correct_pick_percentage
+  
+  return(final_results_df)
+}
+
 ################ calculate betting accuracy picks ##############
 calculate_overall_betting_accuracy <- function(curated_results_df, final_results_df) {
   betting_edge_df <- curated_results_df %>%
