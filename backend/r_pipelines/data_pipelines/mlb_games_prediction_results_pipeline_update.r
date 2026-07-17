@@ -14,6 +14,8 @@ mlb_games_prediction_results_pipeline <- function() {
   
   final_results_df <- calculate_overall_betting_accuracy(curated_results_df, final_results_df)
   
+  final_results_df <- calculate_underdog_accuracy(curated_results_df, final_results_df)
+  
   final_results_df <- calculate_win_probability_accuracy(curated_results_df, final_results_df)
   
   # push data to database
