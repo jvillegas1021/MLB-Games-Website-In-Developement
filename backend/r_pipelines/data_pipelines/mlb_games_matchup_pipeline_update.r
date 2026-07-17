@@ -15,11 +15,15 @@ mlb_games_matchup_pipeline <- function(game_date = as.Date(format(Sys.time(), tz
   # starting pitchers recent form
   starting_pitcher_recent_form_df <- get_data_from_database('starting_pitchers_recent_form')
   # team batting_data + historical
-  team_batting_df <- get_data_from_database('active_team_batting_stats_v2')
-  hist_team_batting_df <- get_data_from_database('historical_team_batting_stats_v2')
+  team_batting_df <- get_data_from_database('active_team_batting_stats_v2') %>%
+    mutate(gamePk = as.integer(gamePk))
+  hist_team_batting_df <- get_data_from_database('historical_team_batting_stats_v2') %>%
+    mutate(gamePk = as.integer(gamePk))
   # team pitching + historical
-  team_pitching_df <- get_data_from_database('active_team_pitching_stats_v2')
-  hist_team_pitching_df <- get_data_from_database('historical_team_pitching_stats_v2')
+  team_pitching_df <- get_data_from_database('active_team_pitching_stats_v2') %>%
+    mutate(gamePk = as.integer(gamePk))
+  hist_team_pitching_df <- get_data_from_database('historical_team_pitching_stats_v2') %>%
+    mutate(gamePk = as.integer(gamePk))
   # mlb_team_record_info
   mlb_team_record_df <-  get_data_from_database('mlb_team_record_info')
   # mlb_team_league_batting_averages
@@ -42,7 +46,8 @@ mlb_games_matchup_pipeline <- function(game_date = as.Date(format(Sys.time(), tz
   # probability model
   prob_model <- load_rds("win_prob_model")
   # historical matchup df table
-  historical_matchup_df <- get_data_from_database('historical_matchup_df')
+  historical_matchup_df <- get_data_from_database('historical_matchup_df') %>%
+    mutate(Game_ID = as.integer(Game_ID))
   
   ###### create matchup df #############
   
