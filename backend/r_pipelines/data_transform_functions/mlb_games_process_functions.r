@@ -2338,15 +2338,9 @@ create_curated_results_df <- function(mlb_games_results_df, historical_matchup_d
       ),
       Correct_Prediction = if_else(
         Predicted_Winner == Winner, TRUE, FALSE
-      ),
-      Predicted_Winner_Betting_Edge = if_else(
-        Predicted_Winner == Home_Team, Home_Team_Betting_Edge, Away_Team_Betting_Edge
       )
     ) %>%
-    drop_na(Correct_Prediction) %>%
-    mutate(
-      Predicted_Winner_Betting_Edge = replace_na(Predicted_Winner_Betting_Edge, 0)
-    )
+    drop_na(Correct_Prediction)
   
   return(curated_results_df)
   
@@ -2367,40 +2361,17 @@ calculate_overall_pick_accuracy <- function(curated_results_df, final_results_df
   return(final_results_df)
 }
 
-################## calculate underdog accuracy picks ###############
-calculate_underdog_accuracy <- function(curated_results_df, final_results_df) {
-  underdog_df <- curated_results_df %>%
-    filter(Bet_Team_Favorite_Underdog == 'Underdog')
-  
-  total_underdog_picks <- nrow(underdog_df)
-  total_correct_underdog_picks <- sum(underdog_df$Correct_Prediction)
-  
-  underdog_correct_pick_percentage <- round((total_correct_underdog_picks / total_underdog_picks) * 100, 2)
-  
-  
-  final_results_df$underdog_picks <- total_underdog_picks
-  final_results_df$correct_underdog_picks <- total_correct_underdog_picks
-  final_results_df$underdog_accuracy <- underdog_correct_pick_percentage
-  
-  return(final_results_df)
-}
-
 ################ calculate betting accuracy picks ##############
 calculate_overall_betting_accuracy <- function(curated_results_df, final_results_df) {
   betting_edge_df <- curated_results_df %>%
     drop_na(Home_Team_Betting_Edge,
             Away_Team_Betting_Edge) %>%
-    mutate(
-      Bet = if_else(
-        Predicted_Winner_Betting_Edge > 0, TRUE, FALSE
-      )
-    ) %>%
     filter(
-      Bet == TRUE
+      Place_Bet == TRUE
     ) %>%
     mutate(
       Correct_Bet = if_else(
-        (Correct_Prediction== TRUE) & (Bet == TRUE), TRUE, FALSE
+        (Correct_Prediction == TRUE) & (Place_Bet == TRUE), TRUE, FALSE
       )
     )
   
@@ -2412,6 +2383,26 @@ calculate_overall_betting_accuracy <- function(curated_results_df, final_results
   final_results_df$bets_placed <- total_bets_placed
   final_results_df$correct_bets_placed <- total_correct_bets_placed
   final_results_df$betting_accuracy <- correct_bet_percentage
+  
+  return(final_results_df)
+}
+
+
+################## calculate underdog accuracy picks ###############
+calculate_underdog_accuracy <- function(curated_results_df, final_results_df) {
+  underdog_df <- curated_results_df %>%
+    drop_na(Bet_Team_Favorite_Underdog) %>%
+    filter(Bet_Team_Favorite_Underdog == 'Underdog')
+  
+  total_underdog_picks <- nrow(underdog_df)
+  total_correct_underdog_picks <- sum(underdog_df$Correct_Prediction)
+  
+  underdog_correct_pick_percentage <- round((total_correct_underdog_picks / total_underdog_picks) * 100, 2)
+  
+  
+  final_results_df$underdog_picks <- total_underdog_picks
+  final_results_df$correct_underdog_picks <- total_correct_underdog_picks
+  final_results_df$underdog_accuracy <- underdog_correct_pick_percentage
   
   return(final_results_df)
 }
