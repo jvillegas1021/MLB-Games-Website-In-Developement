@@ -37,8 +37,8 @@ get_espn_mlb_odds <- function(game_date = as.Date(format(Sys.time(), tz = "Ameri
 
     home_team_names <- character()
     away_team_names <- character()
-    home_team_odds <- character()
-    away_team_odds <- character()
+    home_team_odds <- numeric()
+    away_team_odds <- numeric()
     game_timestamp <- character()
     
     for (game in seq_len(length(odds_df$events$competitions))) {
@@ -54,9 +54,9 @@ get_espn_mlb_odds <- function(game_date = as.Date(format(Sys.time(), tz = "Ameri
             }
         else {
             home_team_names[game] <- matchups$competitors[[1]]$team.displayName[1]
-            home_team_odds[game] <- "Game Started"
+            home_team_odds[game] <- NA_real_
             away_team_names[game] <- matchups$competitors[[1]]$team.displayName[2]
-            away_team_odds[game] <- "Game Started"
+            away_team_odds[game] <- NA_real_
             game_timestamp[game] <- matchups$date
             }
         }
@@ -66,6 +66,14 @@ get_espn_mlb_odds <- function(game_date = as.Date(format(Sys.time(), tz = "Ameri
         Away_Team = away_team_names,
         Away_Team_ESPN_Odds = away_team_odds,
         Game_Timestamp = game_timestamp
+        )
+    
+    odds_table <- odds_table %>%
+      mutate(
+        Home_Team_ESPN_Odds = as.numeric(Home_Team_ESPN_Odds),
+        Away_Team_ESPN_Odds = as.numeric(Away_Team_ESPN_Odds),
+        Home_Team_ESPN_Odds = replace_na(Home_Team_ESPN_Odds, 0),
+        Away_Team_ESPN_Odds = replace_na(Away_Team_ESPN_Odds, 0)
         )
 
     odds_table$Game_Timestamp <- ymd_hm(odds_table$Game_Timestamp, quiet = TRUE)
