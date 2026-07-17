@@ -2008,13 +2008,13 @@ calculate_model_odds_and_edge <- function(matchup_df) {
       # formatted odds for display
       Home_Team_Model_Odds = if_else(
         Home_Odds_Num < 0,
-        paste0("- ", round(abs(Home_Odds_Num))),
-        paste0("+ ", round(Home_Odds_Num))
+        round(abs(Home_Odds_Num)) * (-1),
+        round(Home_Odds_Num) * 1
       ),
       Away_Team_Model_Odds = if_else(
         Away_Odds_Num < 0,
-        paste0("- ", round(abs(Away_Odds_Num))),
-        paste0("+ ", round(Away_Odds_Num))
+        round(abs(Away_Odds_Num)) * (-1),
+        round(Away_Odds_Num) * 1
       ),
       
       # convert ESPN odds to numeric
@@ -2023,7 +2023,12 @@ calculate_model_odds_and_edge <- function(matchup_df) {
       
       # compute edge using numeric odds
       Home_Team_Betting_Edge = Home_ESPN_Num - round(Home_Odds_Num),
-      Away_Team_Betting_Edge = Away_ESPN_Num - round(Away_Odds_Num)
+      Away_Team_Betting_Edge = Away_ESPN_Num - round(Away_Odds_Num),
+      
+      Home_Team_ESPN_Odds = as.integer(Home_Team_ESPN_Odds),
+      Away_Team_ESPN_Odds = as.integer(Away_Team_ESPN_Odds),
+      Home_Team_Model_Odds = as.integer(Home_Team_Model_Odds),
+      Away_Team_Model_Odds = as.integer(Away_Team_Model_Odds)
     )
   
   return(matchup_df)
@@ -2032,10 +2037,10 @@ calculate_model_odds_and_edge <- function(matchup_df) {
 calculate_betting_logic <- function(matchup_df) {
   betting_df <- matchup_df %>%
     mutate(
-      Home_Team_ESPN_Odds = as.numeric(Home_Team_ESPN_Odds),
-      Away_Team_ESPN_Odds = as.numeric(Away_Team_ESPN_Odds),
       Home_Team_ESPN_Odds = replace_na(Home_Team_ESPN_Odds, 0),
       Away_Team_ESPN_Odds = replace_na(Away_Team_ESPN_Odds, 0),
+      Home_Team_Model_Odds = replace_na(Home_Team_Model_Odds, 0),
+      Away_Team_Model_Odds = replace_na(Away_Team_Model_Odds, 0),
       Home_Team_Betting_Edge = replace_na(Home_Team_Betting_Edge, 0),
       Away_Team_Betting_Edge = replace_na(Away_Team_Betting_Edge, 0),
       Bet_Team = Predicted_Winner,
@@ -2045,13 +2050,21 @@ calculate_betting_logic <- function(matchup_df) {
       Underdog = if_else(
         Home_Team_ESPN_Odds > Away_Team_ESPN_Odds, Home_Team, Away_Team
       ),
-      Bet_Team_Favorite_Underdog = if_else(
-        Bet_Team == Favorite, "Favorite", "Underdog"
+      Bet_Team_Favorite_Underdog = case_when(
+        Bet_Team == Favorite ~ "Favorite",
+        Bet_Team == Underdog ~ "Underdog",
+        Bet_Team == 'No Prediction' ~ 'No Prediction'
       ),
-      Betting_Edge = if_else(
-        Predicted_Winner == Home_Team, Home_Team_Betting_Edge, Away_Team_Betting_Edge
+      Betting_Edge = case_when(
+        Predicted_Winner == Home_Team ~ Home_Team_Betting_Edge,
+        Predicted_Winner == Away_Team ~ Away_Team_Betting_Edge,
+        Predicted_Winner == "No Prediction" ~ NA_real_
       ),
-      Place_Bet = Betting_Edge >= 0
+      Place_Bet = if_else(
+        !is.na(Betting_Edge) & Betting_Edge > 0,
+        TRUE,
+        FALSE
+      )
     )
   return(betting_df)
 }
