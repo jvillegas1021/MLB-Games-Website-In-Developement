@@ -2,6 +2,7 @@
 A full‑stack baseball analytics platform that generates daily MLB matchup predictions using automated data pipelines, dynamic benchmarks, player‑level analysis, and an explainable scoring engine.
 
 This project is the next evolution of the original R Shiny application, rebuilt as a modern React + FastAPI web application backed by a PostgreSQL analytics database and fully automated ETL pipelines.
+![Website Preview](images/MLB-Games_Website.png)
 
 ## Overview
 The MLB Matchup Prediction Engine evaluates daily baseball games using only information available before first pitch.
