@@ -2,7 +2,7 @@ name: Run MLB Prediction Results Update (R)
 
 on:
   schedule:
-    - cron: "00 15 * * *"   # 11:00 AM Eastern (10:00 UTC)
+    - cron: "00 14 * * *"   # 10:00 AM Eastern (10:00 UTC)
   workflow_dispatch:
 
 jobs:
