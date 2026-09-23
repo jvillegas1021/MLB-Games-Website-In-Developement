@@ -65,8 +65,13 @@ create_matchup_df <- function(games_table) {
 
 assign_odds_and_win_probability_to_teams <- function(matchup_df, odds_df) {
     
+    recent_odds_df <- odds_df %>%
+      group_by(game_id) %>%
+      slice_max(order_by = update_date, n = 1, with_ties = FALSE) %>% 
+      ungroup()
+  
     matchup_df <- matchup_df %>%
-      left_join(odds_df,
+      left_join(recent_odds_df,
               by=c('Game_ID' = 'game_id'),
               relationship = 'one-to-one') %>%
       mutate(
