@@ -5,6 +5,7 @@ from backend.python_pipelines.data_pipelines.daily_batter_statsapi_update  impor
 from backend.python_pipelines.data_pipelines.daily_pitcher_stats_update  import run_daily_pitcher_stats_update
 from backend.python_pipelines.data_pipelines.daily_pitcher_current_season_stats_update import run_daily_pitcher_current_season_stats_update
 from backend.python_pipelines.data_pipelines.daily_pitcher_recent_form_update import run_starting_pitchers_recent_form_update
+from backend.python_pipelines.data_pipelines.daily_mlb_batting_stats_update import run_mlb_batting_stats_update
 from backend.python_pipelines.data_pipelines.daily_roster_update import run_daily_roster_update
 
 
@@ -16,6 +17,7 @@ def run_one_time_stats_update():
     run_daily_pitcher_stats_update()
     run_daily_pitcher_current_season_stats_update()
     run_starting_pitchers_recent_form_update()
+    run_mlb_batting_stats_update()
     run_daily_roster_update()
 
 if __name__ == "__main__":
