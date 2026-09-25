@@ -9,3 +9,5 @@ ggimage
 crayon
 httr
 jsonlite
+glmnet
+caret
