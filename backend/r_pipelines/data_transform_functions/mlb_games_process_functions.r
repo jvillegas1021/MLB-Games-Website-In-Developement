@@ -2927,8 +2927,7 @@ calculate_pitcher_scores <- function(pitcher_df) {
   # 3. Initialize a clean data frame to hold all our final team scores
   # We will start with just the team identifiers
   final_pitcher_scores_df <- pitcher_df %>% 
-    select(xMLBAMID, player_name)
-  
+    select(any_of(c("xMLBAMID", "player_name", "Throws")), any_of(pitch_usage_cols))
   
   
   # Loop through each of the 7 skill blocks
@@ -3020,6 +3019,28 @@ calculate_pitcher_scores <- function(pitcher_df) {
   
   return(final_pitcher_scores_df)
 } 
+  
+########## FILTER STARTING PITCHERS #############
+filter_starting_pitcher <- function(pitcher_df) {
+  starting_pitcher_df <- pitcher_df %>%
+    filter(GS > 10 & IP_per_start >= 4.0)
+  return(starting_pitcher_df)
+}
+
+########## FILTER HYBRID PITCHERS #############
+filter_hybrid_pitcher <- function(pitcher_df) {
+  hybrid_pitcher_df <- pitcher_df %>%
+    filter((GS > 0 & GS <= 10) | (GS > 10 & IP_per_start < 4.0))
+  return(hybrid_pitcher_df)
+}
+
+########## FILTER RELIEF PITCHERS #############
+filter_relief_pitcher <- function(pitcher_df) {
+  relief_pitcher_df <- pitcher_df %>%
+    filter(GS == 0 & IP >= 10)
+  return(relief_pitcher_df)
+}
+
   
   
   
