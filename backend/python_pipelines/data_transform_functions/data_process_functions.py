@@ -1030,6 +1030,18 @@ def process_mlb_games_odds_df(mlb_games_df, espn_mlb_games_odds_df):
     
     return mlb_games_odds_df
 
+def process_full_roster_batting_stats_df(batting_df_statcast, mlb_batting_rosters):
 
+    all_team_batting_df_list = []
+    
+    for team_name, info in mlb_batting_rosters.items():
+        
+        mlb_team_batting_df = process_full_roster_batting_df(team_name, info["id"], info["batters"], batting_df_statcast)
+        
+        all_team_batting_df_list.append(mlb_team_batting_df)
+        
+    full_roster_batting_stats_df = pd.concat(all_team_batting_df_list, ignore_index=True)
+    
+    return full_roster_batting_stats_df
 
 
