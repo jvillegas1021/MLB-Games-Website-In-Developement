@@ -3,7 +3,7 @@ numpy
 requests
 MLB-StatsAPI
 SQLAlchemy
-psycopg2-binary
+psycopg[binary]
 python-dotenv
 pytz
 pybaseball
