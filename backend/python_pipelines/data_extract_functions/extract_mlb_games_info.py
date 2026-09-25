@@ -354,5 +354,18 @@ def extract_espn_mlb_games_odds(game_date=None):
 
     return odds_df
 
+def extract_active_mlb_rosters():
     
+    teams = requests.get("https://statsapi.mlb.com/api/v1/teams?sportId=1").json()["teams"]
+    roster_map = {}
+    
+    for team in teams:
+        roster_url = f"https://statsapi.mlb.com/api/v1/teams/{team['id']}/roster"
+        roster = requests.get(roster_url).json()["roster"]
+        
+        # Isolate batter IDs safely
+        batter_ids_set = {p["person"]["id"] for p in roster if p["position"]["type"] != "Pitcher"}
+        roster_map[team['name']] = {"id": team['id'], "batters": list(batter_ids_set)}
+        
+    return roster_map
     
