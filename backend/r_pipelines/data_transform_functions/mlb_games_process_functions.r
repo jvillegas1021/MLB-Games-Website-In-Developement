@@ -2994,7 +2994,7 @@ calculate_pitcher_scores <- function(pitcher_df) {
     }
     
     # 7. Sum the individual components together to get the raw composite score
-    raw_composite_score <- rowSums(team_component_points, na.rm = TRUE)
+    raw_composite_score <- rowSums(pitcher_component_points, na.rm = TRUE)
     
     # 8. Scale to our classic Index scale (Mean = 100, Standard Deviation = 15)
     avg_comp <- mean(raw_composite_score, na.rm = TRUE)
