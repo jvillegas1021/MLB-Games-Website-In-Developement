@@ -2964,7 +2964,7 @@ calculate_pitcher_scores <- function(pitcher_df) {
     normalized_weights <- abs(raw_coefficients) / sum_coefs
     
     # 5. Build an internal matrix to store component points for each team
-    team_component_points <- matrix(0, nrow = nrow(pitcher_df), ncol = length(block_stats))
+    pitcher_component_points <- matrix(0, nrow = nrow(pitcher_df), ncol = length(block_stats))
     
     # 6. Calculate the scores for each individual stat in the block
     for (i in 1:length(block_stats)) {
@@ -2990,7 +2990,7 @@ calculate_pitcher_scores <- function(pitcher_df) {
       }
       
       # Multiply by the ridge importance weight
-      team_component_points[, i] <- z_scores * weight
+      pitcher_component_points[, i] <- z_scores * weight
     }
     
     # 7. Sum the individual components together to get the raw composite score
