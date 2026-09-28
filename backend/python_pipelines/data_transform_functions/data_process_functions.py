@@ -1030,6 +1030,255 @@ def process_mlb_games_odds_df(mlb_games_df, espn_mlb_games_odds_df):
     
     return mlb_games_odds_df
 
+def process_full_roster_batting_df( 
+                            team_name: str, 
+                            team_id: int, 
+                            team_batters_player_ids: list[int],
+                            all_batter_stats_statcast: pd.DataFrame) -> pd.DataFrame:
+    wBB = 0.691
+    wHBP = 0.722
+    w1B = 0.882
+    w2B = 1.252
+    w3B = 1.584
+    wHR = 2.037
+
+    league_woba = 0.313
+    wOBAScale = 1.232
+    R_PA_lg = 0.118
+
+    pitch_types = [
+        "2_Seam_Fastball",
+        "4_Seam_Fastball",
+        "Changeup",
+        "Curveball",
+        "Cutter",
+        "Eephus",
+        "Forkball",
+        "Knuckle_Curve",
+        "Knuckleball",
+        "Other",
+        "Pitch_Out",
+        "Screwball",
+        "Sinker",
+        "Slider",
+        "Slow_Curve",
+        "Slurve",
+        "Split_Finger",
+        "Sweeper",
+        "Unknown"
+    ]
+
+    suffix_list = ['K%', 'BB%', 'GB%', 'FB%', 'LD%', 'GB/FB', 'ISO', 'OPS',
+                   'BABIP', 'AVG', 'OBP', 'SLG', 'BB/K', 'HR/FB', 'IFFB%', 'Barrel%', 'HardHit%',
+                   'O-Swing%', 'Z-Swing%', 'Z-Contact%', 'O-Contact%', 'Contact%', 'Chase%',
+                   'Whiff%', 'SwStr%', 'F-Strike%', 'EV', 'LA', 'wOBA', 'wRAA', 'wRC', 'wRC+',
+                   'xWOBA', 'xBA', 'xSLG', 'xISO', 'xBABIP']
+
+
+    roster_batting_df = all_batter_stats_statcast[
+        all_batter_stats_statcast['xMLBAMID'].isin(team_batters_player_ids)
+        ].copy()
+
+
+    if roster_batting_df.empty:
+        return None
+    
+    team_totals = roster_batting_df.select_dtypes(include='number').sum()
+
+    pitcher_hand_list = ['general', 'RHP_', 'LHP_']
+
+    team_batting_metrics = {}
+
+    for hand in pitcher_hand_list:
+        prefix = "" if hand == "general" else f"{hand}"
+
+        #  K /  BB family
+        team_k_perc = safe_div(team_totals[f'{prefix}strikeouts'], team_totals[f'{prefix}plate_appearances'])
+        team_bb_perc  = safe_div(team_totals[f'{prefix}walks'], team_totals[f'{prefix}plate_appearances'])
+        team_bb_k_perc = safe_div(team_totals[f'{prefix}walks'], team_totals[f'{prefix}strikeouts'])
+        # GB  / FB / LD
+        team_gb_fb_ld = team_totals[f'{prefix}GB'] + team_totals[f'{prefix}FB'] + team_totals[f'{prefix}LD']
+        team_gb_perc = safe_div(team_totals[f'{prefix}GB'], team_gb_fb_ld)
+        team_fb_perc = safe_div(team_totals[f'{prefix}FB'], team_gb_fb_ld)
+        team_ld_perc = safe_div(team_totals[f'{prefix}LD'], team_gb_fb_ld)
+        team_hr_fb_perc = safe_div(team_totals[f'{prefix}home_runs'], team_totals[f'{prefix}FB'])
+        team_gb_fb_perc = safe_div(team_totals[f'{prefix}GB'], team_totals[f'{prefix}FB'])
+        team_iffb_perc = safe_div(team_totals[f'{prefix}PU'], team_totals[f'{prefix}FB'])
+        # --- TEAM AT-BATS ---
+        team_at_bats = team_totals[f'{prefix}plate_appearances'] - team_totals[f'{prefix}non_at_bats']
+        # --- AVG ---
+        team_avg = safe_div(team_totals[f'{prefix}hits'], team_at_bats)
+        # --- TOTAL BASES ---
+        team_total_bases = (
+            team_totals[f'{prefix}singles'] * 1 +
+            team_totals[f'{prefix}doubles'] * 2 +
+            team_totals[f'{prefix}triples'] * 3 +
+            team_totals[f'{prefix}home_runs'] * 4
+        )
+        # --- SLG ---
+        team_slg = safe_div(team_total_bases, team_at_bats)
+        # --- ISO ---
+        team_iso = team_slg - team_avg
+        # --- BABIP ---
+        team_babip_num = team_totals[f'{prefix}hits'] - team_totals[f'{prefix}home_runs']
+        team_babip_denom = (
+            team_at_bats
+            - team_totals[f'{prefix}strikeouts']
+            - team_totals[f'{prefix}home_runs']
+            + team_totals[f'{prefix}sac_flies']
+            + team_totals[f'{prefix}sac_fly_double_plays']
+        )
+        team_babip = safe_div(team_babip_num, team_babip_denom)
+        # --- OBP ---
+        team_obp_num = (
+            team_totals[f'{prefix}hits'] +
+            team_totals[f'{prefix}walks'] +
+            team_totals[f'{prefix}hit_by_pitches']
+        )
+        team_obp_denom = (
+            team_at_bats +
+            team_totals[f'{prefix}walks'] +
+            team_totals[f'{prefix}hit_by_pitches'] +
+            team_totals[f'{prefix}sacrifices']
+        )
+        team_obp = safe_div(team_obp_num, team_obp_denom)
+        # --- OPS ---
+        team_ops = team_obp + team_slg
+        # EV  / LA
+        team_ev  = safe_div(team_totals[f'{prefix}launch_speed_sum'] , team_totals[f'{prefix}batted_balls'])
+        team_la = safe_div(team_totals[f'{prefix}launch_angle_sum'] , team_totals[f'{prefix}batted_balls'])
+        # CONTACT QUALITY ESTS
+        team_xba = safe_div(team_totals[f'{prefix}ba_speedangle_sum'], team_totals[f'{prefix}batted_balls'])
+        team_xwoba = safe_div(team_totals[f'{prefix}woba_speedangle_sum'], team_totals[f'{prefix}batted_balls'])
+        team_xslg = safe_div(team_totals[f'{prefix}slg_speedangle_sum'], team_totals[f'{prefix}batted_balls'])
+        team_xiso = safe_div(team_totals[f'{prefix}iso_value_sum'], team_totals[f'{prefix}batted_balls'])
+        team_xbabip = safe_div(team_totals[f'{prefix}babip_value_sum'], team_totals[f'{prefix}batted_balls'])
+        # contact % family
+        team_hard_hit_perc = safe_div(team_totals[f'{prefix}hard_hit_balls'],
+                              team_totals[f'{prefix}batted_balls'])
+        
+        team_z_swing = safe_div(team_totals[f'{prefix}swings_in_zone'],
+                                  team_totals[f'{prefix}pitches_in_zone'])
+        
+        team_z_contact = safe_div(team_totals[f'{prefix}contacted_balls_in_zone'],
+                                  team_totals[f'{prefix}swings_in_zone'])
+        
+        team_contact   = safe_div(team_totals[f'{prefix}contacted_balls'],
+                                  team_totals[f'{prefix}swings'])
+        
+        team_o_contact = safe_div(team_totals[f'{prefix}contacted_balls_outside_zone'],
+                                  team_totals[f'{prefix}swings_outside_zone'])
+                                  
+        team_o_swing   = safe_div(team_totals[f'{prefix}swings_outside_zone'],
+                                  team_totals[f'{prefix}pitches_outside_zone'])
+        
+        team_barrel_perc = safe_div(team_totals[f'{prefix}barrel_balls'], team_totals[f'{prefix}batted_balls'])
+        
+        team_swing_perc = safe_div(team_totals[f'{prefix}whiffs'], team_totals[f'{prefix}pitches'])
+
+        team_f_strike_perc = safe_div(team_totals[f'{prefix}first_pitch_strikes'] , team_totals[f'{prefix}first_pitches'])
+        # --- Team wOBA ---
+        team_woba_numerator = (
+            wBB  * team_totals[f'{prefix}walks'] +
+            wHBP * team_totals[f'{prefix}hit_by_pitches'] +
+            w1B  * team_totals[f'{prefix}singles'] +
+            w2B  * team_totals[f'{prefix}doubles'] +
+            w3B  * team_totals[f'{prefix}triples'] +
+            wHR  * team_totals[f'{prefix}home_runs']
+        )
+        team_woba = team_woba_numerator / team_totals[f'{prefix}plate_appearances'] if team_totals[f'{prefix}plate_appearances'] > 0 else 0
+        # --- Team wRAA ---
+        team_wraa = ((team_woba - league_woba) / wOBAScale) * team_totals[f'{prefix}plate_appearances'] if team_totals[f'{prefix}plate_appearances'] > 0 else 0
+        # --- Team wRC ---
+        team_wrc = team_wraa + (R_PA_lg * team_totals[f'{prefix}plate_appearances'])
+        # --- Team wRC+ ---
+        team_wrc_plus = 100 * ((team_wrc / team_totals[f'{prefix}plate_appearances']) / R_PA_lg) if team_totals[f'{prefix}plate_appearances'] > 0 else 0
+
+
+        swings = team_totals[f'{prefix}swings']
+        swings_oz = team_totals[f'{prefix}swings_outside_zone']
+        contact = team_totals[f'{prefix}contacted_balls']
+        whiffs = team_totals[f'{prefix}whiffs']
+        pitches_oz = team_totals[f'{prefix}pitches_outside_zone']
+
+        team_chase = safe_div(swings_oz, pitches_oz)
+        team_whiff = safe_div(whiffs, swings)
+        
+        # Add to dictionary team batting metrics
+        team_batting_metrics[f'{prefix}K%'] = team_k_perc
+        team_batting_metrics[f'{prefix}BB%'] = team_bb_perc
+        team_batting_metrics[f'{prefix}GB%'] = team_gb_perc
+        team_batting_metrics[f'{prefix}FB%'] = team_fb_perc
+        team_batting_metrics[f'{prefix}LD%'] = team_ld_perc
+        team_batting_metrics[f'{prefix}GB/FB'] = team_gb_fb_perc
+        team_batting_metrics[f'{prefix}ISO'] = team_iso
+        team_batting_metrics[f'{prefix}OPS'] = team_ops
+        team_batting_metrics[f'{prefix}BABIP'] = team_babip
+        team_batting_metrics[f'{prefix}AVG'] = team_avg
+        team_batting_metrics[f'{prefix}OBP'] = team_obp
+        team_batting_metrics[f'{prefix}SLG'] = team_slg
+        team_batting_metrics[f'{prefix}BB/K'] = team_bb_k_perc
+        team_batting_metrics[f'{prefix}HR/FB'] = team_hr_fb_perc
+        team_batting_metrics[f'{prefix}IFFB%'] = team_iffb_perc
+        team_batting_metrics[f'{prefix}Barrel%'] = team_barrel_perc
+        team_batting_metrics[f'{prefix}HardHit%'] = team_hard_hit_perc
+        team_batting_metrics[f'{prefix}O-Swing%'] = team_o_swing
+        team_batting_metrics[f'{prefix}Z-Swing%'] = team_z_swing
+        team_batting_metrics[f'{prefix}Z-Contact%'] = team_z_contact
+        team_batting_metrics[f'{prefix}O-Contact%'] = team_o_contact
+        team_batting_metrics[f'{prefix}Contact%'] = team_contact
+        team_batting_metrics[f'{prefix}Chase%'] = team_chase
+        team_batting_metrics[f'{prefix}Whiff%'] = team_whiff
+        team_batting_metrics[f'{prefix}SwStr%'] = team_swing_perc
+        team_batting_metrics[f'{prefix}F-Strike%'] = team_f_strike_perc
+        team_batting_metrics[f'{prefix}EV'] = team_ev
+        team_batting_metrics[f'{prefix}LA'] = team_la
+        team_batting_metrics[f'{prefix}wOBA'] = team_woba
+        team_batting_metrics[f'{prefix}wRAA'] = team_wraa
+        team_batting_metrics[f'{prefix}wRC'] = team_wrc
+        team_batting_metrics[f'{prefix}wRC+'] = team_wrc_plus
+        team_batting_metrics[f'{prefix}xWOBA'] = team_xwoba
+        team_batting_metrics[f'{prefix}xBA'] = team_xba
+        team_batting_metrics[f'{prefix}xSLG'] = team_xslg
+        team_batting_metrics[f'{prefix}xISO'] = team_xiso
+        team_batting_metrics[f'{prefix}xBABIP'] = team_xbabip
+
+
+        
+    team_pitchtype_metrics = {}
+
+    for pitch in pitch_types:
+        swings = team_totals[f"{pitch}_swings"]
+        swings_oz = team_totals[f"{pitch}_swings_outside_zone"]
+        contact = team_totals[f"{pitch}_contact"]
+        whiffs = team_totals[f"{pitch}_whiffs"]
+        pitches_oz = team_totals[f"{pitch}_outside_zone"]
+
+        team_pitchtype_metrics[f"{pitch}_Chase%"] = safe_div(swings_oz, pitches_oz)
+        team_pitchtype_metrics[f"{pitch}_Contact%"] = safe_div(contact, swings)
+        team_pitchtype_metrics[f"{pitch}_Whiff%"] = safe_div(whiffs, swings)
+
+    split_metrics = {}
+
+    for split in suffix_list:
+        split_metrics[f"{split}_split"] = team_batting_metrics[f"LHP_{split}"] - team_batting_metrics[f"RHP_{split}"]
+
+    team_df = pd.DataFrame({
+        'team_name': [team_name],
+        'team_id': [team_id]
+    })
+
+    batting_df = pd.DataFrame([team_batting_metrics])
+    pitch_type_df = pd.DataFrame([team_pitchtype_metrics])
+    split_df = pd.DataFrame([split_metrics])
+
+    team_df = pd.concat([team_df, batting_df, pitch_type_df, split_df], axis = 1)
+
+    team_df['hitter_player_ids'] = [team_batters_player_ids]
+    team_df['update date'] = datetime.now(pytz.timezone("America/New_York"))
+
+    return team_df
+
 def process_full_roster_batting_stats_df(batting_df_statcast, mlb_batting_rosters):
 
     all_team_batting_df_list = []
