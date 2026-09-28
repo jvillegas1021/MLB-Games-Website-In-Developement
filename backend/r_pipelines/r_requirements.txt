@@ -10,4 +10,5 @@ crayon
 httr
 jsonlite
 glmnet
+recipes
 caret
