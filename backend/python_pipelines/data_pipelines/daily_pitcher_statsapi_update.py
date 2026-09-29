@@ -1,5 +1,5 @@
 from backend.python_pipelines.data_extract_functions.extract_mlb_games_info import get_current_pitcher_ids, get_pitcher_info_and_stats_season
-from backend.python_pipelines.data_transform_functions.utility_functions import convert_player_df_types_statsapi, add_update_date
+from backend.python_pipelines.data_transform_functions.utility_functions import convert_pitcher_df_types_statsapi, add_update_date
 from backend.python_pipelines.data_load_functions.load_data_to_database import push_batter_data_to_sql_upsert
 import pandas as pd
 from datetime import datetime
@@ -20,7 +20,7 @@ def run_daily_pitcher_statsapi_update():
 
     final_pitcher_df = pd.concat(all_current_pitchers_df_list)
 
-    clean_types_pitcher_df = convert_player_df_types_statsapi(final_pitcher_df)
+    clean_types_pitcher_df = convert_pitcher_df_types_statsapi(final_pitcher_df)
     
     update_date_pitcher_df = add_update_date(clean_types_pitcher_df)
 
