@@ -39,6 +39,8 @@ def process_starting_pitcher_stats(pitcher_statsapi_df, pitcher_statcast_df):
                                   )
     
     combined_pitcher_df['inningsPitched'] = convert_ip(combined_pitcher_df['inningsPitched'])
+
+    combined_pitcher_df = combined_pitcher_df.copy()
     
     # Extract identity columns BEFORE grouping
     identity_cols = combined_pitcher_df[["xMLBAMID", "player_name", "Throws"]].drop_duplicates("xMLBAMID")
@@ -49,6 +51,7 @@ def process_starting_pitcher_stats(pitcher_statsapi_df, pitcher_statcast_df):
         .groupby("xMLBAMID")
         .sum(numeric_only=True)
         .reset_index()
+        .copy()
     )
     
     # Merge identity back
@@ -61,183 +64,146 @@ def process_starting_pitcher_stats(pitcher_statsapi_df, pitcher_statcast_df):
     
     fip_constant = 3.1495185210234546
 
-    pitch_usage_dict = {}
+     # --- Dictionary to collect ALL newly calculated columns ---
+    new_metrics = {}
 
     for pitch in pitch_types:
-        pitch_usage_dict[f'{pitch}_usage%'] = safe_div_series(
+        new_metrics[f'{pitch}_usage%'] = safe_div_series(
             pitcher_data_sums[f'{pitch}_pitches'],
-            pitcher_data_sums['pitches']).round(2)
+            pitcher_data_sums['pitches']
+        ).round(2)
 
     pitcher_data_sums['inningsPitched'] = convert_ip(pitcher_data_sums['inningsPitched'])
 
-    pitcher_data_sums['BF_per_start'] = np.where(
-        pitcher_data_sums['gamesStarted'] == 0,
-        0,
+    # Static traditional rate stats
+    new_metrics['BF_per_start'] = np.where(
+        pitcher_data_sums['gamesStarted'] == 0, 0,
         pitcher_data_sums['battersFaced'] / pitcher_data_sums['gamesStarted']
     )
 
-    pitcher_data_sums["IP_per_start"] = np.where(
-        pitcher_data_sums["gamesStarted"] == 0,
-        0,
+    new_metrics["IP_per_start"] = np.where(
+        pitcher_data_sums["gamesStarted"] == 0, 0,
         pitcher_data_sums["inningsPitched"] / pitcher_data_sums["gamesStarted"]
     )
 
-    pitcher_data_sums["ERA"] = safe_div_series(
+    new_metrics["ERA"] = safe_div_series(
         pitcher_data_sums["earnedRuns"], pitcher_data_sums["inningsPitched"]
     ) * 9
 
-    pitcher_data_sums['WHIP'] = safe_div_series((
-            pitcher_data_sums['walks'] + pitcher_data_sums['hits']
-    ), pitcher_data_sums["inningsPitched"])
-
-    pitcher_data_sums['FIP'] = (
-                                                (13 * pitcher_data_sums['home_runs']) +
-                                                (3 * pitcher_data_sums['walks']) -
-                                                (2 * pitcher_data_sums['strikeouts'])
-                                        ) / pitcher_data_sums["inningsPitched"] + fip_constant
-
-    pitcher_data_sums["LOB%"] = safe_div_series(
-        (pitcher_data_sums["hits"] +
-         pitcher_data_sums["baseOnBalls"] +
-         pitcher_data_sums["hitByPitch"] -
-         pitcher_data_sums["runs"])
-        ,
-        (pitcher_data_sums["hits"] +
-         pitcher_data_sums["baseOnBalls"] +
-         pitcher_data_sums["hitByPitch"] -
-         1.4 * pitcher_data_sums["homeRuns"])
+    new_metrics['WHIP'] = safe_div_series(
+        (pitcher_data_sums['walks'] + pitcher_data_sums['hits']), 
+        pitcher_data_sums["inningsPitched"]
     )
 
-    pitcher_data_sums["DP%"] = safe_div_series(
+    new_metrics['FIP'] = (
+        (13 * pitcher_data_sums['home_runs']) +
+        (3 * pitcher_data_sums['walks']) -
+        (2 * pitcher_data_sums['strikeouts'])
+    ) / pitcher_data_sums["inningsPitched"] + fip_constant
+
+    new_metrics["LOB%"] = safe_div_series(
+        (pitcher_data_sums["hits"] + pitcher_data_sums["baseOnBalls"] + pitcher_data_sums["hitByPitch"] - pitcher_data_sums["runs"]),
+        (pitcher_data_sums["hits"] + pitcher_data_sums["baseOnBalls"] + pitcher_data_sums["hitByPitch"] - 1.4 * pitcher_data_sums["homeRuns"])
+    )
+
+    new_metrics["DP%"] = safe_div_series(
         pitcher_data_sums["groundIntoDoublePlay"],
-        (pitcher_data_sums["battersFaced"]
-         - pitcher_data_sums["strikeOuts"]
-         - pitcher_data_sums["baseOnBalls"]
-         - pitcher_data_sums["hitByPitch"])
+        (pitcher_data_sums["battersFaced"] - pitcher_data_sums["strikeOuts"] - pitcher_data_sums["baseOnBalls"] - pitcher_data_sums["hitByPitch"])
     )
 
-    pitcher_data_sums["RS/9"] = safe_div_series(
-        pitcher_data_sums["runs"], pitcher_data_sums["inningsPitched"]
-    ) * 9
+    new_metrics["RS/9"] = safe_div_series(pitcher_data_sums["runs"], pitcher_data_sums["inningsPitched"]) * 9
+    new_metrics["GO/AO"] = safe_div_series(pitcher_data_sums["groundOuts"], pitcher_data_sums["airOuts"])
+    new_metrics["H/9"] = safe_div_series(pitcher_data_sums["hits"], pitcher_data_sums["inningsPitched"]) * 9
+    new_metrics["BB/9"] = safe_div_series(pitcher_data_sums["baseOnBalls"], pitcher_data_sums["inningsPitched"]) * 9
+    new_metrics["HR/9"] = safe_div_series(pitcher_data_sums["homeRuns"], pitcher_data_sums["inningsPitched"]) * 9
+    new_metrics["K/9"] = safe_div_series(pitcher_data_sums["strikeOuts"], pitcher_data_sums["inningsPitched"]) * 9
 
-    pitcher_data_sums["GO/AO"] = safe_div_series(
-        pitcher_data_sums["groundOuts"], pitcher_data_sums["airOuts"]
+    new_metrics["TTO%"] = safe_div_series(
+        (pitcher_data_sums['home_runs'] + pitcher_data_sums['walks'] + pitcher_data_sums['strikeouts']), 
+        (pitcher_data_sums['plate_appearances'] - pitcher_data_sums['non_at_bats'])
     )
 
-    pitcher_data_sums["H/9"] = safe_div_series(
-        pitcher_data_sums["hits"], pitcher_data_sums["inningsPitched"]
-    ) * 9
 
-    pitcher_data_sums["BB/9"] = safe_div_series(
-        pitcher_data_sums["baseOnBalls"], pitcher_data_sums["inningsPitched"]
-    ) * 9
-
-    pitcher_data_sums["HR/9"] = safe_div_series(
-        pitcher_data_sums["homeRuns"], pitcher_data_sums["inningsPitched"]
-    ) * 9
-
-    pitcher_data_sums["K/9"] = safe_div_series(
-        pitcher_data_sums["strikeOuts"], pitcher_data_sums["inningsPitched"]
-    ) * 9
-
-    pitcher_data_sums["TTO%"] = safe_div_series((pitcher_data_sums['home_runs'] + pitcher_data_sums[
-        'walks'] + pitcher_data_sums['strikeouts']), (
-                                                            pitcher_data_sums['plate_appearances'] -
-                                                            pitcher_data_sums['non_at_bats']))
-
-
+    # Dynamic splits tracking (General, RHB, LHB)
     batter_hand_list = ['general', 'RHB_', 'LHB_']
 
     for hand in batter_hand_list:
         prefix = '' if hand == 'general' else hand
 
-        pitcher_data_sums[f'{prefix}at_bats'] = (pitcher_data_sums[f'{prefix}plate_appearances'] - pitcher_data_sums[f'{prefix}non_at_bats'])
-        
-        pitcher_data_sums[f'{prefix}AVG'] = safe_div_series(pitcher_data_sums[f'{prefix}hits'] , pitcher_data_sums[f'{prefix}at_bats'])
+        new_metrics[f'{prefix}at_bats'] = (pitcher_data_sums[f'{prefix}plate_appearances'] - pitcher_data_sums[f'{prefix}non_at_bats'])
+        new_metrics[f'{prefix}AVG'] = safe_div_series(pitcher_data_sums[f'{prefix}hits'], new_metrics[f'{prefix}at_bats'])
 
-        pitcher_data_sums[f'{prefix}total_bases'] = (
+        new_metrics[f'{prefix}total_bases'] = (
             pitcher_data_sums[f'{prefix}singles'] * 1 +
             pitcher_data_sums[f'{prefix}doubles'] * 2 +
             pitcher_data_sums[f'{prefix}triples'] * 3 +
             pitcher_data_sums[f'{prefix}home_runs'] * 4
         )
 
-        pitcher_data_sums[f'{prefix}SLG'] = safe_div_series(pitcher_data_sums[f'{prefix}total_bases'], pitcher_data_sums[f'{prefix}at_bats'])
+        new_metrics[f'{prefix}SLG'] = safe_div_series(new_metrics[f'{prefix}total_bases'], new_metrics[f'{prefix}at_bats'])
+        new_metrics[f'{prefix}ISO'] = new_metrics[f'{prefix}SLG'] - new_metrics[f'{prefix}AVG']
 
-        pitcher_data_sums[f'{prefix}ISO'] = pitcher_data_sums[f'{prefix}SLG'] - pitcher_data_sums[f'{prefix}AVG']
-
-        pitcher_data_sums[f'{prefix}BABIP'] = safe_div_series(
-            (
-                pitcher_data_sums[f'{prefix}hits'] -
-                pitcher_data_sums[f'{prefix}home_runs']
-            ),
-            (
-                pitcher_data_sums[f'{prefix}at_bats'] -
-                pitcher_data_sums[f'{prefix}strikeouts'] -
-                pitcher_data_sums[f'{prefix}home_runs'] +
-                pitcher_data_sums[f'{prefix}sac_flies'] +
-                pitcher_data_sums[f'{prefix}sac_fly_double_plays']
-            ))
+        new_metrics[f'{prefix}BABIP'] = safe_div_series(
+            (pitcher_data_sums[f'{prefix}hits'] - pitcher_data_sums[f'{prefix}home_runs']),
+            (new_metrics[f'{prefix}at_bats'] - pitcher_data_sums[f'{prefix}strikeouts'] - pitcher_data_sums[f'{prefix}home_runs'] + pitcher_data_sums[f'{prefix}sac_flies'] + pitcher_data_sums[f'{prefix}sac_fly_double_plays'])
+        )
     
-        pitcher_data_sums[f'{prefix}OBP'] = safe_div_series(
-            (
-                pitcher_data_sums[f'{prefix}hits'] +
-                pitcher_data_sums[f'{prefix}walks'] +
-                pitcher_data_sums[f'{prefix}hit_by_pitches']
-            ),
-            (
-                pitcher_data_sums[f'{prefix}at_bats'] +
-                pitcher_data_sums[f'{prefix}walks'] +
-                pitcher_data_sums[f'{prefix}hit_by_pitches'] +
-                pitcher_data_sums[f'{prefix}sacrifices']
-            ))
+        new_metrics[f'{prefix}OBP'] = safe_div_series(
+            (pitcher_data_sums[f'{prefix}hits'] + pitcher_data_sums[f'{prefix}walks'] + pitcher_data_sums[f'{prefix}hit_by_pitches']),
+            (new_metrics[f'{prefix}at_bats'] + pitcher_data_sums[f'{prefix}walks'] + pitcher_data_sums[f'{prefix}hit_by_pitches'] + pitcher_data_sums[f'{prefix}sacrifices'])
+        )
 
-        pitcher_data_sums[f'{prefix}OPS'] = pitcher_data_sums[f'{prefix}OBP'] + pitcher_data_sums[f'{prefix}SLG']
+        new_metrics[f'{prefix}OPS'] = new_metrics[f'{prefix}OBP'] + new_metrics[f'{prefix}SLG']
         
-        pitcher_data_sums[f'{prefix}EV'] = safe_div_series(pitcher_data_sums[f'{prefix}launch_speed_sum'] , pitcher_data_sums[f'{prefix}batted_balls'])
-        pitcher_data_sums[f'{prefix}LA'] = safe_div_series(pitcher_data_sums[f'{prefix}launch_angle_sum'] , pitcher_data_sums[f'{prefix}batted_balls'])
-        pitcher_data_sums[f'{prefix}HardHit%'] = safe_div_series(pitcher_data_sums[f'{prefix}hard_hit_balls'] , pitcher_data_sums[f'{prefix}batted_balls'])
-        pitcher_data_sums[f'{prefix}Barrel%'] = safe_div_series(pitcher_data_sums[f'{prefix}barrel_balls'] , pitcher_data_sums[f'{prefix}batted_balls'])
+        # Batted Ball Speed / Angles
+        new_metrics[f'{prefix}EV'] = safe_div_series(pitcher_data_sums[f'{prefix}launch_speed_sum'], pitcher_data_sums[f'{prefix}batted_balls'])
+        new_metrics[f'{prefix}LA'] = safe_div_series(pitcher_data_sums[f'{prefix}launch_angle_sum'], pitcher_data_sums[f'{prefix}batted_balls'])
+        new_metrics[f'{prefix}HardHit%'] = safe_div_series(pitcher_data_sums[f'{prefix}hard_hit_balls'], pitcher_data_sums[f'{prefix}batted_balls'])
+        new_metrics[f'{prefix}Barrel%'] = safe_div_series(pitcher_data_sums[f'{prefix}barrel_balls'], pitcher_data_sums[f'{prefix}batted_balls'])
 
-        # --- Batted-ball profile ---
-        pitcher_data_sums[f'{prefix}GB%'] = safe_div_series(pitcher_data_sums[f'{prefix}GB'] , pitcher_data_sums[f'{prefix}batted_balls'])
-        pitcher_data_sums[f'{prefix}FB%'] = safe_div_series(pitcher_data_sums[f'{prefix}FB'] , pitcher_data_sums[f'{prefix}batted_balls'])
-        pitcher_data_sums[f'{prefix}LD%'] = safe_div_series(pitcher_data_sums[f'{prefix}LD'] , pitcher_data_sums[f'{prefix}batted_balls'])
-        pitcher_data_sums[f'{prefix}IFFB%'] = safe_div_series(pitcher_data_sums[f'{prefix}PU'] , pitcher_data_sums[f'{prefix}FB'])
-        pitcher_data_sums[f'{prefix}HR/FB'] = safe_div_series(pitcher_data_sums[f'{prefix}home_runs'] , pitcher_data_sums[f'{prefix}FB'])
-        pitcher_data_sums[f'{prefix}GB/FB'] = safe_div_series(pitcher_data_sums[f'{prefix}GB'] , pitcher_data_sums[f'{prefix}FB'])
+        # Batted-ball profile
+        new_metrics[f'{prefix}GB%'] = safe_div_series(pitcher_data_sums[f'{prefix}GB'], pitcher_data_sums[f'{prefix}batted_balls'])
+        new_metrics[f'{prefix}FB%'] = safe_div_series(pitcher_data_sums[f'{prefix}FB'], pitcher_data_sums[f'{prefix}batted_balls'])
+        new_metrics[f'{prefix}LD%'] = safe_div_series(pitcher_data_sums[f'{prefix}LD'], pitcher_data_sums[f'{prefix}batted_balls'])
+        new_metrics[f'{prefix}IFFB%'] = safe_div_series(pitcher_data_sums[f'{prefix}PU'], pitcher_data_sums[f'{prefix}FB'])
+        new_metrics[f'{prefix}HR/FB'] = safe_div_series(pitcher_data_sums[f'{prefix}home_runs'], pitcher_data_sums[f'{prefix}FB'])
+        new_metrics[f'{prefix}GB/FB'] = safe_div_series(pitcher_data_sums[f'{prefix}GB'], pitcher_data_sums[f'{prefix}FB'])
 
-        # --- Plate discipline ---
-        pitcher_data_sums[f'{prefix}Zone%'] = safe_div_series(pitcher_data_sums[f'{prefix}pitches_in_zone'] , pitcher_data_sums[f'{prefix}pitches'])
-        pitcher_data_sums[f'{prefix}Z-Swing%'] = safe_div_series(pitcher_data_sums[f'{prefix}swings_in_zone'] , pitcher_data_sums[f'{prefix}pitches_in_zone'])
-        pitcher_data_sums[f'{prefix}O-Swing%'] = safe_div_series(pitcher_data_sums[f'{prefix}swings_outside_zone'] , pitcher_data_sums[f'{prefix}pitches_outside_zone'])
+        # Plate discipline splits
+        new_metrics[f'{prefix}Zone%'] = safe_div_series(pitcher_data_sums[f'{prefix}pitches_in_zone'], pitcher_data_sums[f'{prefix}pitches'])
+        new_metrics[f'{prefix}Z-Swing%'] = safe_div_series(pitcher_data_sums[f'{prefix}swings_in_zone'], pitcher_data_sums[f'{prefix}pitches_in_zone'])
+        new_metrics[f'{prefix}O-Swing%'] = safe_div_series(pitcher_data_sums[f'{prefix}swings_outside_zone'], pitcher_data_sums[f'{prefix}pitches_outside_zone'])
 
-        pitcher_data_sums[f'{prefix}Contact%'] = safe_div_series(pitcher_data_sums[f'{prefix}contacted_balls'] , pitcher_data_sums[f'{prefix}swings'])
-        pitcher_data_sums[f'{prefix}Z-Contact%'] = safe_div_series(pitcher_data_sums[f'{prefix}contacted_balls_in_zone'] , pitcher_data_sums[f'{prefix}swings_in_zone'])
-        pitcher_data_sums[f'{prefix}O-Contact%'] = safe_div_series(pitcher_data_sums[f'{prefix}contacted_balls_outside_zone'] , pitcher_data_sums[f'{prefix}swings_outside_zone'])
+        new_metrics[f'{prefix}Contact%'] = safe_div_series(pitcher_data_sums[f'{prefix}contacted_balls'], pitcher_data_sums[f'{prefix}swings'])
+        new_metrics[f'{prefix}Z-Contact%'] = safe_div_series(pitcher_data_sums[f'{prefix}contacted_balls_in_zone'], pitcher_data_sums[f'{prefix}swings_in_zone'])
+        new_metrics[f'{prefix}O-Contact%'] = safe_div_series(pitcher_data_sums[f'{prefix}contacted_balls_outside_zone'], pitcher_data_sums[f'{prefix}swings_outside_zone'])
 
-        pitcher_data_sums[f'{prefix}Swing%'] = safe_div_series(pitcher_data_sums[f'{prefix}swings'] , pitcher_data_sums[f'{prefix}pitches'])
-        pitcher_data_sums[f'{prefix}SwStr%'] = safe_div_series(pitcher_data_sums[f'{prefix}whiffs'] , pitcher_data_sums[f'{prefix}pitches'])
-        pitcher_data_sums[f'{prefix}CStr%'] = safe_div_series(pitcher_data_sums[f'{prefix}called_strikes'] , pitcher_data_sums[f'{prefix}pitches'])
-        pitcher_data_sums[f'{prefix}C+SwStr%'] = safe_div_series((pitcher_data_sums[f'{prefix}called_strikes'] + pitcher_data_sums[f'{prefix}whiffs']) , pitcher_data_sums[f'{prefix}pitches'])
+        new_metrics[f'{prefix}Swing%'] = safe_div_series(pitcher_data_sums[f'{prefix}swings'], pitcher_data_sums[f'{prefix}pitches'])
+        new_metrics[f'{prefix}SwStr%'] = safe_div_series(pitcher_data_sums[f'{prefix}whiffs'], pitcher_data_sums[f'{prefix}pitches'])
+        new_metrics[f'{prefix}CStr%'] = safe_div_series(pitcher_data_sums[f'{prefix}called_strikes'], pitcher_data_sums[f'{prefix}pitches'])
+        new_metrics[f'{prefix}C+SwStr%'] = safe_div_series((pitcher_data_sums[f'{prefix}called_strikes'] + pitcher_data_sums[f'{prefix}whiffs']), pitcher_data_sums[f'{prefix}pitches'])
 
-        pitcher_data_sums[f'{prefix}F-Strike%'] = safe_div_series(pitcher_data_sums[f'{prefix}first_pitch_strikes'] , pitcher_data_sums[f'{prefix}first_pitches'])
+        new_metrics[f'{prefix}F-Strike%'] = safe_div_series(pitcher_data_sums[f'{prefix}first_pitch_strikes'], pitcher_data_sums[f'{prefix}first_pitches'])
 
-        # --- K,BB family ---
-        pitcher_data_sums[f'{prefix}K%'] = safe_div_series(pitcher_data_sums[f'{prefix}strikeouts'] , pitcher_data_sums[f'{prefix}plate_appearances'])
-        pitcher_data_sums[f'{prefix}BB%'] = safe_div_series(pitcher_data_sums[f'{prefix}walks'] , pitcher_data_sums[f'{prefix}plate_appearances'])
-        pitcher_data_sums[f'{prefix}K/BB'] = safe_div_series(pitcher_data_sums[f'{prefix}strikeouts'] , pitcher_data_sums[f'{prefix}walks'])
-        pitcher_data_sums[f'{prefix}K-BB%'] = pitcher_data_sums[f'{prefix}K%'] - pitcher_data_sums[f'{prefix}BB%']
+        # Plate outcomes & Walk ratios
+        new_metrics[f'{prefix}K%'] = safe_div_series(pitcher_data_sums[f'{prefix}strikeouts'], pitcher_data_sums[f'{prefix}plate_appearances'])
+        new_metrics[f'{prefix}BB%'] = safe_div_series(pitcher_data_sums[f'{prefix}walks'], pitcher_data_sums[f'{prefix}plate_appearances'])
+        new_metrics[f'{prefix}K/BB'] = safe_div_series(pitcher_data_sums[f'{prefix}strikeouts'], pitcher_data_sums[f'{prefix}walks'])
+        new_metrics[f'{prefix}K-BB%'] = new_metrics[f'{prefix}K%'] - new_metrics[f'{prefix}BB%']
 
-        pitcher_data_sums[f'{prefix}xBA'] = safe_div_series(pitcher_data_sums[f'{prefix}ba_speedangle_sum'] , pitcher_data_sums[f'{prefix}batted_balls'])
-        pitcher_data_sums[f'{prefix}xWOBA'] = safe_div_series(pitcher_data_sums[f'{prefix}woba_speedangle_sum'] , pitcher_data_sums[f'{prefix}batted_balls'])
-        pitcher_data_sums[f'{prefix}xSLG'] = safe_div_series(pitcher_data_sums[f'{prefix}slg_speedangle_sum'] , pitcher_data_sums[f'{prefix}batted_balls'])
-        pitcher_data_sums[f'{prefix}xISO'] = safe_div_series(pitcher_data_sums[f'{prefix}iso_value_sum'] , pitcher_data_sums[f'{prefix}batted_balls'])
-        pitcher_data_sums[f'{prefix}xBABIP'] = safe_div_series(pitcher_data_sums[f'{prefix}babip_value_sum'] , pitcher_data_sums[f'{prefix}batted_balls'])
+        new_metrics[f'{prefix}xBA'] = safe_div_series(pitcher_data_sums[f'{prefix}ba_speedangle_sum'], pitcher_data_sums[f'{prefix}batted_balls'])
+        new_metrics[f'{prefix}xWOBA'] = safe_div_series(pitcher_data_sums[f'{prefix}woba_speedangle_sum'], pitcher_data_sums[f'{prefix}batted_balls'])
+        new_metrics[f'{prefix}xSLG'] = safe_div_series(pitcher_data_sums[f'{prefix}slg_speedangle_sum'], pitcher_data_sums[f'{prefix}batted_balls'])
+        new_metrics[f'{prefix}xISO'] = safe_div_series(pitcher_data_sums[f'{prefix}iso_value_sum'], pitcher_data_sums[f'{prefix}batted_balls'])
+        new_metrics[f'{prefix}xBABIP'] = safe_div_series(pitcher_data_sums[f'{prefix}babip_value_sum'], pitcher_data_sums[f'{prefix}batted_balls'])
 
         # You supply league_xwOBA and league_ERA from your 2025 benchmark
-        pitcher_data_sums[f'{prefix}xERA'] = league_era + (pitcher_data_sums[f'{prefix}xWOBA'] - league_xwoba) * 1.15 * 9
+        new_metrics[f'{prefix}xERA'] = league_era + (new_metrics[f'{prefix}xWOBA'] - league_xwoba) * 1.15 * 9
 
+
+    new_metrics_df = pd.DataFrame(new_metrics, index=pitcher_data_sums.index)
+    pitcher_data_sums = pd.concat([pitcher_data_sums, new_metrics_df], axis=1)
+    
     pitcher_data_sums = pitcher_data_sums.rename(columns={
         "gamesStarted": "GS",
         "inningsPitched": "IP",
@@ -245,9 +211,6 @@ def process_starting_pitcher_stats(pitcher_statsapi_df, pitcher_statcast_df):
         "wins": "Wins",
         "losses": "Losses"
     })
-
-    for stat, value in pitch_usage_dict.items():
-        pitcher_data_sums[stat] = value
 
     pitcher_data_sums['update_date'] = datetime.now(pytz.timezone("America/New_York"))
     
@@ -293,9 +256,7 @@ def process_starting_pitcher_stats(pitcher_statsapi_df, pitcher_statcast_df):
 
     columns_to_keep.append('update_date')
     
-    pitcher_data_summed_cleaned_df = pitcher_data_sums[columns_to_keep]
-    
-    final_df = pitcher_data_summed_cleaned_df.copy()
+    final_df = pitcher_data_sums[columns_to_keep].copy()
 
     return final_df
 
