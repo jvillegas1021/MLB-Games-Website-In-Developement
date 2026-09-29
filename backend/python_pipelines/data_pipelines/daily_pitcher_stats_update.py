@@ -10,7 +10,7 @@ def run_daily_pitcher_stats_update():
     #transform
     pitcher_current_stats_df = process_starting_pitcher_stats(pitcher_statsapi, pitcher_statcast)
     #load
-    table_name = 'active_pitcher_stats_v2'
+    table_name = 'active_pitcher_stats'
     push_pitcher_data_to_sql_upsert_player_id(table_name, pitcher_current_stats_df)
 
 if __name__ == "__main__":
