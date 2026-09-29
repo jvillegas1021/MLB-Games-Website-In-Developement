@@ -3,7 +3,7 @@ mlb_pitcher_scores_pipeline <- function() {
   
   # extract data and merge
   
-  pitcher_df <- get_data_from_database('active_pitcher_stats_v2')
+  pitcher_df <- get_data_from_database('active_pitcher_stats')
   
   # transform data
   starting_pitcher_df <- filter_starting_pitcher(pitcher_df)
