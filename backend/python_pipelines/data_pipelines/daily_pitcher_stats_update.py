@@ -6,7 +6,7 @@ from backend.python_pipelines.data_load_functions.load_data_to_database import p
 def run_daily_pitcher_stats_update():
     #extract
     pitcher_statsapi = get_data_from_database('pitcher_seasonal_data_statsapi')
-    pitcher_statcast = get_data_from_database('pitcher_seasonal_data_statcast_v2')
+    pitcher_statcast = get_data_from_database('pitcher_seasonal_data_statcast')
     #transform
     pitcher_current_stats_df = process_starting_pitcher_stats(pitcher_statsapi, pitcher_statcast)
     #load
