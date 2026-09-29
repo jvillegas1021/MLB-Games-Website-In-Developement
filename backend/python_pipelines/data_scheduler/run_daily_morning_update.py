@@ -10,15 +10,15 @@ from backend.python_pipelines.data_pipelines.daily_roster_update import run_dail
 
 
 def run_one_time_stats_update():
-    run_daily_mlb_team_record_info_update()
+    #run_daily_mlb_team_record_info_update()
     run_daily_statcast_stats_update()
     run_daily_pitcher_statsapi_update()
     run_daily_batter_statsapi_update()
     run_daily_pitcher_stats_update()
     run_daily_pitcher_current_season_stats_update()
-    run_starting_pitchers_recent_form_update()
+    #run_starting_pitchers_recent_form_update()
     run_mlb_batting_stats_update()
-    run_daily_roster_update()
+    #run_daily_roster_update()
 
 if __name__ == "__main__":
     run_one_time_stats_update()
