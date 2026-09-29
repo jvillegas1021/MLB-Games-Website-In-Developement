@@ -179,6 +179,7 @@ def compute_count_stats_pitcher(statcast_df) :
     joined_df["Throws"] = joined_df["pitcher"].map(throws_lookup)
     # Final
     final_df = joined_df.rename(columns={"pitcher": "xMLBAMID", "game_year": "season"})
+    final_df["xMLBAMID"] = final_df["xMLBAMID"].astype(str)
     final_df["update_date"] = datetime.now(pytz.timezone("America/New_York"))
 
     return final_df
@@ -371,7 +372,7 @@ def compute_count_stats_batter(statcast_df):
 
     final_df = (joined_df
                 .rename(columns={"batter": "xMLBAMID", "game_year": "season"}))
-
+    final_df["xMLBAMID"] = final_df["xMLBAMID"].astype(str)   
     final_df['update_date'] = datetime.now(pytz.timezone("America/New_York"))
 
     return final_df
