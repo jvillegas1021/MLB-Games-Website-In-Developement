@@ -398,31 +398,32 @@ calculate_matchup_score <- function(matchup_df) {
   matchup_df <- matchup_df %>%
     mutate(
       # 1. Plate Discipline Battles (Hitter Eye vs Pitcher Control)
-      Home_Offense_Edge_Disc  = Home_batting_discipline - Away_pitcher_control,
-      Away_Offense_Edge_Disc  = Away_batting_discipline - Home_pitcher_control,
+      Home_Offense_Edge_Disc  = round(Home_batting_discipline - Away_pitcher_control, 2),
+      Away_Offense_Edge_Disc  = round(Away_batting_discipline - Home_pitcher_control, 2),
       
       # 2. Batted Ball Battles (Hitter Impact vs Pitcher Contact Suppression)
-      Home_Offense_Edge_Pow   = Home_batting_impact - Away_pitcher_contact,
-      Away_Offense_Edge_Pow   = Away_batting_impact - Home_pitcher_contact,
+      Home_Offense_Edge_Pow   = round(Home_batting_impact - Away_pitcher_contact, 2),
+      Away_Offense_Edge_Pow   = round(Away_batting_impact - Home_pitcher_contact, 2),
       
       # 3. Expected Performance Battles (Hitter Expected vs Pitcher Expected)
-      Home_Offense_Edge_Exp   = Home_batting_expected - Away_pitcher_expected,
-      Away_Offense_Edge_Exp   = Away_batting_expected - Home_pitcher_expected,
+      Home_Offense_Edge_Exp   = round(Home_batting_expected - Away_pitcher_expected, 2),
+      Away_Offense_Edge_Exp   = round(Away_batting_expected - Home_pitcher_expected, 2),
       
       # 4. Total Net Game Margins (Home Advantage minus Away Advantage)
-      Net_Discipline_Margin   = Home_Offense_Edge_Disc - Away_Offense_Edge_Disc,
-      Net_Power_Margin        = Home_Offense_Edge_Pow - Away_Offense_Edge_Pow,
-      Net_Expected_Margin     = Home_Offense_Edge_Exp - Away_Offense_Edge_Exp,
+      Net_Discipline_Margin   = round(Home_Offense_Edge_Disc - Away_Offense_Edge_Disc, 2),
+      Net_Power_Margin        = round(Home_Offense_Edge_Pow - Away_Offense_Edge_Pow, 2),
+      Net_Expected_Margin     = round(Home_Offense_Edge_Exp - Away_Offense_Edge_Exp, 2),
       
-      Master_Matchup_Score = (Net_Discipline_Margin * 0.18238419) + 
+      Master_Matchup_Score = round((Net_Discipline_Margin * 0.18238419) + 
         (Net_Power_Margin      * 0.07179902) + 
-        (Net_Expected_Margin   * 0.06473861),
+        (Net_Expected_Margin   * 0.06473861), 2),
       
       Master_Matchup_Score = replace_na(Master_Matchup_Score, 0)
     )
   
   return(matchup_df)
 }
+
 
 ############################# CALCULATE FATIGUE SCORE ####################################
 calculate_team_travel_fatigue_score <- function(matchup_df, team_travel_df) {
