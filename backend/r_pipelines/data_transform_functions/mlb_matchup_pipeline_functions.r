@@ -46,7 +46,9 @@ create_matchup_df <- function(games_table) {
         Away_Pitcher_ID = teams.away.probablePitcher.id
       ) %>%
        dplyr::mutate(
-         Game_ID = as.character(Game_ID)
+         Game_ID = as.character(Game_ID),
+         Home_Pitcher_ID = as.character(Home_Pitcher_ID),
+         Away_Pitcher_ID = as.character(Away_Pitcher_ID)
       )
     
     time <- matchup_df$Game_Time
