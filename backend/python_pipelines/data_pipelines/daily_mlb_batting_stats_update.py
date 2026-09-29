@@ -7,7 +7,7 @@ from backend.python_pipelines.data_load_functions.load_data_to_database import p
 
 def run_mlb_batting_stats_update():
     # Extract
-    batting_df_statcast = get_data_from_database('batter_seasonal_data_statcast_v2')
+    batting_df_statcast = get_data_from_database('batter_seasonal_data_statcast')
     mlb_batting_rosters = extract_active_mlb_rosters()
 
     # Transform
