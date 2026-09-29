@@ -364,8 +364,11 @@ def extract_active_mlb_rosters():
         roster = requests.get(roster_url).json()["roster"]
         
         # Isolate batter IDs safely
-        batter_ids_set = {p["person"]["id"] for p in roster if p["position"]["type"] != "Pitcher"}
-        roster_map[team['name']] = {"id": team['id'], "batters": list(batter_ids_set)}
+        batter_ids_set = {str(p["person"]["id"]) for p in roster if p["position"]["type"] != "Pitcher"}
+        roster_map[team['name']] = {
+            "id": team['id'], 
+            "batters": list(batter_ids_set)
+        }
         
     return roster_map
     
