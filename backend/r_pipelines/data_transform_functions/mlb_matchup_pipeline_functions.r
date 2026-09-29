@@ -625,6 +625,12 @@ calculate_betting_logic <- function(matchup_df, min_favorite_edge = 2.0, min_und
 }
 
 
-
+add_update_date <- function(matchup_df) {
+  matcuhp_df <- matchup_df %>%
+    mutate(
+      update_date = Sys.time())
+  
+  return(matchup_df)
+}
 
 
