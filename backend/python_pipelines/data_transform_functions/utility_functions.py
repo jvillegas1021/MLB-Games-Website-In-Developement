@@ -98,3 +98,23 @@ def convert_batter_df_types_statsapi(player_df) :
         player_df[column] = pd.to_numeric(player_df[column], errors='coerce')
 
     return player_df
+
+
+def convert_pitcher_df_types_statsapi(player_df) :
+    columns_to_str_list = ['xMLBAMID', 'team_name']
+    columns_to_float_list = ['season', 'avg', 'obp', 'slg', 'ops', 'stolenBasePercentage', 'caughtStealingPercentage', 'era',
+                             'inningsPitched', 'whip', 'strikePercentage', 'groundOutsToAirouts', 'winPercentage',
+                             'pitchesPerInning', 'strikeoutWalkRatio', 'strikeoutsPer9Inn', 'walksPer9Inn', 'hitsPer9Inn',
+                             'runsScoredPer9', 'homeRunsPer9']
+    
+    player_df['season'] = player_df['season'].astype(int)
+    for column in columns_to_str_list:
+        player_df[column] = player_df[column].fillna("").astype(str)
+        player_df[column] = player_df[column].astype(str)
+
+    
+    for column in columns_to_float_list:
+        player_df[column] = player_df[column].fillna("").astype(str)
+        player_df[column] = pd.to_numeric(player_df[column], errors='coerce')
+
+    return player_df
