@@ -82,7 +82,7 @@ def add_update_date(player_df):
 
     return player_df
     
-def convert_player_df_types_statsapi(player_df) :
+def convert_batter_df_types_statsapi(player_df) :
     columns_to_str_list = ['xMLBAMID', 'team_name']
     columns_to_float_list = ['avg', 'obp', 'slg', 'ops', 'stolenBasePercentage', 'caughtStealingPercentage',
                           'babip', 'groundOutsToAirouts', 'atBatsPerHomeRun']
