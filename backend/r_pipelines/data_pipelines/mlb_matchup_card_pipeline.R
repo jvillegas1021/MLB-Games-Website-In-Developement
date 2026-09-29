@@ -10,8 +10,8 @@ mlb_matchup_card_pipeline <- function(game_date = as.Date(format(Sys.time(), tz 
   # pitcher_data
   starting_pitcher_stats_df <- get_data_from_database('mlb_pitcher_scores')
   # pitcher_data
-  starting_pitcher_stats_current_year_df <- get_data_from_database('active_pitcher_stats_current_year_v2')
-  # team batting_data + historical
+  starting_pitcher_stats_current_year_df <- get_data_from_database('active_pitcher_stats_current_year')
+  # team batting_data
   team_batting_df <- get_data_from_database('mlb_team_batting_scores')
   # probability model
   prob_model <- load_rds("win_prob_model")
@@ -28,12 +28,6 @@ mlb_matchup_card_pipeline <- function(game_date = as.Date(format(Sys.time(), tz 
   matchup_df <- no_starting_pitchers_guard(matchup_df)
   ########################## ADD PITCHER THROWING HANDS / WINS / LOSES / ERA###################################
   matchup_df <- assign_starting_pitcher_throwing_hands_wins_loses_era(matchup_df, starting_pitcher_filtered_df, starting_pitcher_current_year_filtered_df)
-  #################### CHANGE PITCHER ID TO CHARACTERS ####################################
-  starting_pitcher_filtered_df <- starting_pitcher_filtered_df %>%
-    mutate(xMLBAMID = as.character(xMLBAMID))
-  
-  starting_pitcher_current_year_filtered_df <- starting_pitcher_current_year_filtered_df %>%
-    mutate(xMLBAMID = as.character(xMLBAMID))
   ##################### ADD PITCHER SCORES #########################################
   matchup_df <- assign_pitcher_scores(matchup_df, starting_pitcher_filtered_df)
   ################### ADD BATTING LINEUPS LIST PLUS HYDRATION STATUS ###################################
@@ -48,8 +42,9 @@ mlb_matchup_card_pipeline <- function(game_date = as.Date(format(Sys.time(), tz 
   matchup_df <- calculate_model_odds_and_edge(matchup_df)
   ############################### add betting logic / columns ####################
   matchup_df <- calculate_betting_logic(matchup_df)
+  ########################## add update date time #####################
+  matchup_df <- add_update_date(matchup_df)
   ########################### push to sql ####################################
-  
   write_df_to_sql_replace('mlb_matchup_card', matchup_df )
   
   return(invisible((TRUE)))
