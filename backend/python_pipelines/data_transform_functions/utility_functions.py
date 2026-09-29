@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 import pandas as pd
 import numpy as np
-
+import pytz
 
 def safe_div(n, d):
     # Handle zero or None denominator immediately
@@ -77,4 +77,24 @@ def compute_travel_distance_around_earth(team_travel_df):
 
     return team_travel_df
 
+def add_update_date(player_df):
+    player_df['update_date'] = datetime.now(pytz.timezone("America/New_York"))
+
+    return player_df
     
+def convert_player_df_types_statsapi(player_df) :
+    columns_to_str_list = ['xMLBAMID', 'team_name']
+    columns_to_float_list = ['avg', 'obp', 'slg', 'ops', 'stolenBasePercentage', 'caughtStealingPercentage',
+                          'babip', 'groundOutsToAirouts', 'atBatsPerHomeRun']
+
+    player_df['season'] = player_df['season'].astype(int)
+    for column in columns_to_str_list:
+        player_df[column] = player_df[column].fillna("").astype(str)
+        player_df[column] = player_df[column].astype(str)
+
+    
+    for column in columns_to_float_list:
+        player_df[column] = player_df[column].fillna("").astype(str)
+        player_df[column] = pd.to_numeric(player_df[column], errors='coerce')
+
+    return player_df
