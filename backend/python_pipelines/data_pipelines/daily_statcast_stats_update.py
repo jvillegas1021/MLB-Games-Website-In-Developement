@@ -17,12 +17,12 @@ def run_daily_statcast_stats_update():
 
     # pitcher branch
     pitcher_data = compute_count_stats_pitcher(statcast_data)
-    pitcher_data_table_name = 'pitcher_seasonal_data_statcast_v2'
+    pitcher_data_table_name = 'pitcher_seasonal_data_statcast'
     push_pitcher_data_to_sql_upsert(pitcher_data_table_name, pitcher_data)
 
     # batter branch
     batter_data = compute_count_stats_batter(statcast_data)
-    batter_data_table_name = 'batter_seasonal_data_statcast_v2'
+    batter_data_table_name = 'batter_seasonal_data_statcast'
     push_batter_data_to_sql_upsert(batter_data_table_name, batter_data)
 
 if __name__ == "__main__":
