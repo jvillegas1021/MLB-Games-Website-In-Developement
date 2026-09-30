@@ -43,7 +43,7 @@ mlb_matchup_card_pipeline <- function(game_date = as.Date(format(Sys.time(), tz 
   ############################### add betting logic / columns ####################
   matchup_df <- calculate_betting_logic(matchup_df)
   ############################ create historical matchup df ####################
-  historical_matchup_final_df <- create_historical_matchup_df(matchup_df, historical_matchup_df)
+  historical_matchup_final_df <- create_historical_matchup_df(matchup_df, mlb_historical_matchup_df)
   ########################## add update date time #####################
   matchup_df <- add_update_date(matchup_df)
   ########################### push to sql ####################################
