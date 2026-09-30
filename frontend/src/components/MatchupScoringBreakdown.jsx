@@ -22,7 +22,7 @@ export default function MatchupScoringBreakdown({ matchup }) {
             homeValue={matchup.Home_pitcher_control}
             awayColor={away_team_color}
             homeColor={home_team_color}
-            dividerIcon='🥇'
+            dividerIcon='🎯'
         />
 
         {/* 5 — Batting Discipline Score */}
@@ -42,7 +42,7 @@ export default function MatchupScoringBreakdown({ matchup }) {
             homeValue={matchup.Home_pitcher_contact}
             awayColor={away_team_color}
             homeColor={home_team_color}
-            dividerIcon='🏏'
+            dividerIcon='🛡️'
         />
 
         {/* 5 — Batting Contact Score */}
@@ -52,7 +52,7 @@ export default function MatchupScoringBreakdown({ matchup }) {
             homeValue={matchup.Home_batting_impact}
             awayColor={away_team_color}
             homeColor={home_team_color}
-            dividerIcon='⚖️'
+            dividerIcon='💥'
         />
 
         {/* 4 — Pitcher Expeceted Score */}
@@ -62,7 +62,7 @@ export default function MatchupScoringBreakdown({ matchup }) {
             homeValue={matchup.Home_pitcher_expected}
             awayColor={away_team_color}
             homeColor={home_team_color}
-            dividerIcon='🎯'
+            dividerIcon='📉'
         />
 
         {/* 5 — Batting Expected Score */}
@@ -72,7 +72,7 @@ export default function MatchupScoringBreakdown({ matchup }) {
             homeValue={matchup.Home_batting_expected}
             awayColor={away_team_color}
             homeColor={home_team_color}
-            dividerIcon='⚖️'
+            dividerIcon='📈'
         />
 
         
