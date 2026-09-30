@@ -12,6 +12,9 @@ def add_generic_flags(statcast_df: pd.DataFrame) -> pd.DataFrame:
     all_events_list =   flagged_statcast_df['events'].unique()
     all_descriptions_list = flagged_statcast_df['description'].unique()
 
+    # Define a flag for pitches that actually finish a play
+    is_pa_ending_event = flagged_statcast_df["events"].notna()
+    
     swinging_strike_event_list = ['swinging_strike', 'swinging_strike_blocked']
 
     contact_event_list = ['foul', 'foul_tip', 'hit_into_play', 'foul_pitchout']
@@ -97,26 +100,36 @@ def add_generic_flags(statcast_df: pd.DataFrame) -> pd.DataFrame:
         flagged_statcast_df["bb_type"].notna()
         )
 
-    flagged_statcast_df['estimated_ba_using_speedangle_bip'] = flagged_statcast_df['estimated_ba_using_speedangle'].where(
-        flagged_statcast_df['bb_type'].notna()
+
+    # Core Damage Stats: If play ended but no batted ball (like a strikeout), force to 0.0
+    flagged_statcast_df['estimated_ba_using_speedangle_bip'] = (
+        flagged_statcast_df['estimated_ba_using_speedangle']
+        .where(flagged_statcast_df['bb_type'].notna(), 0.0)
+        .where(is_pa_ending_event, np.nan)
     )
 
-    flagged_statcast_df['estimated_woba_using_speedangle_bip'] = flagged_statcast_df['estimated_woba_using_speedangle'].where(
-        flagged_statcast_df['bb_type'].notna()
+    flagged_statcast_df['estimated_woba_using_speedangle_bip'] = (
+        flagged_statcast_df['estimated_woba_using_speedangle']
+        .where(flagged_statcast_df['bb_type'].notna(), 0.0)
+        .where(is_pa_ending_event, np.nan)
     )
 
+    flagged_statcast_df['iso_value_bip'] = (
+        flagged_statcast_df['iso_value']
+        .where(flagged_statcast_df['bb_type'].notna(), 0.0)
+        .where(is_pa_ending_event, np.nan)
+    )
+
+    flagged_statcast_df['estimated_slg_using_speedangle_bip'] = (
+        flagged_statcast_df['estimated_slg_using_speedangle']
+        .where(flagged_statcast_df['bb_type'].notna(), 0.0)
+        .where(is_pa_ending_event, np.nan)
+    )
+
+    # BABIP Exception: Keep as standard BIP only (Strikeouts/Walks stay NaN)
     flagged_statcast_df['babip_value_bip'] = flagged_statcast_df['babip_value'].where(
         flagged_statcast_df['bb_type'].notna()
     )
-
-    flagged_statcast_df['iso_value_bip'] = flagged_statcast_df['iso_value'].where(
-        flagged_statcast_df['bb_type'].notna()
-    )
-
-    flagged_statcast_df['estimated_slg_using_speedangle_bip'] = flagged_statcast_df['estimated_slg_using_speedangle'].where(
-        flagged_statcast_df['bb_type'].notna()
-    )
-
     ev = flagged_statcast_df["launch_speed_bip"]
     la = flagged_statcast_df["launch_angle_bip"]
 
