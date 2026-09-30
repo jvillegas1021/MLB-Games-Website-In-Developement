@@ -100,7 +100,7 @@ export default function MatchupCard({ matchup }) {
             <div>
               <span style={{ fontWeight: 600}}>ERA: </span>
               <span style={{ fontWeight: 600, color: away_era_color }}>
-                {matchup.Away_Pitcher_ERA}
+                {Number(matchup.Away_Pitcher_ERA).toFixed(2)}
               </span>
             </div>
             <div>
@@ -215,7 +215,7 @@ export default function MatchupCard({ matchup }) {
             </div>
             <div>
               <span style={{ fontWeight: 600}}>ERA: </span>
-              <span style={{ fontWeight: 600, color: home_era_color }}> {matchup.Home_Pitcher_ERA}</span>
+              <span style={{ fontWeight: 600, color: home_era_color }}> {Number(matchup.Home_Pitcher_ERA).toFixed(2)}</span>
             </div>
             <div>
               <span style={{ fontWeight: 600}}>Model Odds: </span>
