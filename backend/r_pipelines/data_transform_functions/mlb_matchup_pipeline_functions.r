@@ -625,6 +625,20 @@ calculate_betting_logic <- function(matchup_df, min_favorite_edge = 2.0, min_und
   return(betting_df)
 }
 
+######################### CREATE HISTORICAL MATCHUP CARD #####################
+create_historical_matchup_df <- function(matchup_df, historical_matchup_df) {
+  
+  
+  historical_game_id_list <- historical_matchup_df$Game_ID
+  
+  
+  historical_matchup_final_df <- matchup_df %>%
+    filter((!(Game_ID %in% historical_game_id_list)) &
+             Prediction_Status == 'Full Prediction')
+  
+  return(historical_matchup_final_df)
+  
+}
 
 #################### add update date ###########################
 
