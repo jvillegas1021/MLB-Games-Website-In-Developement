@@ -277,6 +277,22 @@ def get_current_batter_ids():
 
     return (batter_ids)
 
+def get_all_active_batter_ids():
+    
+    batter_ids = set()
+    
+    url = "https://statsapi.mlb.com/api/v1/sports/1/players"
+    
+    data = requests.get(url).json()
+    
+    for player in data['people']:
+        if player['primaryPosition']['type'] != 'Pitcher':
+            batter_ids.add(player['id'])
+
+    return(batter_ids)
+
+
+
 def get_batter_info_and_stats_season(batter_id, season=2026):
     url = f"https://statsapi.mlb.com/api/v1/people/{batter_id}/stats"
     params = {
