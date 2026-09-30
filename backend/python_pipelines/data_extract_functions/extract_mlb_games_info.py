@@ -194,6 +194,20 @@ def get_current_pitcher_ids():
 
     return (pitcher_ids)
 
+def get_all_active_pitcher_ids():
+    
+    pitcher_ids = set()
+    
+    url = "https://statsapi.mlb.com/api/v1/sports/1/players"
+
+    data = requests.get(url).json()
+
+    for player in data['people']:
+        if player['primaryPosition']['type'] == 'Pitcher' or player['primaryPosition']['type'] == 'Two-Way Player':
+            pitcher_ids.add(player['id'])
+
+    return(pitcher_ids)
+    
 def get_pitcher_info_and_stats_season(pitcher_id, season=2026):
     url = f"https://statsapi.mlb.com/api/v1/people/{pitcher_id}/stats"
     params = {
