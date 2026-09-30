@@ -4,7 +4,7 @@ from database import get_connection
 
 router = APIRouter()
 
-@router.get("/matchups")
+@router.get("/mlb_matchup_card")
 def get_matchups_today(x_api_key: str = Header(None)):
     if x_api_key != os.getenv("API_KEY"):
         raise HTTPException(status_code=401, detail="Invalid API Key")
@@ -12,7 +12,7 @@ def get_matchups_today(x_api_key: str = Header(None)):
     connection = get_connection()
     cursor = connection.cursor()
 
-    cursor.execute("SELECT * FROM matchup_df")
+    cursor.execute("SELECT * FROM mlb_matchup_card")
     rows = cursor.fetchall()
     colnames = [desc[0] for desc in cursor.description]
 
