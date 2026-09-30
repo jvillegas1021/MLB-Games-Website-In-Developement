@@ -37,10 +37,10 @@ export default function MatchupCard({ matchup }) {
     const predicted_winner_color = mlb_team_colors[matchup.Predicted_Winner];
     const best_bet_color = mlb_team_colors[matchup.Bet_Team_Current];
 
-    const home_bet_icon_current = bet_icon(matchup.Home_Team_Current_Odds, matchup.Away_Team_Current_Odds);
-    const away_bet_icon_current = bet_icon(matchup.Away_Team_Current_Odds, matchup.Home_Team_Current_Odds);
-    const home_bet_icon_open = bet_icon(matchup.Home_Team_Open_Odds, matchup.Away_Team_Open_Odds);
-    const away_bet_icon_open = bet_icon(matchup.Away_Team_Open_Odds, matchup.Home_Team_Open_Odds);
+    const home_bet_icon_current = bet_icon(matchup.home_close_odds, matchup.away_close_odds);
+    const away_bet_icon_current = bet_icon(matchup.away_close_odds, matchup.home_close_odds);
+    const home_bet_icon_open = bet_icon(matchup.home_open_odds, matchup.away_open_odds);
+    const away_bet_icon_open = bet_icon(matchup.away_open_odds, matchup.home_open_odds);
     
     const home_bet_icon_model = bet_icon(matchup.Home_Team_Model_Odds, matchup.Away_Team_Model_Odds);
     const away_bet_icon_model = bet_icon(matchup.Away_Team_Model_Odds, matchup.Home_Team_Model_Odds);
@@ -112,7 +112,7 @@ export default function MatchupCard({ matchup }) {
             <div>
               <span style={{ fontWeight: 600}}>Open Odds: </span>
               <span style={{ fontWeight: 600}}>
-                {matchup.Away_Team_Open_Odds}
+                {matchup.away_open_odds}
               </span> {away_bet_icon_open}
             </div>
             <div>
@@ -124,7 +124,7 @@ export default function MatchupCard({ matchup }) {
             <div>
               <span style={{ fontWeight: 600}}>Current Odds: </span>
               <span style={{ fontWeight: 600}}>
-                {matchup.Away_Team_Current_Odds}
+                {matchup.away_close_odds}
               </span> {away_bet_icon_current}
             </div>
             <div>
@@ -226,7 +226,7 @@ export default function MatchupCard({ matchup }) {
             <div>
               <span style={{ fontWeight: 600}}>Open Odds: </span>
               <span style={{ fontWeight: 600}}>
-                {matchup.Home_Team_Open_Odds}
+                {matchup.home_open_odds}
               </span> {home_bet_icon_open}
             </div>
             <div>
@@ -238,7 +238,7 @@ export default function MatchupCard({ matchup }) {
             <div>
               <span style={{ fontWeight: 600}}>Current Odds: </span>
               <span style={{ fontWeight: 600}}>
-                {matchup.Home_Team_Current_Odds}
+                {matchup.home_close_odds}
               </span> {home_bet_icon_current}
             </div>
             <div>
