@@ -12,12 +12,18 @@ from backend.python_pipelines.data_pipelines.daily_roster_update import run_dail
 def run_one_time_stats_update():
     #run_daily_mlb_team_record_info_update()
     run_daily_statcast_stats_update()
+    print("Statcast data updated!")
     run_daily_pitcher_statsapi_update()
+    print("Pitcher Statsapi data updated!")
     run_daily_batter_statsapi_update()
+    print("Batter Statsapi data updated!")
     run_daily_pitcher_stats_update()
+    print("Pitcher Stats updated!")
     run_daily_pitcher_current_season_stats_update()
+    print("Pitcher Current Year Stats updated!")
     #run_starting_pitchers_recent_form_update()
     run_mlb_batting_stats_update()
+    print("Batter Stats updated!")
     #run_daily_roster_update()
 
 if __name__ == "__main__":
