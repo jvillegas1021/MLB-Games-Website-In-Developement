@@ -15,55 +15,67 @@ export default function MatchupScoringBreakdown({ matchup }) {
 
     <div style={{ width: "70%", margin: "0 auto" }}>
 
-        {/* 1 — Team Total Score */}
-        <h3 style={{ marginTop: "25px" }}>Team Total Score</h3>
+        {/* 1 — Pitcher Control Score */}
+        <h3 style={{ marginTop: "25px" }}>Pitcher Control Score</h3>
         <ScoreBar 
-            awayValue={matchup.Away_Team_Total_Score}
-            homeValue={matchup.Home_Team_Total_Score}
+            awayValue={matchup.Away_pitcher_control}
+            homeValue={matchup.Home_pitcher_control}
             awayColor={away_team_color}
             homeColor={home_team_color}
             dividerIcon='🥇'
         />
 
-        {/* 2 — Pitcher Score */}
-        <h3 style={{ marginTop: "25px" }}>Pitcher Score</h3>
+        {/* 3 — Pitcher Contact Score */}
+        <h3 style={{ marginTop: "25px" }}>Pitcher Contact Score</h3>
         <ScoreBar 
-            awayValue={matchup.Away_Pitcher_Score}
-            homeValue={matchup.Home_Pitcher_Score}
-            awayColor={away_team_color}
-            homeColor={home_team_color}
-            dividerIcon='⚾'
-        />
-
-        {/* 3 — Lineup Score */}
-        <h3 style={{ marginTop: "25px" }}>Lineup Score</h3>
-        <ScoreBar 
-            awayValue={matchup.Away_Batting_Score}
-            homeValue={matchup.Home_Batting_Score}
+            awayValue={matchup.Away_pitcher_contact}
+            homeValue={matchup.Home_pitcher_contact}
             awayColor={away_team_color}
             homeColor={home_team_color}
             dividerIcon='🏏'
         />
 
-        {/* 4 — Bullpen Score */}
-        <h3 style={{ marginTop: "25px" }}>Bullpen Score</h3>
+        {/* 4 — Pitcher Expeceted Score */}
+        <h3 style={{ marginTop: "25px" }}>Pitcher Expected Results Score</h3>
         <ScoreBar 
-            awayValue={matchup.Away_Pitching_Score}
-            homeValue={matchup.Home_Pitching_Score}
+            awayValue={matchup.Away_pitcher_expected}
+            homeValue={matchup.Home_pitcher_expected}
             awayColor={away_team_color}
             homeColor={home_team_color}
             dividerIcon='🎯'
         />
 
-        {/* 5 — Batting Split Score */}
-        <h3 style={{ marginTop: "25px" }}>Batting Split Score</h3>
+        {/* 5 — Batting Discipline Score */}
+        <h3 style={{ marginTop: "25px" }}>Batting Discipline Score</h3>
         <ScoreBar 
-            awayValue={matchup.Away_Team_Split_Score}
-            homeValue={matchup.Home_Team_Split_Score}
+            awayValue={matchup.Away_batting_discipline}
+            homeValue={matchup.Home_batting_discipline}
             awayColor={away_team_color}
             homeColor={home_team_color}
             dividerIcon='⚖️'
         />
+
+        {/* 5 — Batting Contact Score */}
+        <h3 style={{ marginTop: "25px" }}>Batting Contact Score</h3>
+        <ScoreBar 
+            awayValue={matchup.Away_batting_impact}
+            homeValue={matchup.Home_batting_impact}
+            awayColor={away_team_color}
+            homeColor={home_team_color}
+            dividerIcon='⚖️'
+        />
+
+        {/* 5 — Batting Expected Score */}
+        <h3 style={{ marginTop: "25px" }}>Batting Expected Results Score</h3>
+        <ScoreBar 
+            awayValue={matchup.Away_batting_expected}
+            homeValue={matchup.Home_batting_expected}
+            awayColor={away_team_color}
+            homeColor={home_team_color}
+            dividerIcon='⚖️'
+        />
+
+        
         </div>
   </div>
 );
