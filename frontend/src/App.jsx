@@ -12,7 +12,7 @@ function App() {
   const [matchups, setMatchups] = useState([]);
 
   useEffect(() => {
-  fetch('https://mlb-games-website.onrender.com/matchups', {
+  fetch('https://mlb-games-website.onrender.com/mlb_matchup_card', {
     headers: { 'x-api-key': 'mlb_games_api_key' },
   })
     .then((res) => {
