@@ -498,7 +498,7 @@ def process_team_batting_df(game_id: int,
                             game_official_date, 
                             team_name: str, 
                             team_id: int, 
-                            team_batters_player_ids: list[int],
+                            team_batters_player_ids: list[str],
                             all_batter_stats_statcast: pd.DataFrame) -> pd.DataFrame:
     wBB = 0.691
     wHBP = 0.722
@@ -539,7 +539,9 @@ def process_team_batting_df(game_id: int,
                    'Whiff%', 'SwStr%', 'F-Strike%', 'EV', 'LA', 'wOBA', 'wRAA', 'wRC', 'wRC+',
                    'xWOBA', 'xBA', 'xSLG', 'xISO', 'xBABIP']
 
-
+    fastball_types = ["4_Seam_Fastball", "2_Seam_Fastball", "Sinker", "Cutter"]
+    breaking_types = ["Slider", "Sweeper", "Curveball", "Changeup", "Split_Finger"]
+    
     roster_batting_df = all_batter_stats_statcast[
         all_batter_stats_statcast['xMLBAMID'].isin(team_batters_player_ids)
         ].copy()
@@ -553,7 +555,7 @@ def process_team_batting_df(game_id: int,
     pitcher_hand_list = ['general', 'RHP_', 'LHP_']
 
     team_batting_metrics = {}
-
+    
     for hand in pitcher_hand_list:
         prefix = "" if hand == "general" else f"{hand}"
 
@@ -709,7 +711,31 @@ def process_team_batting_df(game_id: int,
         team_batting_metrics[f'{prefix}xBABIP'] = team_xbabip
 
 
-        
+    # 1. --- MACRO FASTBALL DAMAGE RATES (4-Seam, 2-Seam, Sinker, Cutter) ---
+    fb_pas_total       = sum(team_totals[f"{p}_pas"] for p in fastball_types)
+    fb_abs_total       = sum(team_totals[f"{p}_abs"] for p in fastball_types)
+    fb_xwoba_sum_total = sum(team_totals[f"{p}_xwoba_sum"] for p in fastball_types)
+    fb_xslg_sum_total  = sum(team_totals[f"{p}_xslg_sum"] for p in fastball_types)
+    fb_xiso_sum_total  = sum(team_totals[f"{p}_xiso_sum"] for p in fastball_types)
+
+    # Compute clean, final Fastball Damage Rates
+    team_batting_metrics["fastball_types_xWOBA"] = safe_div(fb_xwoba_sum_total, fb_pas_total)
+    team_batting_metrics["fastball_types_xSLG"]  = safe_div(fb_xslg_sum_total, fb_abs_total)
+    team_batting_metrics["fastball_types_xISO"]  = safe_div(fb_xiso_sum_total, fb_abs_total)
+
+    # 2. --- MACRO BREAKING DAMAGE RATES (Slider, Sweeper, Curve, Change, Split) ---
+    brk_pas_total       = sum(team_totals[f"{p}_pas"] for p in breaking_types)
+    brk_abs_total       = sum(team_totals[f"{p}_abs"] for p in breaking_types)
+    brk_xwoba_sum_total = sum(team_totals[f"{p}_xwoba_sum"] for p in breaking_types)
+    brk_xslg_sum_total  = sum(team_totals[f"{p}_xslg_sum"] for p in breaking_types)
+    brk_xiso_sum_total  = sum(team_totals[f"{p}_xiso_sum"] for p in breaking_types)
+
+    # Compute clean, final Breaking Ball Damage Rates
+    team_batting_metrics["breakingball_types_xWOBA"] = safe_div(brk_xwoba_sum_total, brk_pas_total)
+    team_batting_metrics["breakingball_types_xSLG"]  = safe_div(brk_xslg_sum_total, brk_abs_total)
+    team_batting_metrics["breakingball_types_xISO"]  = safe_div(brk_xiso_sum_total, brk_abs_total)
+
+    
     team_pitchtype_metrics = {}
 
     for pitch in pitch_types:
@@ -991,10 +1017,11 @@ def process_mlb_games_odds_df(mlb_games_df, espn_mlb_games_odds_df):
     
     return mlb_games_odds_df
 
+
 def process_full_roster_batting_df( 
                             team_name: str, 
                             team_id: int, 
-                            team_batters_player_ids: list[int],
+                            team_batters_player_ids: list[str],
                             all_batter_stats_statcast: pd.DataFrame) -> pd.DataFrame:
     wBB = 0.691
     wHBP = 0.722
@@ -1035,7 +1062,10 @@ def process_full_roster_batting_df(
                    'Whiff%', 'SwStr%', 'F-Strike%', 'EV', 'LA', 'wOBA', 'wRAA', 'wRC', 'wRC+',
                    'xWOBA', 'xBA', 'xSLG', 'xISO', 'xBABIP']
 
+    fastball_types = ["4_Seam_Fastball", "2_Seam_Fastball", "Sinker", "Cutter"]
+    breaking_types = ["Slider", "Sweeper", "Curveball", "Changeup", "Split_Finger"]
 
+    
     roster_batting_df = all_batter_stats_statcast[
         all_batter_stats_statcast['xMLBAMID'].isin(team_batters_player_ids)
         ].copy()
@@ -1205,7 +1235,31 @@ def process_full_roster_batting_df(
         team_batting_metrics[f'{prefix}xBABIP'] = team_xbabip
 
 
-        
+    # 1. --- MACRO FASTBALL DAMAGE RATES (4-Seam, 2-Seam, Sinker, Cutter) ---
+    fb_pas_total       = sum(team_totals[f"{p}_pas"] for p in fastball_types)
+    fb_abs_total       = sum(team_totals[f"{p}_abs"] for p in fastball_types)
+    fb_xwoba_sum_total = sum(team_totals[f"{p}_xwoba_sum"] for p in fastball_types)
+    fb_xslg_sum_total  = sum(team_totals[f"{p}_xslg_sum"] for p in fastball_types)
+    fb_xiso_sum_total  = sum(team_totals[f"{p}_xiso_sum"] for p in fastball_types)
+
+    # Compute clean, final Fastball Damage Rates
+    team_batting_metrics["fastball_types_xWOBA"] = safe_div(fb_xwoba_sum_total, fb_pas_total)
+    team_batting_metrics["fastball_types_xSLG"]  = safe_div(fb_xslg_sum_total, fb_abs_total)
+    team_batting_metrics["fastball_types_xISO"]  = safe_div(fb_xiso_sum_total, fb_abs_total)
+
+    # 2. --- MACRO BREAKING DAMAGE RATES (Slider, Sweeper, Curve, Change, Split) ---
+    brk_pas_total       = sum(team_totals[f"{p}_pas"] for p in breaking_types)
+    brk_abs_total       = sum(team_totals[f"{p}_abs"] for p in breaking_types)
+    brk_xwoba_sum_total = sum(team_totals[f"{p}_xwoba_sum"] for p in breaking_types)
+    brk_xslg_sum_total  = sum(team_totals[f"{p}_xslg_sum"] for p in breaking_types)
+    brk_xiso_sum_total  = sum(team_totals[f"{p}_xiso_sum"] for p in breaking_types)
+
+    # Compute clean, final Breaking Ball Damage Rates
+    team_batting_metrics["breakingball_types_xWOBA"] = safe_div(brk_xwoba_sum_total, brk_pas_total)
+    team_batting_metrics["breakingball_types_xSLG"]  = safe_div(brk_xslg_sum_total, brk_abs_total)
+    team_batting_metrics["breakingball_types_xISO"]  = safe_div(brk_xiso_sum_total, brk_abs_total)
+
+    
     team_pitchtype_metrics = {}
 
     for pitch in pitch_types:
@@ -1253,5 +1307,3 @@ def process_full_roster_batting_stats_df(batting_df_statcast, mlb_batting_roster
     full_roster_batting_stats_df = pd.concat(all_team_batting_df_list, ignore_index=True)
     
     return full_roster_batting_stats_df
-
-
