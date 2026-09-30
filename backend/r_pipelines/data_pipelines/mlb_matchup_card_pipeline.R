@@ -6,7 +6,8 @@ mlb_matchup_card_pipeline <- function(game_date = as.Date(format(Sys.time(), tz 
     message("No MLB games today. Pipeline exiting.")
     return(invisible(NULL))
   }
-
+  ######## PULL DATA ########
+  
   # pitcher_data
   starting_pitcher_stats_df <- get_data_from_database('mlb_pitcher_scores')
   # pitcher_data
@@ -17,6 +18,12 @@ mlb_matchup_card_pipeline <- function(game_date = as.Date(format(Sys.time(), tz 
   prob_model <- load_rds("win_prob_model")
   # mlb odds table
   mlb_games_odds_df <- get_data_from_database('mlb_games_odds_df')
+  # historical matchup df
+  mlb_historical_matchup_df <- get_data_from_database('historical_matchup_df_v2')
+  
+  
+  ######## TRANSFORM DATA #########
+  
   ###### create matchup df #############
   matchup_df <- create_matchup_df(games_table)
   ######### assing odds #############
