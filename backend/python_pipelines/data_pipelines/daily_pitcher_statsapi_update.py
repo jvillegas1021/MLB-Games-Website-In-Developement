@@ -1,4 +1,4 @@
-from backend.python_pipelines.data_extract_functions.extract_mlb_games_info import get_current_pitcher_ids, get_pitcher_info_and_stats_season
+from backend.python_pipelines.data_extract_functions.extract_mlb_games_info import get_all_active_pitcher_ids, get_pitcher_info_and_stats_season
 from backend.python_pipelines.data_transform_functions.utility_functions import convert_pitcher_df_types_statsapi, add_update_date
 from backend.python_pipelines.data_load_functions.load_data_to_database import push_pitcher_data_to_sql_upsert
 import pandas as pd
@@ -8,7 +8,7 @@ def run_daily_pitcher_statsapi_update():
 
     current_year = datetime.now().year
 
-    current_pitcher_ids = get_current_pitcher_ids()
+    current_pitcher_ids = get_all_active_pitcher_ids()
 
     all_current_pitchers_df_list = []
 
