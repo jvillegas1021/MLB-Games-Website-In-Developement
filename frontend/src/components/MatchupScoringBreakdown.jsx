@@ -25,6 +25,16 @@ export default function MatchupScoringBreakdown({ matchup }) {
             dividerIcon='🥇'
         />
 
+        {/* 5 — Batting Discipline Score */}
+        <h3 style={{ marginTop: "25px" }}>Batting Discipline Score</h3>
+        <ScoreBar 
+            awayValue={matchup.Away_batting_discipline}
+            homeValue={matchup.Home_batting_discipline}
+            awayColor={away_team_color}
+            homeColor={home_team_color}
+            dividerIcon='⚖️'
+        />
+      
         {/* 3 — Pitcher Contact Score */}
         <h3 style={{ marginTop: "25px" }}>Pitcher Contact Score</h3>
         <ScoreBar 
@@ -35,26 +45,6 @@ export default function MatchupScoringBreakdown({ matchup }) {
             dividerIcon='🏏'
         />
 
-        {/* 4 — Pitcher Expeceted Score */}
-        <h3 style={{ marginTop: "25px" }}>Pitcher Expected Results Score</h3>
-        <ScoreBar 
-            awayValue={matchup.Away_pitcher_expected}
-            homeValue={matchup.Home_pitcher_expected}
-            awayColor={away_team_color}
-            homeColor={home_team_color}
-            dividerIcon='🎯'
-        />
-
-        {/* 5 — Batting Discipline Score */}
-        <h3 style={{ marginTop: "25px" }}>Batting Discipline Score</h3>
-        <ScoreBar 
-            awayValue={matchup.Away_batting_discipline}
-            homeValue={matchup.Home_batting_discipline}
-            awayColor={away_team_color}
-            homeColor={home_team_color}
-            dividerIcon='⚖️'
-        />
-
         {/* 5 — Batting Contact Score */}
         <h3 style={{ marginTop: "25px" }}>Batting Contact Score</h3>
         <ScoreBar 
@@ -63,6 +53,16 @@ export default function MatchupScoringBreakdown({ matchup }) {
             awayColor={away_team_color}
             homeColor={home_team_color}
             dividerIcon='⚖️'
+        />
+
+        {/* 4 — Pitcher Expeceted Score */}
+        <h3 style={{ marginTop: "25px" }}>Pitcher Expected Results Score</h3>
+        <ScoreBar 
+            awayValue={matchup.Away_pitcher_expected}
+            homeValue={matchup.Home_pitcher_expected}
+            awayColor={away_team_color}
+            homeColor={home_team_color}
+            dividerIcon='🎯'
         />
 
         {/* 5 — Batting Expected Score */}
