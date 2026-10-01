@@ -136,39 +136,63 @@ export default function MatchupCard({ matchup }) {
           </div>
 
           {/* CENTER: Game info */}
-          <div className="matchup-card-column matchup-card-center" style={{ width: '40%', fontWeight: 600}}>
+          <div className="matchup-card-column matchup-card-center" style={{ width: '40%', fontWeight: 600 }}>
             <p>Game ID: {matchup.Game_ID}</p>
             <p>Game Date: {matchup.Game_Date}</p>
             <p>Game Time: {matchup.Game_Time}</p>
             <p>Ball Park: {matchup.Game_Venue}</p>
-            <p> Day / Night: {matchup.Day_Night === "day" ? "☀️" : "🌑"}</p>
-            <p> Over / Under: {matchup.Over_Under}</p>
-            <p> Moneyline: {matchup.Moneyline}</p>
-            <p> 
-              <span style={{ fontWeight: 600}}>Best Bet: </span>
-              <span className="team-title"
-              style={{fontWeight: 600, color: best_bet_color}}>{matchup.Bet_Team_Current}</span>
-              <img
-                src={`/mlb_logos/${matchup.Bet_Team_Current}.png`}
-                onError={(e) => { e.target.src = "/mlb_logos/MLB-Logo.png"; }}
-                alt={matchup.Bet_Team_Current}
-                style={{ width: '60px', marginLeft: '8px' }}
-              />
+            <p>Day / Night: {matchup.Day_Night === "day" ? "☀️" : "🌑"}</p>
+            <p>Over / Under: {matchup.Over_Under}</p>
+            <p>Moneyline: {matchup.Moneyline}</p>
+            
+            {/* NEW: Opening Line Engine Track */}
+            <p style={{ display: 'flex', alignItems: 'center', margin: '4px 0' }}> 
+              <span style={{ fontWeight: 600 }}>Open Odds Bet: </span>
+              <span className="team-title" style={{ fontWeight: 600, color: best_bet_color, marginLeft: '4px' }}>
+                {matchup.Bet_Team_Open}
+              </span>
+              {matchup.Bet_Team_Open !== "No Bet" && (
+                <img
+                  src={`/mlb_logos/${matchup.Bet_Team_Open}.png`}
+                  onError={(e) => { e.target.src = "/mlb_logos/MLB-Logo.png"; }}
+                  alt={matchup.Bet_Team_Open}
+                  style={{ width: '30px', height: '30px', marginLeft: '8px', objectFit: 'contain' }} // Logo Shrunk
+                />
+              )}
             </p>
-            <p>
-              <span style={{ fontWeight: 600}}>Predicted Winner: </span>
-              <span className="team-title"
-              style={{fontWeight: 600, color: predicted_winner_color}}>{matchup.Predicted_Winner}</span>
+
+            {/* UPDATED: Current Line Engine Track */}
+            <p style={{ display: 'flex', alignItems: 'center', margin: '4px 0' }}> 
+              <span style={{ fontWeight: 600 }}>Current Odds Bet: </span>
+              <span className="team-title" style={{ fontWeight: 600, color: best_bet_color, marginLeft: '4px' }}>
+                {matchup.Bet_Team_Current}
+              </span>
+              {matchup.Bet_Team_Current !== "No Bet" && (
+                <img
+                  src={`/mlb_logos/${matchup.Bet_Team_Current}.png`}
+                  onError={(e) => { e.target.src = "/mlb_logos/MLB-Logo.png"; }}
+                  alt={matchup.Bet_Team_Current}
+                  style={{ width: '30px', height: '30px', marginLeft: '8px', objectFit: 'contain' }} // Logo Shrunk
+                />
+              )}
+            </p>
+
+            {/* Predicted Winner Platform */}
+            <p style={{ display: 'flex', alignItems: 'center', margin: '8px 0 4px 0', borderTop: '1px solid #eee', paddingTop: '4px' }}>
+              <span style={{ fontWeight: 600 }}>Predicted Winner: </span>
+              <span className="team-title" style={{ fontWeight: 600, color: predicted_winner_color, marginLeft: '4px' }}>
+                {matchup.Predicted_Winner}
+              </span>
               <img
                 src={`/mlb_logos/${matchup.Predicted_Winner}.png`}
                 onError={(e) => { e.target.src = "/mlb_logos/MLB-Logo.png"; }}
                 alt={matchup.Predicted_Winner}
-                style={{ width: '60px', marginLeft: '8px' }}
+                style={{ width: '30px', height: '30px', marginLeft: '8px', objectFit: 'contain' }} // Logo Shrunk
               />
             </p>
 
             <p>
-              <span style={{ fontWeight: 600}}>Prediction Confidence : </span>{" "}
+              <span style={{ fontWeight: 600 }}>Prediction Confidence : </span>{" "}
               <span style={{ fontWeight: 600, color: win_probability_color }}>
                 {matchup.Win_Probability} %
               </span>
@@ -184,11 +208,9 @@ export default function MatchupCard({ matchup }) {
               dividerIcon='💎'
             />
 
-            <p style={{ fontWeight: 'bold', color: prediction_color }}>
+            <p style={{ fontWeight: 'bold', color: prediction_color, marginTop: '8px' }}>
               {matchup.Prediction_Status}
             </p>
-
-
           </div>
 
           {/* RIGHT: Home team */}
