@@ -19,7 +19,7 @@ mlb_matchup_card_pipeline <- function(game_date = as.Date(format(Sys.time(), tz 
   # mlb odds table
   mlb_games_odds_df <- get_data_from_database('mlb_games_odds_df')
   # historical matchup df
-  mlb_historical_matchup_df <- get_data_from_database('historical_matchup_df_v2')
+  mlb_historical_matchup_df <- get_data_from_database('historical_matchup_df')
   
   
   ######## TRANSFORM DATA #########
@@ -55,7 +55,7 @@ mlb_matchup_card_pipeline <- function(game_date = as.Date(format(Sys.time(), tz 
   matchup_df <- add_update_date(matchup_df)
   ########################### push to sql ####################################
   write_df_to_sql_replace('mlb_matchup_card', matchup_df )
-  write_df_to_sql_append('historical_matchup_df_v2', historical_matchup_final_df)
+  write_df_to_sql_append('historical_matchup_df', historical_matchup_final_df)
   
   return(invisible((TRUE)))
   
