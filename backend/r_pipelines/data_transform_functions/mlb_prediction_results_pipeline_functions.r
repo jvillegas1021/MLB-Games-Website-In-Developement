@@ -25,13 +25,9 @@ create_curated_results_df <- function(mlb_games_results_df, historical_matchup_d
         Predicted_Winner == Winner, TRUE, FALSE
       )
     ) %>%
-    drop_na(Correct_Prediction)
-  
-  curated_results_df <- curated_results_df %>%
-    filter(
-      Win_Probability > 54.0
-    )
-  
+    drop_na(Correct_Prediction) %>%
+    
+
   return(curated_results_df)
   
 }
@@ -79,11 +75,9 @@ calculate_overall_betting_accuracy <- function(curated_results_df, final_results
 ################## calculate underdog accuracy picks ###############
 calculate_underdog_accuracy <- function(curated_results_df, final_results_df) {
   underdog_df <- curated_results_df %>%
-    filter(Vegas_Favorite != 'Even') %>%
-    mutate(
-      Vegas_Underdog = if_else(Home_Team == Vegas_Favorite, Away_Team, Home_Team)
-    ) %>%
-    filter(Predicted_Winner == Vegas_Underdog)   
+    filter(
+      Predicted_Winner == Vegas_Underdog
+      )   
   
   total_underdog_predictions <- nrow(underdog_df)
   total_correct_underdog_predictions <- sum(underdog_df$Correct_Prediction)
