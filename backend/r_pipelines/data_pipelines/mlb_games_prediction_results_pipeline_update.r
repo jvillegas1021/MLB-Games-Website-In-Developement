@@ -2,7 +2,7 @@
 mlb_games_prediction_results_pipeline <- function() {
   # pull in data
   mlb_games_results_df <- get_data_from_database('mlb_games_results')
-  historical_matchup_df <- get_data_from_database('historical_matchup_df')
+  historical_matchup_df <- get_data_from_database('historical_matchup_df_v2')
   
   # process data
   curated_results_df <- create_curated_results_df(mlb_games_results_df, historical_matchup_df)
