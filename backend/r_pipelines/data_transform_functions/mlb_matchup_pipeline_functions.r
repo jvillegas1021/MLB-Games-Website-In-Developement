@@ -1,7 +1,6 @@
 ##### CREATE MATCHUP DF ##############
-##### CREATE MATCHUP DF ##############
 create_matchup_df <- function(games_table) {
-  
+  # 1. Define the exact columns you expect to pull from the API
   expected_cols <- c(
     "gamePk", "officialDate", "status.detailedState", "status.abstractGameCode",
     "seriesGameNumber", "venue.name", "gameDate", "dayNight",
@@ -11,6 +10,8 @@ create_matchup_df <- function(games_table) {
     "teams.away.probablePitcher.fullName", "teams.away.probablePitcher.id"
   )
   
+  # 2. Ensure all columns exist in the dataframe before selecting.
+  # If a column is missing completely from the API payload, this creates it as NA.
   missing_cols <- setdiff(expected_cols, colnames(games_table))
   if (length(missing_cols) > 0) {
     games_table[missing_cols] <- NA
@@ -42,8 +43,10 @@ create_matchup_df <- function(games_table) {
     ) %>%
     dplyr::mutate(
       Game_ID = as.character(Game_ID),
+      # safely converts IDs to character, turning NA or NULL placeholders into legal character "NA"
       Home_Pitcher_ID = ifelse(is.na(Home_Pitcher_ID), NA_character_, as.character(Home_Pitcher_ID)),
       Away_Pitcher_ID = ifelse(is.na(Away_Pitcher_ID), NA_character_, as.character(Away_Pitcher_ID)),
+      # Optional: explicitly provide a string fallback for missing names
       Home_Pitcher = ifelse(is.na(Home_Pitcher), "TBD", as.character(Home_Pitcher)),
       Away_Pitcher = ifelse(is.na(Away_Pitcher), "TBD", as.character(Away_Pitcher))
     )
@@ -61,8 +64,6 @@ create_matchup_df <- function(games_table) {
 
     return(matchup_df)
     }
-
-
 ######################### ASSIGN ODDS TABLE ##############################
 
 assign_odds_and_win_probability_to_teams <- function(matchup_df, odds_df) {
@@ -415,15 +416,14 @@ calculate_matchup_score <- function(matchup_df) {
       Net_Expected_Margin     = round(Home_Offense_Edge_Exp - Away_Offense_Edge_Exp, 2),
       
       Master_Matchup_Score = round((Net_Discipline_Margin * 0.19793663) + 
-        (Net_Power_Margin      * 0.09048099) + 
-        (Net_Expected_Margin   * 0.11854899), 2),
+                                     (Net_Power_Margin      * 0.09048099) + 
+                                     (Net_Expected_Margin   * 0.11854899), 2),
       
       Master_Matchup_Score = replace_na(Master_Matchup_Score, 0)
     )
   
   return(matchup_df)
 }
-
 
 ############################# CALCULATE FATIGUE SCORE ####################################
 calculate_team_travel_fatigue_score <- function(matchup_df, team_travel_df) {
@@ -573,40 +573,54 @@ calculate_model_odds_and_edge <- function(matchup_df) {
   return(matchup_df)
 }
 ################## betting logic ##############################
-calculate_betting_logic <- function(matchup_df, min_favorite_edge = 2.0, min_underdog_edge = 5.0) {
+calculate_betting_logic <- function(matchup_df, base_edge = 2.0, penalty_coefficient = 0.75) {
   
   betting_df <- matchup_df %>%
     mutate(
       # 1. Clean up edge inputs safely (on a 0-100 scale)
       Home_Team_Current_Edge = as.numeric(replace_na(Home_Team_Current_Edge, 0)),
+      Home_Team_Open_Edge = as.numeric(replace_na(Home_Team_Open_Edge, 0)),
       Away_Team_Current_Edge = as.numeric(replace_na(Away_Team_Current_Edge, 0)),
+      Away_Team_Open_Edge = as.numeric(replace_na(Away_Team_Open_Edge, 0)),
       
       # 2. Explicitly flag who the sportsbook thinks is the favorite/underdog
-      Vegas_Favorite = case_when(
+      Vegas_Open_Favorite = case_when(
+        home_open_odds < away_open_odds ~ Home_Team,
+        home_open_odds > away_open_odds ~ Away_Team,
+        TRUE ~ "Even"
+      ),
+      Vegas_Current_Favorite = case_when(
         home_close_odds < away_close_odds ~ Home_Team,
         home_close_odds > away_close_odds ~ Away_Team,
         TRUE ~ "Even"
       ),
       
+      home_team_threshold_edge = pmax(0.5, base_edge + ((54 - Home_Team_Model_Win_Probability) * penalty_coefficient)),
+      away_team_threshold_edge = pmax(0.5, base_edge + ((54 - Away_Team_Model_Win_Probability) * penalty_coefficient)),
+      
       # 3. Dynamic Threshold check for HOME team (Scale: 50.0)
-      Place_Bet_Home_Current = case_when(
-        # Home is your model's favorite -> requires a smaller edge (e.g., +2.0%)
-        Home_Team_Model_Win_Probability >= 50.0 & Home_Team_Current_Edge >= min_favorite_edge ~ TRUE,
-        # Home is your model's underdog -> requires a much tighter edge (e.g., +5.0%)
-        Home_Team_Model_Win_Probability < 50.0 & Home_Team_Current_Edge >= min_underdog_edge ~ TRUE,
-        TRUE ~ FALSE
+      Place_Bet_Home_Open = if_else(
+        Home_Team_Open_Edge >= home_team_threshold_edge, TRUE, FALSE
+      ),
+      Place_Bet_Home_Current = if_else(
+        Home_Team_Current_Edge >= home_team_threshold_edge, TRUE, FALSE
+      ),
+      Place_Bet_Away_Open = if_else(
+        Away_Team_Open_Edge >= away_team_threshold_edge, TRUE, FALSE
+      ),
+      Place_Bet_Away_Current = if_else(
+        Away_Team_Current_Edge >= away_team_threshold_edge, TRUE, FALSE
       ),
       
-      # 4. Dynamic Threshold check for AWAY team (Scale: 50.0)
-      Place_Bet_Away_Current = case_when(
-        # Away is your model's favorite -> requires a smaller edge (e.g., +2.0%)
-        Away_Team_Model_Win_Probability >= 50.0 & Away_Team_Current_Edge >= min_favorite_edge ~ TRUE,
-        # Away is your model's underdog -> requires a much tighter edge (e.g., +5.0%)
-        Away_Team_Model_Win_Probability < 50.0 & Away_Team_Current_Edge >= min_underdog_edge ~ TRUE,
-        TRUE ~ FALSE
+
+      Bet_Team_Open = case_when(
+        Place_Bet_Home_Open & Place_Bet_Away_Open ~ "No Bet", # Conflict shield
+        Place_Bet_Home_Open ~ Home_Team,
+        Place_Bet_Away_Open ~ Away_Team,
+        TRUE ~ "No Bet"
       ),
       
-      # 5. Assign final bet selection
+
       Bet_Team_Current = case_when(
         Place_Bet_Home_Current & Place_Bet_Away_Current ~ "No Bet", # Conflict shield
         Place_Bet_Home_Current ~ Home_Team,
@@ -614,10 +628,16 @@ calculate_betting_logic <- function(matchup_df, min_favorite_edge = 2.0, min_und
         TRUE ~ "No Bet"
       ),
       
-      # 6. Label the pick type so you can track performance perfectly
-      Bet_Type = case_when(
+
+      Bet_Type_Open = case_when(
+        Bet_Team_Open == "No Bet" ~ "No Bet",
+        Bet_Team_Open == Vegas_Open_Favorite ~ "Favorite Bet",
+        TRUE ~ "Underdog Bet"
+      ),
+      
+      Bet_Type_Current = case_when(
         Bet_Team_Current == "No Bet" ~ "No Bet",
-        Bet_Team_Current == Vegas_Favorite ~ "Favorite Bet",
+        Bet_Team_Current == Vegas_Current_Favorite ~ "Favorite Bet",
         TRUE ~ "Underdog Bet"
       )
     )
@@ -633,13 +653,11 @@ create_historical_matchup_df <- function(matchup_df, historical_matchup_df) {
   
   
   historical_matchup_final_df <- matchup_df %>%
-    filter((!(Game_ID %in% historical_game_id_list)) &
-             Prediction_Status == 'Full Prediction')
+    filter((!(Game_ID %in% historical_game_id_list)))
   
   return(historical_matchup_final_df)
   
 }
-
 #################### add update date ###########################
 
 add_update_date <- function(matchup_df) {
@@ -649,6 +667,5 @@ add_update_date <- function(matchup_df) {
   
   return(matchup_df)
 }
-
 
 
