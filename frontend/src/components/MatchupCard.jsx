@@ -142,8 +142,8 @@ export default function MatchupCard({ matchup }) {
             <p>Game Time: {matchup.Game_Time}</p>
             <p>Ball Park: {matchup.Game_Venue}</p>
             <p>Day / Night: {matchup.Day_Night === "day" ? "☀️" : "🌑"}</p>
-            <p>Over / Under: {matchup.Over_Under}</p>
-            <p>Moneyline: {matchup.Moneyline}</p>
+            <p>Over / Under: {matchup.over_under}</p>
+            <p>Moneyline: {matchup.details}</p>
             
             {/* NEW: Opening Line Engine Track */}
             <p style={{ display: 'flex', alignItems: 'center', margin: '4px 0' }}> 
