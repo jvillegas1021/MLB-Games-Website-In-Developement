@@ -14,20 +14,40 @@ export default function DiamondsEdgeResults({ mlb_games_prediction_results }) {
 
     const winProbData = [
     {
-        range: "<50%",
-        accuracy: prediction_results.Win_Prob_Under_50
+        range: "<48%",
+        accuracy: prediction_results.Win_Prob_Under_48
     },
     {
-        range: "50-55%",
-        accuracy: prediction_results.Win_Prob_50_55
+        range: "48-50%",
+        accuracy: prediction_results.Win_Prob_48_50
     },
     {
-        range: "55-60%",
-        accuracy: prediction_results.Win_Prob_55_60
+        range: "50-52%",
+        accuracy: prediction_results.Win_Prob_50_52
     },
     {
-        range: "60-65%",
-        accuracy: prediction_results.Win_Prob_60_65
+        range: "52-54%",
+        accuracy: prediction_results.Win_Prob_52_54
+    },
+    {
+        range: "54-56%",
+        accuracy: prediction_results.Win_Prob_54_56
+    },
+    {
+        range: "56-58%",
+        accuracy: prediction_results.Win_Prob_56_58
+    },
+    {
+        range: "58-60%",
+        accuracy: prediction_results.Win_Prob_58_60
+    },
+    {
+        range: "60-62%",
+        accuracy: prediction_results.Win_Prob_60_62 // Maps to your fixed R label!
+    },
+    {
+        range: "62-65%",
+        accuracy: prediction_results.Win_Prob_62_65
     },
     {
         range: "65%+",
