@@ -114,7 +114,7 @@ calculate_win_probability_accuracy <- function(curated_results_df, final_results
         Win_Probability >= 54 & Win_Probability < 56 ~ "Win_Prob_54_56",
         Win_Probability >= 56 & Win_Probability < 58 ~ "Win_Prob_56_58",
         Win_Probability >= 58 & Win_Probability < 60 ~ "Win_Prob_58_60",
-        Win_Probability >= 60 & Win_Probability < 62 ~ "Win_Prob_62_64", 
+        Win_Probability >= 60 & Win_Probability < 62 ~ "Win_Prob_60_62", 
         Win_Probability >= 62 & Win_Probability < 65 ~ "Win_Prob_62_65", 
         Win_Probability >= 65                        ~ "Win_Prob_65+"   
       )
