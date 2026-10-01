@@ -1,55 +1,53 @@
 ##### CREATE MATCHUP DF ##############
+##### CREATE MATCHUP DF ##############
 create_matchup_df <- function(games_table) {
-     matchup_df <- games_table %>%
-      dplyr::select(
-        gamePk,
-        officialDate,
-        status.detailedState,
-        status.abstractGameCode,
-        seriesGameNumber,
-        venue.name,
-        gameDate,
-        dayNight,
-        teams.home.team.name,
-        teams.home.team.id,
-        teams.home.leagueRecord.wins,
-        teams.home.leagueRecord.losses,
-        teams.home.probablePitcher.fullName,
-        teams.home.probablePitcher.id,
-        teams.away.team.name,
-        teams.away.team.id,
-        teams.away.leagueRecord.wins,
-        teams.away.leagueRecord.losses,
-        teams.away.probablePitcher.fullName,
-        teams.away.probablePitcher.id
-      ) %>%
-      dplyr::rename(
-        Game_ID = gamePk,
-        Game_Date = officialDate,
-        Game_Status = status.detailedState,
-        Game_Status_Code = status.abstractGameCode,
-        Game_In_Series = seriesGameNumber,
-        Game_Venue = venue.name,
-        Game_Time = gameDate,
-        Day_Night = dayNight,
-        Home_Team = teams.home.team.name,
-        Home_Team_ID = teams.home.team.id,
-        Home_Team_Wins = teams.home.leagueRecord.wins,
-        Home_Team_Losses = teams.home.leagueRecord.losses,
-        Home_Pitcher = teams.home.probablePitcher.fullName,
-        Home_Pitcher_ID = teams.home.probablePitcher.id,
-        Away_Team = teams.away.team.name,
-        Away_Team_ID = teams.away.team.id,
-        Away_Team_Wins = teams.away.leagueRecord.wins,
-        Away_Team_Losses = teams.away.leagueRecord.losses,
-        Away_Pitcher = teams.away.probablePitcher.fullName,
-        Away_Pitcher_ID = teams.away.probablePitcher.id
-      ) %>%
-       dplyr::mutate(
-         Game_ID = as.character(Game_ID),
-         Home_Pitcher_ID = as.character(Home_Pitcher_ID),
-         Away_Pitcher_ID = as.character(Away_Pitcher_ID)
-      )
+  
+  expected_cols <- c(
+    "gamePk", "officialDate", "status.detailedState", "status.abstractGameCode",
+    "seriesGameNumber", "venue.name", "gameDate", "dayNight",
+    "teams.home.team.name", "teams.home.team.id", "teams.home.leagueRecord.wins", "teams.home.leagueRecord.losses",
+    "teams.home.probablePitcher.fullName", "teams.home.probablePitcher.id",
+    "teams.away.team.name", "teams.away.team.id", "teams.away.leagueRecord.wins", "teams.away.leagueRecord.losses",
+    "teams.away.probablePitcher.fullName", "teams.away.probablePitcher.id"
+  )
+  
+  missing_cols <- setdiff(expected_cols, colnames(games_table))
+  if (length(missing_cols) > 0) {
+    games_table[missing_cols] <- NA
+  }
+  
+  matchup_df <- games_table %>%
+    dplyr::select(dplyr::all_of(expected_cols)) %>%
+    dplyr::rename(
+      Game_ID = gamePk,
+      Game_Date = officialDate,
+      Game_Status = status.detailedState,
+      Game_Status_Code = status.abstractGameCode,
+      Game_In_Series = seriesGameNumber,
+      Game_Venue = venue.name,
+      Game_Time = gameDate,
+      Day_Night = dayNight,
+      Home_Team = teams.home.team.name,
+      Home_Team_ID = teams.home.team.id,
+      Home_Team_Wins = teams.home.leagueRecord.wins,
+      Home_Team_Losses = teams.home.leagueRecord.losses,
+      Home_Pitcher = teams.home.probablePitcher.fullName,
+      Home_Pitcher_ID = teams.home.probablePitcher.id,
+      Away_Team = teams.away.team.name,
+      Away_Team_ID = teams.away.team.id,
+      Away_Team_Wins = teams.away.leagueRecord.wins,
+      Away_Team_Losses = teams.away.leagueRecord.losses,
+      Away_Pitcher = teams.away.probablePitcher.fullName,
+      Away_Pitcher_ID = teams.away.probablePitcher.id
+    ) %>%
+    dplyr::mutate(
+      Game_ID = as.character(Game_ID),
+      Home_Pitcher_ID = ifelse(is.na(Home_Pitcher_ID), NA_character_, as.character(Home_Pitcher_ID)),
+      Away_Pitcher_ID = ifelse(is.na(Away_Pitcher_ID), NA_character_, as.character(Away_Pitcher_ID)),
+      Home_Pitcher = ifelse(is.na(Home_Pitcher), "TBD", as.character(Home_Pitcher)),
+      Away_Pitcher = ifelse(is.na(Away_Pitcher), "TBD", as.character(Away_Pitcher))
+    )
+  
     
     time <- matchup_df$Game_Time
     dt_utc <- ymd_hms(time, tz = 'UTC')
@@ -63,6 +61,8 @@ create_matchup_df <- function(games_table) {
 
     return(matchup_df)
     }
+
+
 ######################### ASSIGN ODDS TABLE ##############################
 
 assign_odds_and_win_probability_to_teams <- function(matchup_df, odds_df) {
