@@ -59,8 +59,6 @@ calculate_roster_batting_scores <- function(team_batting_df) {
   # Any stat NOT on this list will automatically be treated as "Positive/Higher is better".
   negative_stats <- c(
     'K%', 'Chase%', 'Whiff%', 'F-Strike%', 'GB%', 'IFFB%', 'RHP_K%', 'LHP_K%',
-    '4_Seam_Fastball_Whiff%', '2_Seam_Fastball_Whiff%', 'Sinker_Whiff%', 'Cutter_Whiff%',
-    'Slider_Whiff%', 'Sweeper_Whiff%', 'Curveball_Whiff%', 'Changeup_Whiff%', 'Split_Finger_Whiff%',
     'RHP_K%', 'LHP_K%'
   )
   
