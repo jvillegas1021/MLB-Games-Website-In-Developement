@@ -11,8 +11,8 @@ calculate_roster_batting_scores <- function(team_batting_df) {
   block_results    <- c('OPS', 'AVG', 'OBP', 'SLG', 'BABIP')
   block_vs_rhp <- c('RHP_OPS', 'RHP_AVG', 'RHP_OBP', 'RHP_SLG', 'RHP_ISO', 'RHP_K%', 'RHP_BB%')
   block_vs_lhp <- c('LHP_OPS', 'LHP_AVG', 'LHP_OBP', 'LHP_SLG', 'LHP_ISO', 'LHP_K%', 'LHP_BB%')
-  block_fastballs  <- c('4_Seam_Fastball_Whiff%', '2_Seam_Fastball_Whiff%', 'Sinker_Whiff%', 'Cutter_Whiff%')
-  block_breaking   <- c('Slider_Whiff%', 'Sweeper_Whiff%', 'Curveball_Whiff%', 'Changeup_Whiff%', 'Split_Finger_Whiff%')
+  block_fastballs  <- c('fastball_types_xWOBA', 'fastball_types_xSLG', 'fastball_types_xISO')
+  block_breaking   <- c('breakingball_types_xWOBA', 'breakingball_types_xSLG', 'breakingball_types_xISO')
   
   
   # Create a master list of all tracking stats to clean in the next step
