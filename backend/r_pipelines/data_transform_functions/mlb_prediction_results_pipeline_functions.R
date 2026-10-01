@@ -74,8 +74,11 @@ calculate_overall_betting_accuracy <- function(curated_results_df, final_results
 ################## calculate underdog accuracy picks ###############
 calculate_underdog_accuracy <- function(curated_results_df, final_results_df) {
   underdog_df <- curated_results_df %>%
-    drop_na(Underdog_Open) %>%  
-    filter(Predicted_Winner == Underdog_Open)   
+    filter(Vegas_Favorite != 'Even') %>%
+    mutate(
+      Vegas_Underdog = if_else(Home_Team == Vegas_Favorite, Away_Team, Home_Team)
+    ) %>%
+    filter(Predicted_Winner == Vegas_Underdog)   
   
   total_underdog_predictions <- nrow(underdog_df)
   total_correct_underdog_predictions <- sum(underdog_df$Correct_Prediction)
@@ -99,11 +102,16 @@ calculate_win_probability_accuracy <- function(curated_results_df, final_results
   win_probability_df <- curated_results_df %>%
     mutate(
       WinProb_Bucket = case_when(
-        Win_Probability < 50 ~ "Win_Prob_Under_50",
-        Win_Probability >= 50 & Win_Probability < 55 ~ "Win_Prob_50_55",
-        Win_Probability >= 55 & Win_Probability < 60 ~ "Win_Prob_55_60",
-        Win_Probability >= 60 & Win_Probability < 65 ~ "Win_Prob_60_65",
-        Win_Probability >= 65 ~ "Win_Prob_65+"
+        Win_Probability < 48 ~ "Win_Prob_Under_48",
+        Win_Probability >= 48 & Win_Probability < 50 ~ "Win_Prob_48_50",
+        Win_Probability >= 50 & Win_Probability < 52 ~ "Win_Prob_50_52",
+        Win_Probability >= 52 & Win_Probability < 54 ~ "Win_Prob_52_54",
+        Win_Probability >= 54 & Win_Probability < 56 ~ "Win_Prob_54_56",
+        Win_Probability >= 56 & Win_Probability < 58 ~ "Win_Prob_56_58",
+        Win_Probability >= 58 & Win_Probability < 60 ~ "Win_Prob_58_60",
+        Win_Probability >= 60 & Win_Probability < 62 ~ "Win_Prob_60_62",
+        Win_Probability >= 62 & Win_Probability < 64 ~ "Win_Prob_62_64",
+        Win_Probability >= 66 ~ "Win_Prob_66+"
       )
     )
   
