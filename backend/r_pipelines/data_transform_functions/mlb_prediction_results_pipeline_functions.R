@@ -27,6 +27,11 @@ create_curated_results_df <- function(mlb_games_results_df, historical_matchup_d
     ) %>%
     drop_na(Correct_Prediction)
   
+  curated_results_df <- curated_results_df %>%
+    filter(
+      Win_Probability > 54.0
+    )
+  
   return(curated_results_df)
   
 }
@@ -109,9 +114,9 @@ calculate_win_probability_accuracy <- function(curated_results_df, final_results
         Win_Probability >= 54 & Win_Probability < 56 ~ "Win_Prob_54_56",
         Win_Probability >= 56 & Win_Probability < 58 ~ "Win_Prob_56_58",
         Win_Probability >= 58 & Win_Probability < 60 ~ "Win_Prob_58_60",
-        Win_Probability >= 60 & Win_Probability < 62 ~ "Win_Prob_60_62",
-        Win_Probability >= 62 & Win_Probability < 64 ~ "Win_Prob_62_64",
-        Win_Probability >= 66 ~ "Win_Prob_66+"
+        Win_Probability >= 60 & Win_Probability < 62 ~ "Win_Prob_62_64", 
+        Win_Probability >= 62 & Win_Probability < 65 ~ "Win_Prob_62_65", 
+        Win_Probability >= 65                        ~ "Win_Prob_65+"   
       )
     )
   
