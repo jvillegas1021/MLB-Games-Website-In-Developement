@@ -19,19 +19,18 @@ def get_matchup_card(
     if x_api_key != os.getenv("API_KEY"):
         raise HTTPException(status_code=401, detail="Invalid API Key")
 
-    # If no date parameter is supplied from React, default to today's date string
-    if not game_date:
-        # Generates a string like "2026-10-02" matching your database text format
-        game_date = datetime.now(timezone.utc).strftime("%Y-%m-%d")
-
     connection = get_connection()
     cursor = connection.cursor()
 
-    # Updated to match your exact column name: Game_Date
+    # If no date parameter is supplied from React, find the LATEST available date in the database
+    if not game_date:
+        cursor.execute('SELECT MAX("Game_Date") FROM historical_matchup_df')
+        result = cursor.fetchone()
+        # Fall back to today's date string if the table is completely empty
+        game_date = result[0] if (result and result[0]) else datetime.now(timezone.utc).strftime("%Y-%m-%d")
+
+    # Match your working Neon editor query exactly
     query = 'SELECT * FROM historical_matchup_df WHERE "Game_Date" = %s'
-    
-    # Note: If your database uses case-insensitive columns you can drop the double quotes,
-    # but if it was created specifically as CamelCase, wrapping it in quotes ensures it connects.
     cursor.execute(query, (game_date,))
     
     rows = cursor.fetchall()

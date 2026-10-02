@@ -17,7 +17,7 @@ function App() {
   useEffect(() => {
     // If a date is selected, append it as a query parameter. Otherwise, fetch today's defaults.
     const url = selectedDate 
-      ? `https://onrender.com{selectedDate}`
+      ? `https://mlb-games-website.onrender.com/mlb_matchup_card?game_date=${selectedDate}`
       : 'https://mlb-games-website.onrender.com/mlb_matchup_card';
 
     fetch(url, {
