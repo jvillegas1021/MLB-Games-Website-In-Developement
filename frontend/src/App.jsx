@@ -98,7 +98,7 @@ function App() {
             <MatchupCard key={i} matchup={m} />
           ))
         ) : (
-          <p style={{ color: '#666' }}>No games found in the historical card for this date.</p>
+          <p style={{ color: '#666' }}>No games on the card for this date.</p>
         )}
       </>
     )}
