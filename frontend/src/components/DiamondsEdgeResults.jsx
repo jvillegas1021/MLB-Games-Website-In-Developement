@@ -12,6 +12,10 @@ export default function DiamondsEdgeResults({ mlb_games_prediction_results }) {
 
     const prediction_results = mlb_games_prediction_results?.[0];
 
+    if (!prediction_results) {
+        return <div>Loading...</div>;
+    }
+
     const winProbData = [
     { range: "<48%", accuracy: prediction_results.Win_Prob_Under_48 },
     { range: "48-50%", accuracy: prediction_results.Win_Prob_48_50 },
@@ -25,10 +29,6 @@ export default function DiamondsEdgeResults({ mlb_games_prediction_results }) {
     { range: "65%+", accuracy: prediction_results["Win_Prob_65+"] }
     ];
 
-    if (!prediction_results) {
-        return <div>Loading...</div>;
-    }
-
     return (
     <div>
         {/* Top Metrics Banner */}
@@ -37,35 +37,42 @@ export default function DiamondsEdgeResults({ mlb_games_prediction_results }) {
             <div className="stat-title">Overall Accuracy</div>
             <div 
             className="stat-value"
-            style={{ color: prediction_results.overall_accuracy < 50 ? "red" : "green" }}
+            style={{ color: prediction_results.overall_accuracy < 50 ? "#ef4444" : "#22c55e" }} // Dark-mode friendly red/green hex
             >
             {prediction_results.overall_accuracy} %
             </div>
         </div>
-        </div> {/* CLOSED THE GRID CONTAINER HERE */}
+        </div>
 
-        {/* Chart Section: Completely isolated outside of the grid */}
+        {/* Chart Section */}
         <div style={{ marginTop: "40px" }}>
         <h2>Accuracy By Prediction Confidence</h2>
 
         <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={winProbData} margin={{ top: 20, right: 10, left: -20, bottom: 5 }}>
-            <XAxis dataKey="range" />
-            <YAxis domain={[40, 80]} tickFormatter={(value) => `${value}%`} /> {/* Fixed scaling */}
-            <Tooltip formatter={(value) => [`${value}%`, "Accuracy"]} />
+            <BarChart data={winProbData} margin={{ top: 25, right: 10, left: -20, bottom: 5 }}>
+            
+            {/* 1. Added stroke labels to axis lines so labels aren't hidden by a dark canvas */}
+            <XAxis dataKey="range" stroke="#94a3b8" tick={{ fill: '#94a3b8' }} />
+            <YAxis domain={[40, 80]} tickFormatter={(value) => `${value}%`} stroke="#94a3b8" tick={{ fill: '#94a3b8' }} /> 
+            
+            {/* 2. Styled tooltip container background for dark mode styling */}
+            <Tooltip 
+            formatter={(value) => [`${value}%`, "Accuracy"]} 
+            contentStyle={{ backgroundColor: '#1e293b', borderColor: '#475569', color: '#f8fafc' }}
+            />
 
-            <Bar dataKey="accuracy" fill="#16a34a">
+            <Bar dataKey="accuracy" fill="#22c55e"> {/* Brighter vivid green for dark UI view grids */}
                 <LabelList
                 dataKey="accuracy"
-                position="top" /* Moved to top so it's clean and easy to read */
-                fill="black"
+                position="top" 
+                fill="#f8fafc" // 3. CHANGED TO OFF-WHITE: Visible on slate/black/dark-gray canvases!
                 fontWeight={600}
-                formatter={(value) => `${Math.round(value)}%`} /* Appends % symbol */
+                formatter={(value) => `${Math.round(value)}%`} 
                 />
             </Bar>
             </BarChart>
         </ResponsiveContainer>
-        </div> {/* CLOSED THE CHART CONTAINER */}
+        </div>
     </div>
     );
 }
