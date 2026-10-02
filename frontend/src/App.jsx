@@ -10,42 +10,49 @@ import './App.css';
 
 function App() {
   const [matchups, setMatchups] = useState([]);
+  // 1. New state to track the YYYY-MM-DD date string picked by the user
+  const [selectedDate, setSelectedDate] = useState('');
 
+  // 2. Updated to re-fetch whenever selectedDate changes
   useEffect(() => {
-  fetch('https://mlb-games-website.onrender.com/mlb_matchup_card', {
-    headers: { 'x-api-key': 'mlb_games_api_key' },
-  })
-    .then((res) => {
-      console.log("STATUS:", res.status);
-      return res.json();
+    // If a date is selected, append it as a query parameter. Otherwise, fetch today's defaults.
+    const url = selectedDate 
+      ? `https://onrender.com{selectedDate}`
+      : 'https://mlb-games-website.onrender.com/mlb_matchup_card';
+
+    fetch(url, {
+      headers: { 'x-api-key': 'mlb_games_api_key' },
     })
-    .then((data) => {
-      console.log("DATA:", data);
-      setMatchups(data.matchups);
-    })
-    .catch(err => console.log("FETCH ERROR:", err));
-  }, []);
+      .then((res) => res.json())
+      .then((data) => {
+        console.log("MATCHUP DATA:", data);
+        setMatchups(data.matchups || []);
+      })
+      .catch(err => console.log("FETCH ERROR:", err));
+  }, [selectedDate]); // <-- Crucial: triggers the network request on calendar change
 
 
-  const [mlb_games_prediction_results, setMLBGamesPredictionResults] = useState([])
+  const [mlb_games_prediction_results, setMLBGamesPredictionResults] = useState([]);
 
   useEffect(() => {
     fetch('https://mlb-games-website.onrender.com/diamonds_edge_results', {
       headers: {'x-api-key': 'mlb_games_api_key'},
     })
-    .then((res) => {
-      console.log("STATUS:", res.status);
-      return res.json();
-    })
+    .then((res) => res.json())
     .then((data) => {
-      console.log("DATA:", data);
-      setMLBGamesPredictionResults(data.mlb_games_prediction_results);
+      console.log("PRED DATA:", data);
+      setMLBGamesPredictionResults(data.mlb_games_prediction_results || []);
     })
     .catch(err => console.log("FETCH ERROR:", err));
   }, []);
 
   const [tab, setTab] = useState("matchups");
   const [selectedMatchup, setSelectedMatchup] = useState(null);
+
+  // Clear selected detail card if the base matchups array shifts due to a new date
+  useEffect(() => {
+    setSelectedMatchup(null);
+  }, [matchups]);
 
 
   return (
@@ -68,15 +75,38 @@ function App() {
     {tab === "matchups" && (
       <>
         <img 
-        src="/website_images/Diamonds_Edge_Logo_Transparent.png"
-        alt="MLB Logo"
-        style={{ width: "200px", marginBottom: "20px" }}
+          src="/website_images/Diamonds_Edge_Logo_Transparent.png"
+          alt="MLB Logo"
+          style={{ width: "200px", marginBottom: "20px" }}
         />
         <h1 className="shiny">The Diamond's Edge</h1>
 
-        {matchups.map((m, i) => (
-          <MatchupCard key={i} matchup={m} />
-        ))}
+        {/* 3. Global Date Picker Element */}
+        <div style={{ marginBottom: '25px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <label style={{ fontWeight: 'bold' }}>Game Date: </label>
+          <input 
+            type="date" 
+            value={selectedDate}
+            onChange={(e) => setSelectedDate(e.target.value)}
+            style={{ padding: '8px', fontSize: '15px', borderRadius: '4px', border: '1px solid #ccc' }}
+          />
+          {selectedDate && (
+            <button 
+              onClick={() => setSelectedDate('')}
+              style={{ padding: '6px 12px', cursor: 'pointer' }}
+            >
+              Reset to Today
+            </button>
+          )}
+        </div>
+
+        {matchups.length > 0 ? (
+          matchups.map((m, i) => (
+            <MatchupCard key={i} matchup={m} />
+          ))
+        ) : (
+          <p style={{ color: '#666' }}>No games found in the historical card for this date.</p>
+        )}
       </>
     )}
 
@@ -84,19 +114,19 @@ function App() {
     {tab === "details" && (
       <div>
         <img 
-        src="/website_images/Diamonds_Edge_Logo_Transparent.png"
-        alt="MLB Logo"
-        style={{ width: "200px", marginBottom: "20px" }}
+          src="/website_images/Diamonds_Edge_Logo_Transparent.png"
+          alt="MLB Logo"
+          style={{ width: "200px", marginBottom: "20px" }}
         />
         <h1>Scoring Breakdown</h1>
 
-        {/* Dropdown */}
+        {/* Dropdown - Now automatically shows games for whatever date is active! */}
         <select
           onChange={(e) => setSelectedMatchup(matchups[e.target.value])}
-          style={{ padding: "10px", fontSize: "16px", marginBottom: "20px" }}
+          value={matchups.indexOf(selectedMatchup)}
+          style={{ padding: "10px", fontSize: "16px", marginBottom: "20px", width: "100%", maxWidth: "400px" }}
         >
           <option value="">Select a matchup...</option>
-
           {matchups.map((m, i) => (
             <option key={i} value={i}>
               {m.Away_Team} vs {m.Home_Team}
@@ -108,16 +138,9 @@ function App() {
         {selectedMatchup && (
           <>
             <MatchupCard matchup={selectedMatchup} />
-
-            {/* Extra info section */}
-            <MatchupScoringBreakdown 
-            matchup={selectedMatchup}
-            />
+            <MatchupScoringBreakdown matchup={selectedMatchup} />
           </>
         )}
-
-
-
       </div>
     )}
 
@@ -125,19 +148,18 @@ function App() {
     {tab === "about" && (
       <div>
         <img 
-        src="/website_images/Diamonds_Edge_Logo_Transparent.png"
-        alt="MLB Logo"
-        style={{ width: "200px", marginBottom: "20px" }}
+          src="/website_images/Diamonds_Edge_Logo_Transparent.png"
+          alt="MLB Logo"
+          style={{ width: "200px", marginBottom: "20px" }}
         />
         <DiamondsEdgeResults
-        mlb_games_prediction_results={mlb_games_prediction_results}
+          mlb_games_prediction_results={mlb_games_prediction_results}
         />
       </div>
     )}
 
   </div>
 );
-
 }
 
 
