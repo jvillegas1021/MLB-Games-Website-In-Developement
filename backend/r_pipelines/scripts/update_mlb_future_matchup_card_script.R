@@ -1,0 +1,15 @@
+library(httr)
+library(jsonlite)
+library(tidyverse)
+library(DBI)
+library(RPostgres)
+
+source("backend/r_pipelines/data_extract_functions/extract_mlb_games_info.r")
+source("backend/r_pipelines/data_extract_functions/extract_data_from_database.r")
+source("backend/r_pipelines/data_extract_functions/extract_data_from_files.r")
+source("backend/r_pipelines/data_transform_functions/mlb_matchup_pipeline_functions.r")
+source("backend/r_pipelines/data_load_functions/load_data_to_database.r")
+source("backend/r_pipelines/data_pipelines/mlb_matchup_card_pipeline.r")
+source("backend/r_pipelines/data_pipelines/mlb_future_matchup_card_pipeline.r")
+
+mlb_future_matchup_card_pipeline()
