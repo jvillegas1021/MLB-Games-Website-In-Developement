@@ -24,10 +24,9 @@ def get_matchup_card(
 
     # If no date parameter is supplied from React, find the LATEST available date in the database
     if not game_date:
-        cursor.execute('SELECT MAX("Game_Date") FROM historical_matchup_df')
-        result = cursor.fetchone()
-        # Fall back to today's date string if the table is completely empty
-        game_date = result[0] if (result and result[0]) else datetime.now(timezone.utc).strftime("%Y-%m-%d")
+        # Uses North Carolina local time (Eastern) so it aligns perfectly with your pipeline
+        eastern_tz = zoneinfo.ZoneInfo("America/New_York")
+        game_date = datetime.now(eastern_tz).strftime("%Y-%m-%d")
 
     # Match your working Neon editor query exactly
     query = 'SELECT * FROM historical_matchup_df WHERE "Game_Date" = %s'
@@ -39,6 +38,8 @@ def get_matchup_card(
     cursor.close()
     connection.close()
 
+    # If no rows exist for today, this naturally returns an empty array []
+    # Your React frontend will automatically display your custom "No matchups logged..." text!
     return {"date_requested": game_date, "matchups": [dict(zip(colnames, row)) for row in rows]}
 
 
