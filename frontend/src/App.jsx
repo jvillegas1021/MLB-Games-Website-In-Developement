@@ -81,7 +81,7 @@ function App() {
         />
         <h1 className="shiny">The Diamond's Edge</h1>
 
-        {/* 3. Global Date Picker Element */}
+        {/* GLOBAL DATE PICKER ELEMENT */}
         <div style={{ marginBottom: '25px', display: 'flex', alignItems: 'center', gap: '10px' }}>
           <label style={{ fontWeight: 'bold' }}>Game Date: </label>
           <input 
@@ -90,15 +90,8 @@ function App() {
             onChange={(e) => setSelectedDate(e.target.value)}
             style={{ padding: '8px', fontSize: '15px', borderRadius: '4px', border: '1px solid #ccc' }}
           />
-          {selectedDate && (
-            <button 
-              onClick={() => setSelectedDate('')}
-              style={{ padding: '6px 12px', cursor: 'pointer' }}
-            >
-              Reset to Today
-            </button>
-          )}
         </div>
+
 
         {matchups.length > 0 ? (
           matchups.map((m, i) => (
