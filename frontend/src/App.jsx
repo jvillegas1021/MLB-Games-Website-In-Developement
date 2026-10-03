@@ -9,13 +9,21 @@ import DiamondsEdgeResults from './components/DiamondsEdgeResults.jsx';
 import './App.css';
 
 function App() {
-  const [matchups, setMatchups] = useState([]);
-  // 1. New state to track the YYYY-MM-DD date string picked by the user
-  const [selectedDate, setSelectedDate] = useState('');
+  const getLocalDate = () => {
+  const now = new Date();
 
-  // 2. Updated to re-fetch whenever selectedDate changes
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const day = String(now.getDate()).padStart(2, '0');
+
+  return `${year}-${month}-${day}`;
+};
+
+const [matchups, setMatchups] = useState([]);
+const [selectedDate, setSelectedDate] = useState(getLocalDate());
+  
   useEffect(() => {
-    // If a date is selected, append it as a query parameter. Otherwise, fetch today's defaults.
+
     const url = selectedDate 
       ? `https://mlb-games-website.onrender.com/mlb_matchup_card?game_date=${selectedDate}`
       : 'https://mlb-games-website.onrender.com/mlb_matchup_card';
