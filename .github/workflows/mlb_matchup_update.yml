@@ -38,4 +38,4 @@ jobs:
           Rscript -e 'stopifnot(requireNamespace("RPostgres", quietly = TRUE))'
 
       - name: Run MLB matchup update
-        run: Rscript backend/r_pipelines/scripts/update_mlb_games_matchup_script.r
+        run: Rscript backend/r_pipelines/scripts/update_mlb_future_matchup_cardcript.r
