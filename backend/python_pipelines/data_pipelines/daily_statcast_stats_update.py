@@ -7,7 +7,7 @@ from pybaseball import statcast, cache
 
 def run_daily_statcast_stats_update():
     cache.enable()
-    statcast_data = statcast('2026-03-01', '2026-11-30')
+    statcast_data = statcast('2026-03-25', '2026-11-30', parallel=False)
 
     statcast_data = remove_empty_pitch_types(statcast_data)
     statcast_data = remove_excess_columns(statcast_data)
