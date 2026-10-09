@@ -14,6 +14,8 @@ mlb_team_pick_accuracy_pipeline <- function() {
       team_name,
       team_id_num
     )
+
+  curated_results_df <- create_curated_results_df(mlb_games_results_df, historical_matchup_df)
   
   home_team_df <- curated_results_df %>%
     mutate(
