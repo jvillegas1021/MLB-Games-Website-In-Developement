@@ -4,7 +4,9 @@ create_matchup_df <- function(games_table) {
   check_col_list <- c("isTie", "teams.away.score", "teams.away.isWinner", "teams.away.probablePitcher.id",
                       "teams.away.probablePitcher.fullName", "teams.away.probablePitcher.link", "teams.home.score",
                       "teams.home.isWinner", "teams.home.probablePitcher.id", "teams.home.probablePitcher.fullName",
-                      "teams.home.probablePitcher.link")
+                      "teams.home.probablePitcher.link", "rescheduleDate", "rescheduleGameDate", "status.reason",
+                      "rescheduledFrom", "rescheduledFromDate", "resumeDate", "resumeGameDate",
+                      "resumedFrom", "resumedFromDate")
 
   missing_cols <- setdiff(check_col_list, colnames(games_table))
   
@@ -20,14 +22,21 @@ create_matchup_df <- function(games_table) {
       teams.away.isWinner = ifelse(is.na(teams.away.isWinner), NA, as.logical(teams.away.isWinner)),
       teams.away.probablePitcher.link = ifelse(is.na(teams.away.probablePitcher.link), NA_character_, as.character(teams.away.probablePitcher.link)),
       teams.home.probablePitcher.link = ifelse(is.na(teams.home.probablePitcher.link), NA_character_, as.character(teams.home.probablePitcher.link)),
-      # safely converts IDs to character, turning NA or NULL placeholders into legal character "NA"
       teams.away.probablePitcher.id = ifelse(is.na(teams.away.probablePitcher.id), NA_character_, as.character(teams.away.probablePitcher.id)),
       teams.away.probablePitcher.id = ifelse(is.na(teams.away.probablePitcher.id), NA_character_, as.character(teams.away.probablePitcher.id)),
-      # Optional: explicitly provide a string fallback for missing names
       teams.home.probablePitcher.fullName = ifelse(is.na(teams.home.probablePitcher.fullName), "TBD", as.character(teams.home.probablePitcher.fullName)),
       teams.away.probablePitcher.fullName = ifelse(is.na(teams.away.probablePitcher.fullName), "TBD", as.character(teams.away.probablePitcher.fullName)),
       teams.home.score = ifelse(is.na(teams.home.score), NA_real_, as.numeric(teams.home.score)),
-      teams.away.score = ifelse(is.na(teams.away.score), NA_real_, as.numeric(teams.away.score))
+      teams.away.score = ifelse(is.na(teams.away.score), NA_real_, as.numeric(teams.away.score)),
+      rescheduleDate = ifelse(is.na(rescheduleDate), NA_character_, as.character(rescheduleDate)),
+      rescheduleGameDate = ifelse(is.na(rescheduleGameDate), NA_character_, as.character(rescheduleGameDate)),
+      status.reason = ifelse(is.na(status.reason), NA_character_, as.character(status.reason)),
+      rescheduledFrom = ifelse(is.na(rescheduledFrom), NA_character_, as.character(rescheduledFrom)),
+      rescheduledFromDate = ifelse(is.na(rescheduledFromDate), NA_character_, as.character(rescheduledFromDate)),
+      resumeDate = ifelse(is.na(resumeDate), NA_character_, as.character(resumeDate)),
+      resumeGameDate = ifelse(is.na(resumeGameDate), NA_character_, as.character(resumeGameDate)),
+      resumedFrom = ifelse(is.na(resumedFrom), NA_character_, as.character(resumedFrom)),
+      resumedFromDate = ifelse(is.na(resumedFromDate), NA_character_, as.character(resumedFromDate))
     ) %>%
     dplyr::rename(
       Game_ID = gamePk,
