@@ -12,17 +12,24 @@ source("backend/r_pipelines/data_load_functions/load_data_to_database.r")
 source("backend/r_pipelines/data_pipelines/mlb_matchup_card_pipeline.r")
 
 
-season_dates <- seq(as.Date("2026-03-25"), as.Date("2026-10-01"), by = "day")
+season_dates <- seq(as.Date("2026-03-25"), as.Date("2026-10-15"), by = "day")
+
+
+mlb_matchup_card_list <- c()
+
 
 for (d in season_dates) {
-  # 1. Re-construct a completely unambiguous Date object from the loop index
+
   loop_date_obj <- as.Date(d, origin = "1970-01-01")
   
   print(paste("Processing Matchup Card for:", as.character(loop_date_obj)))
+
+  mlb_matchup_card <- mlb_matchup_card_pipeline(game_date = loop_date_obj)
   
-  # 2. FORCE the pipeline function to accept this exact date object 
-  # explicitly by name so it bypasses the default Sys.time() parameter trap
-  mlb_matchup_card_pipeline(game_date = loop_date_obj)
+  mlb_matchup_card_list[[length(mlb_matchup_card_list) + 1]] <- mlb_matchup_card
+  # clean up memory
+  gc()
 }
+
 
 
