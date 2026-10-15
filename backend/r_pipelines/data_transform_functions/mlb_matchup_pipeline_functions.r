@@ -1,24 +1,34 @@
 ##### CREATE MATCHUP DF ##############
 create_matchup_df <- function(games_table) {
-  # 1. Define the exact columns you expect to pull from the API
-  expected_cols <- c(
-    "gamePk", "officialDate", "status.detailedState", "status.abstractGameCode",
-    "seriesGameNumber", "venue.name", "gameDate", "dayNight",
-    "teams.home.team.name", "teams.home.team.id", "teams.home.leagueRecord.wins", "teams.home.leagueRecord.losses",
-    "teams.home.probablePitcher.fullName", "teams.home.probablePitcher.id",
-    "teams.away.team.name", "teams.away.team.id", "teams.away.leagueRecord.wins", "teams.away.leagueRecord.losses",
-    "teams.away.probablePitcher.fullName", "teams.away.probablePitcher.id"
-  )
   
-  # 2. Ensure all columns exist in the dataframe before selecting.
-  # If a column is missing completely from the API payload, this creates it as NA.
-  missing_cols <- setdiff(expected_cols, colnames(games_table))
+  check_col_list <- c("isTie", "teams.away.score", "teams.away.isWinner", "teams.away.probablePitcher.id",
+                      "teams.away.probablePitcher.fullName", "teams.away.probablePitcher.link", "teams.home.score",
+                      "teams.home.isWinner", "teams.home.probablePitcher.id", "teams.home.probablePitcher.fullName",
+                      "teams.home.probablePitcher.link")
+
+  missing_cols <- setdiff(check_col_list, colnames(games_table))
+  
   if (length(missing_cols) > 0) {
     games_table[missing_cols] <- NA
   }
   
   matchup_df <- games_table %>%
-    dplyr::select(dplyr::all_of(expected_cols)) %>%
+    dplyr::mutate(
+      gamePk = as.character(gamePk),
+      isTie = ifelse(is.na(isTie), NA, as.logical(isTie)),
+      teams.home.isWinner = ifelse(is.na(teams.home.isWinner), NA, as.logical(teams.home.isWinner)),
+      teams.away.isWinner = ifelse(is.na(teams.away.isWinner), NA, as.logical(teams.away.isWinner)),
+      teams.away.probablePitcher.link = ifelse(is.na(teams.away.probablePitcher.link), NA_character_, as.character(teams.away.probablePitcher.link)),
+      teams.home.probablePitcher.link = ifelse(is.na(teams.home.probablePitcher.link), NA_character_, as.character(teams.home.probablePitcher.link)),
+      # safely converts IDs to character, turning NA or NULL placeholders into legal character "NA"
+      teams.away.probablePitcher.id = ifelse(is.na(teams.away.probablePitcher.id), NA_character_, as.character(teams.away.probablePitcher.id)),
+      teams.away.probablePitcher.id = ifelse(is.na(teams.away.probablePitcher.id), NA_character_, as.character(teams.away.probablePitcher.id)),
+      # Optional: explicitly provide a string fallback for missing names
+      teams.home.probablePitcher.fullName = ifelse(is.na(teams.home.probablePitcher.fullName), "TBD", as.character(teams.home.probablePitcher.fullName)),
+      teams.away.probablePitcher.fullName = ifelse(is.na(teams.away.probablePitcher.fullName), "TBD", as.character(teams.away.probablePitcher.fullName)),
+      teams.home.score = ifelse(is.na(teams.home.score), NA_real_, as.numeric(teams.home.score)),
+      teams.away.score = ifelse(is.na(teams.away.score), NA_real_, as.numeric(teams.away.score))
+    ) %>%
     dplyr::rename(
       Game_ID = gamePk,
       Game_Date = officialDate,
@@ -39,18 +49,13 @@ create_matchup_df <- function(games_table) {
       Away_Team_Wins = teams.away.leagueRecord.wins,
       Away_Team_Losses = teams.away.leagueRecord.losses,
       Away_Pitcher = teams.away.probablePitcher.fullName,
-      Away_Pitcher_ID = teams.away.probablePitcher.id
-    ) %>%
-    dplyr::mutate(
-      Game_ID = as.character(Game_ID),
-      # safely converts IDs to character, turning NA or NULL placeholders into legal character "NA"
-      Home_Pitcher_ID = ifelse(is.na(Home_Pitcher_ID), NA_character_, as.character(Home_Pitcher_ID)),
-      Away_Pitcher_ID = ifelse(is.na(Away_Pitcher_ID), NA_character_, as.character(Away_Pitcher_ID)),
-      # Optional: explicitly provide a string fallback for missing names
-      Home_Pitcher = ifelse(is.na(Home_Pitcher), "TBD", as.character(Home_Pitcher)),
-      Away_Pitcher = ifelse(is.na(Away_Pitcher), "TBD", as.character(Away_Pitcher))
+      Away_Pitcher_ID = teams.away.probablePitcher.id,
+      Tie_Game = isTie,
+      Home_Team_Score = teams.home.score,
+      Home_Team_Is_Winner = teams.home.isWinner,
+      Away_Team_Score = teams.away.score,
+      Away_Team_Is_Winner = teams.away.isWinner
     )
-  
     
     time <- matchup_df$Game_Time
     dt_utc <- ymd_hms(time, tz = 'UTC')
