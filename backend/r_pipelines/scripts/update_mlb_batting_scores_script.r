@@ -3,10 +3,12 @@ library(DBI)
 library(RPostgres)
 library(glmnet)
 library(caret)
+library(baseballr)
 
 
 source("backend/r_pipelines/data_extract_functions/extract_data_from_database.r")
 source("backend/r_pipelines/data_transform_functions/mlb_scoring_pipeline_functions.r")
+source("backend/r_pipelines/data_transform_functions/utility_functions.r")
 source("backend/r_pipelines/data_load_functions/load_data_to_database.r")
 source("backend/r_pipelines/data_pipelines/mlb_batting_scoring_pipeline_update.r")
 
