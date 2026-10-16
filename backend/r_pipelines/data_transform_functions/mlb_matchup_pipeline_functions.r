@@ -266,8 +266,8 @@ assign_pitcher_scores <- function(matchup_df, pitcher_df) {
     select(
       xMLBAMID,
       score_control,
-      score_strikeout,
       score_contact,
+      score_results,
       score_expected,
       score_vs_lhb,
       score_vs_rhb
@@ -295,8 +295,8 @@ assign_pitcher_scores <- function(matchup_df, pitcher_df) {
     ) %>%
     rename(
       Home_pitcher_control = score_control,
-      Home_pitcher_strikeout = score_strikeout,
       Home_pitcher_contact = score_contact,
+      Home_pitcher_results = score_results,
       Home_pitcher_expected = score_expected,
       Home_pitcher_vs_lhb = score_vs_lhb,
       Home_pitcher_vs_rhb = score_vs_rhb
@@ -309,8 +309,8 @@ assign_pitcher_scores <- function(matchup_df, pitcher_df) {
     ) %>%
     rename(
       Away_pitcher_control = score_control,
-      Away_pitcher_strikeout = score_strikeout,
       Away_pitcher_contact = score_contact,
+      Away_pitcher_results = score_results,
       Away_pitcher_expected = score_expected,
       Away_pitcher_vs_lhb = score_vs_lhb,
       Away_pitcher_vs_rhb = score_vs_rhb
@@ -356,7 +356,7 @@ assign_team_batting_scores <- function(matchup_df, team_batting_df) {
     ) %>%
     rename(
       Home_batting_discipline = score_discipline,
-      Home_batting_impact = score_impact,
+      Home_batting_contact = score_contact,
       Home_batting_expected = score_expected,
       Home_batting_results = score_results,
       Home_batting_vs_lhp = score_vs_lhp,
@@ -372,7 +372,7 @@ assign_team_batting_scores <- function(matchup_df, team_batting_df) {
     ) %>%
     rename(
       Away_batting_discipline = score_discipline,
-      Away_batting_impact = score_impact,
+      Away_batting_contact = score_contact,
       Away_batting_expected = score_expected,
       Away_batting_results = score_results,
       Away_batting_vs_lhp = score_vs_lhp,
@@ -417,20 +417,26 @@ calculate_matchup_score <- function(matchup_df) {
       Away_Offense_Edge_Disc  = round(Away_batting_discipline - Home_pitcher_control, 2),
       
       # 2. Batted Ball Battles (Hitter Impact vs Pitcher Contact Suppression)
-      Home_Offense_Edge_Pow   = round(Home_batting_impact - Away_pitcher_contact, 2),
-      Away_Offense_Edge_Pow   = round(Away_batting_impact - Home_pitcher_contact, 2),
+      Home_Offense_Edge_Pow   = round(Home_batting_contact - Away_pitcher_contact, 2),
+      Away_Offense_Edge_Pow   = round(Away_batting_contact - Home_pitcher_contact, 2),
       
-      # 3. Expected Performance Battles (Hitter Expected vs Pitcher Expected)
+      # 3. Batted Ball Battles (Hitter Impact vs Pitcher Contact Suppression)
+      Home_Offense_Edge_Res   = round(Home_batting_results - Away_pitcher_results, 2),
+      Away_Offense_Edge_Res   = round(Away_batting_results - Home_pitcher_results, 2),
+      
+      # 4. Expected Performance Battles (Hitter Expected vs Pitcher Expected)
       Home_Offense_Edge_Exp   = round(Home_batting_expected - Away_pitcher_expected, 2),
       Away_Offense_Edge_Exp   = round(Away_batting_expected - Home_pitcher_expected, 2),
       
-      # 4. Total Net Game Margins (Home Advantage minus Away Advantage)
+      # 5. Total Net Game Margins (Home Advantage minus Away Advantage)
       Net_Discipline_Margin   = round(Home_Offense_Edge_Disc - Away_Offense_Edge_Disc, 2),
       Net_Power_Margin        = round(Home_Offense_Edge_Pow - Away_Offense_Edge_Pow, 2),
+      Net_Result_Margin       = round(Home_Offense_Edge_Res - Away_Offense_Edge_Res, 2),
       Net_Expected_Margin     = round(Home_Offense_Edge_Exp - Away_Offense_Edge_Exp, 2),
       
       Master_Matchup_Score = round((Net_Discipline_Margin * 0.19583988) + 
-                                     (Net_Power_Margin      * 0.09566831) + 
+                                     (Net_Power_Margin      * 0.09566831) +
+                                     (Net_Result_Margin * 1.0) +
                                      (Net_Expected_Margin   * 0.11674322), 2),
       
       Master_Matchup_Score = replace_na(Master_Matchup_Score, 0)
