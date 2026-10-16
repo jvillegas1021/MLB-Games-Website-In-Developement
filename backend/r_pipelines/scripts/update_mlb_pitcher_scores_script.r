@@ -3,6 +3,7 @@ library(DBI)
 library(RPostgres)
 library(glmnet)
 library(caret)
+library(baseballr)
 
 
 source("backend/r_pipelines/data_extract_functions/extract_data_from_database.r")
