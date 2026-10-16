@@ -5,23 +5,26 @@ calculate_roster_batting_scores <- function(team_batting_df) {
   # create blocks
   
   # 1. CORE DISCIPLINE 
-  block_discipline <- c('Chase%', 'Whiff%', 'BB%', 'K%', 'Contact%', 'F-Strike%')
-  block_impact     <- c('Barrel%', 'HardHit%', 'EV', 'ISO', 'LD%', 'GB%', 'FB%')
-  block_expected   <- c('xBA', 'xSLG', 'xBABIP', 'xISO')
-  block_results    <- c('OPS', 'AVG', 'OBP', 'SLG', 'BABIP')
-  block_vs_rhp <- c('RHP_OPS', 'RHP_AVG', 'RHP_OBP', 'RHP_SLG', 'RHP_ISO', 'RHP_K%', 'RHP_BB%')
-  block_vs_lhp <- c('LHP_OPS', 'LHP_AVG', 'LHP_OBP', 'LHP_SLG', 'LHP_ISO', 'LHP_K%', 'LHP_BB%')
+  block_discipline <- c('K%', 'BB%', 'BB/K', 'O-Swing%', 'Z-Swing%', 'Chase%', 'Whiff%')
+  block_contact     <- c('GB%', 'FB%', 'LD%', 'GB/FB', 'HR/FB', 'IFFB%', 'Barrel%', 'HardHit%',
+                         'Z-Contact%', 'O-Contact%', 'Contact%', 'EV', 'LA')
+  block_results    <- c('ISO', 'OPS', 'BABIP', 'AVG', 'OBP', 'SLG', 'wOBA', 'wRAA', 'wRC', 'wRC+')
+  block_expected   <- c('xWOBA', 'xBA', 'xSLG', 'xISO', 'xBABIP')
+  block_vs_rhp <- c('RHP_ISO', 'RHP_OPS', 'RHP_BABIP', 'RHP_AVG', 'RHP_OBP', 'RHP_SLG',
+                    'RHP_BB%', 'RHP_K%', 'RHP_wOBA')
+  block_vs_lhp <- c('LHP_ISO', 'LHP_OPS', 'LHP_BABIP', 'LHP_AVG', 'LHP_OBP', 'LHP_SLG',
+                    'LHP_BB%', 'LHP_K%', 'LHP_wOBA')
   block_fastballs  <- c('fastball_types_xWOBA', 'fastball_types_xSLG', 'fastball_types_xISO')
   block_breaking   <- c('breakingball_types_xWOBA', 'breakingball_types_xSLG', 'breakingball_types_xISO')
   
   
   # Create a master list of all tracking stats to clean in the next step
-  all_stats_to_clean <- c(block_discipline, block_impact, block_expected, 
-                          block_results, block_vs_lhp, block_vs_rhp, block_fastballs, block_breaking)
+  all_stats_to_clean <- c(block_discipline, block_contact, block_expected, block_results,
+                          block_vs_rhp, block_vs_lhp, block_fastballs, block_breaking)
   
   
   # 1. Combine all your block stats plus runs_scored into one master list
-  all_numeric_cols <- c(all_stats_to_clean, 'xWOBA')
+  all_numeric_cols <- c(all_stats_to_clean, 'R')
   
   # 2. Force every stat column to be numeric (fixes character/factor text issues)
   team_batting_df[all_numeric_cols] <- lapply(
@@ -45,9 +48,9 @@ calculate_roster_batting_scores <- function(team_batting_df) {
   # 1. Create a structured list linking each block to its specific stats
   blocks_list <- list(
     Discipline = block_discipline,
-    Impact     = block_impact,
-    Expected   = block_expected,
+    Contact   = block_contact,
     Results    = block_results,
+    Expected   = block_expected,
     VS_LHP     = block_vs_lhp,
     VS_RHP     = block_vs_rhp,
     Fastballs  = block_fastballs,
@@ -58,9 +61,8 @@ calculate_roster_batting_scores <- function(team_batting_df) {
   # 2. Define a master vector of stats where LOWER values are better.
   # Any stat NOT on this list will automatically be treated as "Positive/Higher is better".
   negative_stats <- c(
-    'K%', 'Chase%', 'Whiff%', 'F-Strike%', 'GB%', 'IFFB%', 'RHP_K%', 'LHP_K%',
-    'RHP_K%', 'LHP_K%'
-  )
+    'K%', 'Chase%', 'Whiff%', "O-Swing%", 'GB%', 'IFFB%',
+    'RHP_K%', 'LHP_K%', 'GB/FB', 'O-Contact%')
   
   # 3. Initialize a clean data frame to hold all our final team scores
   # We will start with just the team identifiers
@@ -84,7 +86,7 @@ calculate_roster_batting_scores <- function(team_batting_df) {
     X_scaled <- scale(X_mat)
     X_scaled[is.na(X_scaled)] <- 0
     
-    y_raw <- team_batting_df$xWOBA
+    y_raw <- team_batting_df$R
     y_scaled <- as.vector(scale(y_raw))
     
     # 3. Fit the Ridge Regression model for this block
@@ -170,20 +172,25 @@ calculate_pitcher_scores <- function(pitcher_df) {
   )
   
   # 1. define blocks
-  block_control   <- c('BB%', 'Zone%', 'F-Strike%', 'K/BB')
-  block_strikeout <- c('K%', 'SwStr%', 'C+SwStr%', 'O-Swing%', 'Contact%', 'CStr%')
-  block_contact   <- c('Barrel%', 'HardHit%', 'EV', 'GB%', 'LD%', 'FB%')
-  block_expected  <- c('xBA', 'xSLG', 'xBABIP', 'xISO', 'xERA')
-  block_vs_lhb    <- c('LHB_OPS', 'LHB_ISO', 'LHB_K%', 'LHB_BB%', 'LHB_xWOBA', 'LHB_Barrel%', 'LHB_CStr%')
-  block_vs_rhb    <- c('RHB_OPS', 'RHB_ISO', 'RHB_K%', 'RHB_BB%', 'RHB_xWOBA', 'RHB_Barrel%', 'RHB_CStr%')
-  
+  block_control   <- c('BB%', 'K/9', 'BB/9', 'K%', 'O-Swing%', 'CStr%', 'SwStr%',
+                       'Zone%', 'F-Strike%', 'C+SwStr%', 'K/BB', 'K-BB%')
+  block_contact   <- c('DP%', 'HardHit%', 'Barrel%', 'GB%', 'FB%', 'LD%', 'IFFB%',
+                       'HR/FB', 'GB/FB', 'Contact%', 'Z-Contact%', 'O-Contact%',
+                       'EV', 'LA')
+  block_results   <- c('ERA', 'WHIP', 'FIP', 'AVG', 'SLG', 'ISO', 'BABIP', 'OBP',
+                       'OPS')
+  block_expected  <- c('xBA', 'xWOBA', 'xSLG', 'xISO', 'xBABIP', 'xERA')
+  block_vs_rhb <- c('RHB_ISO', 'RHB_OPS', 'RHB_BABIP', 'RHB_AVG', 'RHB_OBP', 'RHB_SLG',
+                    'RHB_BB%', 'RHB_K%')
+  block_vs_lhb <- c('LHB_ISO', 'LHB_OPS', 'LHB_BABIP', 'LHB_AVG', 'LHB_OBP', 'LHB_SLG',
+                    'LHB_BB%', 'LHB_K%')
   # Create a master list of all tracking stats to clean in the next step
-  all_stats_to_clean <- c(block_control, block_strikeout, block_contact, 
+  all_stats_to_clean <- c(block_control, block_contact, block_results,
                           block_expected, block_vs_lhb, block_vs_rhb)
   
   
   # 1. Combine all your block stats plus runs_scored into one master list
-  all_numeric_cols <- c(all_stats_to_clean, 'xWOBA')
+  all_numeric_cols <- c(all_stats_to_clean, 'SIERA')
   
   # 2. Force every stat column to be numeric (fixes character/factor text issues)
   pitcher_df[all_numeric_cols] <- lapply(
@@ -207,8 +214,8 @@ calculate_pitcher_scores <- function(pitcher_df) {
   # 1. Create a structured list linking each block to its specific stats
   blocks_list <- list(
     Control   = block_control,
-    Strikeout = block_strikeout,
     Contact   = block_contact,
+    Results   = block_results,
     Expected  = block_expected,
     Vs_LHB    = block_vs_lhb,
     Vs_RHB    = block_vs_rhb
@@ -218,9 +225,12 @@ calculate_pitcher_scores <- function(pitcher_df) {
   # 2. Define a master vector of stats where LOWER values are better.
   # Any stat NOT on this list will automatically be treated as "Positive/Higher is better".
   negative_stats <- c(
-    'BB%', 'Contact%', 'Barrel%', 'HardHit%', 'EV', 'LD%', 'xBA', 'xSLG', 'xBABIP', 'xISO', 'xERA',
-    'LHB_OPS', 'LHB_ISO', 'LHB_BB%', 'LHB_xWOBA', 'LHB_Barrel%',
-    'RHB_OPS', 'RHB_ISO', 'RHB_BB%', 'RHB_xWOBA', 'RHB_Barrel%'
+    'BB%', 'BB/9', 'HardHit%', 'Barrel%', 'FB%', 'LD%', 'HR/FB', 'Contact%',
+    'Z-Contact%', 'EV', 'LA', 'ERA', 'WHIP', 'FIP', 'AVG', 'SLG', 'ISO', 'BABIP',
+    'OBP', 'OPS', 'xBA', 'xWOBA', 'xSLG', 'xISO', 'xBABIP', 'xERA',
+    'RHB_ISO', 'RHB_OPS', 'RHB_BABIP', 'RHB_AVG', 'RHB_OBP', 'RHB_SLG',
+    'RHB_BB%', 'LHB_ISO', 'LHB_OPS', 'LHB_BABIP', 'LHB_AVG', 'LHB_OBP', 'LHB_SLG',
+    'LHB_BB%'
   )
   
   # 3. Initialize a clean data frame to hold all our final team scores
@@ -244,7 +254,7 @@ calculate_pitcher_scores <- function(pitcher_df) {
     X_scaled <- scale(X_mat)
     X_scaled[is.na(X_scaled)] <- 0
     
-    y_raw <- pitcher_df$xWOBA
+    y_raw <- pitcher_df$SIERA
     y_scaled <- as.vector(scale(y_raw))
     
     # 3. Fit the Ridge Regression model for this block
