@@ -434,10 +434,10 @@ calculate_matchup_score <- function(matchup_df) {
       Net_Result_Margin       = round(Home_Offense_Edge_Res - Away_Offense_Edge_Res, 2),
       Net_Expected_Margin     = round(Home_Offense_Edge_Exp - Away_Offense_Edge_Exp, 2),
       
-      Master_Matchup_Score = round((Net_Discipline_Margin * 0.19583988) + 
-                                     (Net_Power_Margin      * 0.09566831) +
-                                     (Net_Result_Margin * 1.0) +
-                                     (Net_Expected_Margin   * 0.11674322), 2),
+      Master_Matchup_Score = round((Net_Discipline_Margin * 0.07513895) + 
+                                     (Net_Power_Margin      * 0.06636294) +
+                                     (Net_Result_Margin * 0.23411239) +
+                                     (Net_Expected_Margin   * 0.0), 2),
       
       Master_Matchup_Score = replace_na(Master_Matchup_Score, 0)
     )
