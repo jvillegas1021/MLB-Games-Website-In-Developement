@@ -16,7 +16,7 @@ export default function MatchupScoringBreakdown({ matchup }) {
     <div style={{ width: "70%", margin: "0 auto" }}>
 
         {/* 1 — Pitcher Control */}
-        <h3 style={{ marginTop: "25px" }}>Pitcher Control</h3>
+        <h3 style={{ marginTop: "25px" }}>Pitcher Discipline</h3>
         <ScoreBar 
             awayValue={matchup.Away_pitcher_control}
             homeValue={matchup.Home_pitcher_control}
