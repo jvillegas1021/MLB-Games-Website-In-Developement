@@ -48,8 +48,8 @@ export default function MatchupScoringBreakdown({ matchup }) {
         {/* 5 — Batting Contact Score */}
         <h3 style={{ marginTop: "25px" }}>Batting Contact</h3>
         <ScoreBar 
-            awayValue={matchup.Away_batting_impact}
-            homeValue={matchup.Home_batting_impact}
+            awayValue={matchup.Away_batting_contact}
+            homeValue={matchup.Home_batting_contact}
             awayColor={away_team_color}
             homeColor={home_team_color}
             dividerIcon='💥'
