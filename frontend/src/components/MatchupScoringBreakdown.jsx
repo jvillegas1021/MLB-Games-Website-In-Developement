@@ -28,8 +28,8 @@ export default function MatchupScoringBreakdown({ matchup }) {
         {/* 5 — Batting Discipline */}
         <h3 style={{ marginTop: "25px" }}>Batting Discipline</h3>
         <ScoreBar 
-            awayValue={matchup.Away_batting_contact}
-            homeValue={matchup.Home_batting_contact}
+            awayValue={matchup.Away_batting_discipline}
+            homeValue={matchup.Home_batting_discipline}
             awayColor={away_team_color}
             homeColor={home_team_color}
             dividerIcon='⚖️'
@@ -48,8 +48,8 @@ export default function MatchupScoringBreakdown({ matchup }) {
         {/* 5 — Batting Contact Score */}
         <h3 style={{ marginTop: "25px" }}>Batting Contact</h3>
         <ScoreBar 
-            awayValue={matchup.Away_batting_impact}
-            homeValue={matchup.Home_batting_impact}
+            awayValue={matchup.Away_batting_contact}
+            homeValue={matchup.Home_batting_contact}
             awayColor={away_team_color}
             homeColor={home_team_color}
             dividerIcon='💥'
@@ -58,8 +58,8 @@ export default function MatchupScoringBreakdown({ matchup }) {
         {/* 4 — Pitcher Expeceted Score */}
         <h3 style={{ marginTop: "25px" }}>Pitcher Results</h3>
         <ScoreBar 
-            awayValue={matchup.Away_pitcher_expected}
-            homeValue={matchup.Home_pitcher_expected}
+            awayValue={matchup.Away_pitcher_results}
+            homeValue={matchup.Home_pitcher_results}
             awayColor={away_team_color}
             homeColor={home_team_color}
             dividerIcon='📉'
@@ -68,8 +68,8 @@ export default function MatchupScoringBreakdown({ matchup }) {
         {/* 5 — Batting Expected Score */}
         <h3 style={{ marginTop: "25px" }}>Batting Results</h3>
         <ScoreBar 
-            awayValue={matchup.Away_batting_expected}
-            homeValue={matchup.Home_batting_expected}
+            awayValue={matchup.Away_batting_results}
+            homeValue={matchup.Home_batting_results}
             awayColor={away_team_color}
             homeColor={home_team_color}
             dividerIcon='📈'
