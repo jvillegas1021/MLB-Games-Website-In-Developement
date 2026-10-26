@@ -56,7 +56,7 @@ export default function MatchupScoringBreakdown({ matchup }) {
         />
 
         {/* 4 — Pitcher Expeceted Score */}
-        <h3 style={{ marginTop: "25px" }}>Pitcher Expected Results</h3>
+        <h3 style={{ marginTop: "25px" }}>Pitcher Results</h3>
         <ScoreBar 
             awayValue={matchup.Away_pitcher_expected}
             homeValue={matchup.Home_pitcher_expected}
@@ -66,7 +66,7 @@ export default function MatchupScoringBreakdown({ matchup }) {
         />
 
         {/* 5 — Batting Expected Score */}
-        <h3 style={{ marginTop: "25px" }}>Batting Expected Results</h3>
+        <h3 style={{ marginTop: "25px" }}>Batting Results</h3>
         <ScoreBar 
             awayValue={matchup.Away_batting_expected}
             homeValue={matchup.Home_batting_expected}
