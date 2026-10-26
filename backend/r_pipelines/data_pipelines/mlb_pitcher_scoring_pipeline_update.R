@@ -7,11 +7,11 @@ mlb_pitcher_scores_pipeline <- function() {
   
   pitcher_fg_df <- fg_pitcher_leaders(startseason = 2026, endseason = 2026)
   
-  pitcher_fg_df <- pitcher_df %>%
+  pitcher_fg_df <- pitcher_fg_df %>%
     select(xMLBAMID, SIERA) %>%
     mutate(xMLBAMID = as.character(xMLBAMID))
   
-  complete_pitcher_stats <- pitcher_stats %>%
+  complete_pitcher_stats <- pitcher_database_df %>%
     left_join(
       pitcher_fg_df,
       by=('xMLBAMID'))
