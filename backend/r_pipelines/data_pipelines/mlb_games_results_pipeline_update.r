@@ -1,7 +1,7 @@
 
 mlb_games_results_pipeline <- function() {
   
-  mlb_historical_results_df <- get_data_from_database('mlb_game_results')
+  mlb_historical_results_df <- get_data_from_database('mlb_games_results')
   
   season_dates <- seq(as.Date("2026-03-25"), as.Date("2026-11-02"), by = "day")
   
@@ -48,7 +48,7 @@ mlb_games_results_pipeline <- function() {
     return(invisible(NULL))
   }
   
-  write_df_to_sql_append('mlb_game_results', cleaned_final_results_df)
+  write_df_to_sql_append('mlb_games_results', cleaned_final_results_df)
   
 }
 
