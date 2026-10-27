@@ -1,4 +1,10 @@
-mlb_matchup_card_pipeline <- function(game_date = as.Date(format(Sys.time(), tz = "America/New_York"))) {
+mlb_matchup_card_pipeline <- function(game_date = as.Date(format(Sys.time(), tz = "America/New_York")),
+                                      mlb_pitcher_scores = NULL,
+                                      mlb_pitcher_stats_current_year = NULL,
+                                      mlb_team_batting_scores = NULL,
+                                      win_prob_model = NULL,
+                                      mlb_odds_df = NULL
+                                      ) {
   
   games_table <- get_mlb_games(game_date)
   
@@ -9,18 +15,39 @@ mlb_matchup_card_pipeline <- function(game_date = as.Date(format(Sys.time(), tz 
   ######## PULL DATA ########
   
   # pitcher_data
+  if (is.null(mlb_pitcher_scores) || nrow(mlb_pitcher_scores) == 0) {
   starting_pitcher_stats_df <- get_data_from_database('mlb_pitcher_scores')
-  # pitcher_data
-  starting_pitcher_stats_current_year_df <- get_data_from_database('active_pitcher_stats_current_year')
-  # team batting_data
-  team_batting_df <- get_data_from_database('mlb_team_batting_scores')
-  # probability model
-  prob_model <- load_rds("win_prob_model")
-  # mlb odds table
-  mlb_games_odds_df <- get_data_from_database('mlb_games_odds_df')
-  # historical matchup df
-  mlb_historical_matchup_df <- get_data_from_database('historical_matchup_df')
+  } else {
+    starting_pitcher_stats_df <- mlb_pitcher_scores
+  }
   
+  # pitcher_data
+  if (is.null(mlb_pitcher_stats_current_year) || nrow(mlb_pitcher_stats_current_year) == 0) {
+    starting_pitcher_stats_current_year_df <- get_data_from_database('active_pitcher_stats_current_year')
+  } else {
+    starting_pitcher_stats_current_year_df <- mlb_pitcher_stats_current_year
+  }
+  
+  # team batting_data
+  if (is.null(mlb_team_batting_scores) || nrow(mlb_team_batting_scores) == 0) {
+    team_batting_df <- get_data_from_database('mlb_team_batting_scores')
+  } else {
+    team_batting_df <- mlb_team_batting_scores
+  }
+  
+  # probability model
+  if (is.null(win_prob_model) || is.null(win_prob_model)) {
+    prob_model <- load_rds("win_prob_model")
+  } else {
+    prob_model <- win_prob_model
+  }
+  
+  # mlb odds table
+  if (is.null(mlb_odds_df) || nrow(mlb_odds_df) == 0) {
+    mlb_games_odds_df <- get_data_from_database('mlb_games_odds_df')
+  } else {
+    mlb_games_odds_df <- mlb_odds_df
+  }
   
   ######## TRANSFORM DATA #########
   
