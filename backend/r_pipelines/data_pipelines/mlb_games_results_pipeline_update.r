@@ -1,29 +1,56 @@
-mlb_games_results_pipeline <- function(game_date = Sys.Date()) {
-  ######## Previous day mlb game results ##############
-  game_date <- as.Date(game_date, tz = "America/New_York")
+
+mlb_games_results_pipeline <- function() {
   
-  previous_date <- game_date - 1
-  games_table <- get_mlb_games(previous_date)
+  mlb_historical_results_df <- get_data_from_database('mlb_game_results')
   
-  if (is.null(games_table) || nrow(games_table) == 0) {
-    message("No MLB games for this date. Pipeline exiting.")
-    return(invisible(NULL))
+  season_dates <- seq(as.Date("2026-03-25"), as.Date("2026-11-02"), by = "day")
+  
+  game_results_list <- c()
+  
+  for (d in season_dates) {
+    # 1. Re-construct a completely unambiguous Date object from the loop index
+    loop_date_obj <- as.Date(d, origin = "1970-01-01")
+    
+    print(paste0('Processing game date ', loop_date_obj))
+    
+    games_table <- get_mlb_games(loop_date_obj)
+    
+    if (is.null(games_table) || nrow(games_table) == 0) {
+      message("No MLB games for this date. Pipeline exiting.")
+      next
+    }
+    
+    matchup_df <- create_matchup_df(games_table)
+    
+    results_df <- create_results_df(matchup_df)
+    
+    if (nrow(results_df) == 0) {
+      message("No new valid MLB results to insert.")
+      next
+    }
+    
+    game_results_list[[length(game_results_list) + 1]] <- results_df
   }
   
-  ############ pull pushed results from  data base ##########
-  historical_mlb_games_results <- get_data_from_database('mlb_games_results')
-  ############# create results df ###########################
-  results_df <- create_results_df(games_table)
-  ############### check if valid / new results ##############
-  results_final_df <- check_valid_results_df(results_df, historical_mlb_games_results)
-  ################ empty df guard ######################
-  if (nrow(results_final_df) == 0) {
+  all_results_df <- bind_rows(game_results_list)
+  
+  
+  cleaned_final_results_df <- all_results_df %>%
+    drop_na(Home_Team_Score, Away_Team_Score)
+  
+  historical_game_ids <- mlb_historical_results_df$Game_ID
+  
+  final_results_df <- cleaned_final_results_df %>%
+    filter(!(Game_ID %in% historical_game_ids))
+  
+  if (nrow(final_results_df) == 0) {
     message("No new valid MLB results to insert.")
     return(invisible(NULL))
   }
-  ############## push to data base #####################
-  write_df_to_sql_append('mlb_games_results', results_final_df)
+  
+  write_df_to_sql_append('mlb_game_results', cleaned_final_results_df)
   
 }
+
 
 
