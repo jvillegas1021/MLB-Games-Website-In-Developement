@@ -18,6 +18,11 @@ mlb_future_matchup_card_pipeline <- function(game_date = as.Date(format(Sys.time
   
   combined_mlb_matchup_card <- bind_rows(mlb_matchup_card_list)
   
+  if (length(combined_mlb_matchup_card) == 0) {
+    print("No games to update.")
+    return(invisible())
+    }
+  
   pre_game_status_list <- c('Scheduled', 'Pre-Game', 'Warmup')
   
   mlb_matchup_card_not_started <- combined_mlb_matchup_card %>%
