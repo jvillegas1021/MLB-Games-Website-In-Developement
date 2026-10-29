@@ -3,75 +3,88 @@ library(jsonlite)
 library(tidyverse)
 library(DBI)
 library(RPostgres)
+library(baseballr)
 
 source("backend/r_pipelines/data_extract_functions/extract_data_from_database.r")
 source("backend/r_pipelines/data_transform_functions/mlb_prediction_results_pipeline_functions.r")
 source("backend/r_pipelines/data_load_functions/load_data_to_database.r")
 source("backend/r_pipelines/data_pipelines/mlb_games_prediction_results_pipeline_update.r")
 
+mlb_batting_rosters <- get_data_from_database('mlb_batting_rosters_gameday')
+batter_stats <- get_data_from_database('batter_seasonal_data_statsapi')
 
-mlb_games_results_df <- get_data_from_database('mlb_games_results')
-historical_matchup_df <- get_data_from_database('historical_matchup_df')
+######### grab roster stats scores for team and day
 
-# process data
-curated_results_df <- create_curated_results_df(mlb_games_results_df, historical_matchup_df)
-# create final_results_df 
-final_results_df <- data.frame(update_date = Sys.time())
+# extract batting_rosters_gameday
+mlb_batting_rosters <- get_data_from_database('mlb_batting_rosters_gameday')
+# extract statcast data
+batter_stats_statcast <- get_data_from_database('batter_seasonal_data_statcast')
+# extract teams
+mlb_teams <- mlb_teams(season = current_season, sport_ids = 1)
 
-final_results_df <- calculate_overall_pick_accuracy(curated_results_df, final_results_df)
+# set parameters
+game_date <- '2026-09-28'
+mlb_team_id <- 133
 
-final_results_df <- calculate_win_probability_accuracy(curated_results_df, final_results_df)
+# extract roster_linup_ids
+lineup_ids <- mlb_batting_rosters %>%
+  filter(roster_date == game_date,
+         team_id == mlb_team_id) %>%
+  pull(roster_lineup_ids)
 
-# push data to database
+split_up_linup_ids <- str_split(lineup_ids, ",") %>% unlist()
 
-#write_df_to_sql_replace('mlb_games_prediction_results', final_results_df)
-  
+lineup_ids <- mlb_batting_rosters %>%
+  filter(roster_date == '2026-09-28',
+         team_id == 133) %>%
+  pull(roster_lineup_ids)
 
-master_analysis_df <- curated_results_df %>%
-  # 1. Drop rows missing odds data entirely
-  drop_na(away_open_odds, home_open_odds, away_close_odds, home_close_odds) %>%
-  
-  # 2. Process ALL opening and closing metrics simultaneously
-  mutate(
-    # --- OPENING LINE ANALYSIS ---
-    Correct_Open_Bet  = if_else(Bet_Team_Open == Winner, TRUE, FALSE),
-    Open_Bet_Odds     = if_else(Bet_Team_Open == Home_Team, as.numeric(home_open_odds), as.numeric(away_open_odds)),
-    Open_Bet_Profit   = if_else(Open_Bet_Odds < 0, round(100 * (100 / abs(Open_Bet_Odds)), 2), round(Open_Bet_Odds, 2)),
-    Actual_Open_Profit = if_else(Correct_Open_Bet, Open_Bet_Profit, -100.00),
-    
-    # --- CLOSING LINE ANALYSIS ---
-    Correct_Close_Bet  = if_else(Bet_Team_Current == Winner, TRUE, FALSE),
-    Close_Bet_Odds     = if_else(Bet_Team_Current == Home_Team, as.numeric(home_close_odds), as.numeric(away_close_odds)),
-    Close_Bet_Profit   = if_else(Close_Bet_Odds < 0, round(100 * (100 / abs(Close_Bet_Odds)), 2), round(Close_Bet_Odds, 2)),
-    Actual_Close_Profit = if_else(Correct_Close_Bet, Close_Bet_Profit, -100.00)
-  )
+split_up_linup_ids <- str_split(lineup_ids, ",") %>% unlist()
 
-prob_ranges <- seq(from = 50, to = 65)
+# filter statcast data
+filtered_batter_statcast <- batter_stats_statcast %>%
+  filter(xMLBAMID %in% split_up_linup_ids)
 
-for (prob in prob_ranges) {
-# 3. Generate a single, comprehensive summary grid for the 58%+ Elite Threshold
-  master_performance_summary <- master_analysis_df %>%
-    summarise(
-      # --- Opening Line 58%+ Metrics ---
-      Open_Elite_Bets    = sum(Bet_Team_Open != "No Bet" & Win_Probability >= prob),
-      Open_Elite_Win_Pct = mean(Correct_Open_Bet[Bet_Team_Open != "No Bet" & Win_Probability >= prob]) * 100,
-      Open_Elite_Profit  = sum(Actual_Open_Profit[Bet_Team_Open != "No Bet" & Win_Probability >= prob]),
-      
-      # --- Closing Line 58%+ Metrics ---
-      Close_Elite_Bets    = sum(Bet_Team_Current != "No Bet" & Win_Probability >= prob),
-      Close_Elite_Win_Pct = mean(Correct_Close_Bet[Bet_Team_Current != "No Bet" & Win_Probability >= prob]) * 100,
-      Close_Elite_Profit  = sum(Actual_Close_Profit[Bet_Team_Current != "No Bet" & Win_Probability >= prob])
-    )
-  
-  # --- Print the Side-by-Side Performance Matrix ---
-  cat(paste0("=== UNIFIED STRATEGY ANALYSIS (", prob, "%+ THRESHOLD) ===\n"))
-  print(
-    data.frame(
-      Strategy_Metric = c("Total Bets Triggered", "Win Percentage", "Net Profit ($)"),
-      Opening_Line_Market = c(master_performance_summary$Open_Elite_Bets, round(master_performance_summary$Open_Elite_Win_Pct, 2), round(master_performance_summary$Open_Elite_Profit, 2)),
-      Closing_Line_Market = c(master_performance_summary$Close_Elite_Bets, round(master_performance_summary$Close_Elite_Win_Pct, 2), round(master_performance_summary$Close_Elite_Profit, 2))
-    ),
-    row.names = FALSE
-  )
+if (nrow(filtered_batter_statcast) == 0 || length(filtered_batter_statcast) == 0){
+  return(tibble())
 }
 
+wBB <- 0.698
+wHBP <- 0.729
+w1B <- 0.890
+w2B <- 1.261
+w3B <- 1.596
+wHR <- 2.049
+
+league_woba <- 0.316
+wOBAScale <- 1.238
+R_PA_lg <- 0.118
+
+column_list <- c('K%', 'BB%', 'GB%', 'FB%', 'LD%', 'GB/FB', 'ISO', 'OPS',
+               'BABIP', 'AVG', 'OBP', 'SLG', 'BB/K', 'HR/FB', 'IFFB%', 'Barrel%', 'HardHit%',
+               'O-Swing%', 'Z-Swing%', 'Z-Contact%', 'O-Contact%', 'Contact%', 'Chase%',
+               'Whiff%', 'SwStr%', 'F-Strike%', 'EV', 'LA', 'wOBA', 'wRAA', 'wRC', 'wRC+',
+               'xWOBA', 'xBA', 'xSLG', 'xISO', 'xBABIP')
+
+batter_stats_summarized <- filtered_batter_statcast %>%
+  summarise(
+    `K%` = sum(strikeouts, na.rm = TRUE) / sum(plate_appearances, na.rm = TRUE),
+    `BB%` = sum(walks, na.rm = TRUE) / sum(plate_appearances, na.rm = TRUE),
+    `BB/K` = sum(walks, na.rm = TRUE) / sum(strikeouts, na.rm = TRUE),
+    gb_fb_ld = sum(GB, na.rm = TRUE) + sum(FB, na.rm = TRUE) + sum(LD, na.rm = TRUE),
+    `GB%` = sum(GB, na.rm = TRUE) / gb_fb_ld,
+    `FB%` = sum(FB, na.rm = TRUE) / gb_fb_ld,
+    `LD%` = sum(LD, na.rm = TRUE) / gb_fb_ld,
+    `HR/FB` = sum(home_runs, na.rm = TRUE) / sum(FB, na.rm = TRUE),
+    `GB/FB` = sum(GB, na.rm = TRUE) / sum(FB, na.rm = TRUE),
+    `IFFB%` = sum(PU, na.rm = TRUE) / sum(FB, na.rm = TRUE),
+    at_bats = sum(plate_appearances, na.rm = TRUE) - sum(non_at_bats, na.rm = TRUE),
+    AVG = sum(hits, na.rm = TRUE) / at_bats,
+    total_bases = sum(singles, na.rm = TRUE) * 1 + sum(doubles, na.rm = TRUE) * 2 + sum(triples, na.rm = TRUE) * 3 +
+      sum(home_runs, na.rm = TRUE) * 4,
+    SLG = total_bases / at_bats,
+    ISO = SLG - AVG,
+    babip_num = sum(hits, na.rm = TRUE) - sum(, na.rm = TRUE)
+  )
+
+batter_stats_summarized
