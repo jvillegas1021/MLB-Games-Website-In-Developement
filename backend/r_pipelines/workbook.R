@@ -84,7 +84,7 @@ batter_stats_summarized <- filtered_batter_statcast %>%
       sum(home_runs, na.rm = TRUE) * 4,
     SLG = total_bases / at_bats,
     ISO = SLG - AVG,
-    babip_num = sum(hits, na.rm = TRUE) - sum(, na.rm = TRUE)
+    babip_num = sum(hits, na.rm = TRUE) - sum(home_runs, na.rm = TRUE),
   )
 
 batter_stats_summarized
