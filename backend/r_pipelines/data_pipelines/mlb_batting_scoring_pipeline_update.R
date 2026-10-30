@@ -1,12 +1,12 @@
-mlb_team_batting_scores_pipeline <- function() {
+mlb_team_batting_scores_pipeline <- function(game_date = as.Date(format(Sys.time(), tz = "America/New_York")),
+                                             current_season = as.numeric(format(Sys.Date(), "%Y"))) {
   
-
+  current_gameday = game_date
   # extract data and merge
   
-  team_batting_database_df = get_data_from_database('mlb_team_batting_stats')
-  team_batting_database_df <- add_team_abbv_using_team_name(team_batting_database_df)
+  team_batting_database_df = get_data_from_database('mlb_team_batting_stats_gameday')
   
-  team_batting_fg_df = fg_team_batter(startseason = 2026, endseason = 2026)
+  team_batting_fg_df = fg_team_batter(startseason = current_season, endseason = current_season)
   team_batting_fg_df <- team_batting_fg_df %>%
     select(
     team_name_abb,
@@ -16,13 +16,15 @@ mlb_team_batting_scores_pipeline <- function() {
   all_team_batting_df <- team_batting_database_df %>%
     left_join(
       team_batting_fg_df,
-      by=c('team_abbv' = 'team_name_abb')
-    )
+      by=c('team_abbreviation' = 'team_name_abb')
+    ) %>%
+    filter(game_date == current_gameday)
+  
   # transform data
   final_team_scores_df = calculate_roster_batting_scores(all_team_batting_df)
   
   # load data
-  write_df_to_sql_replace('mlb_team_batting_scores', final_team_scores_df)
+  write_df_to_sql_append('mlb_team_batting_scores_gameday', final_team_scores_df)
 
 } 
 
