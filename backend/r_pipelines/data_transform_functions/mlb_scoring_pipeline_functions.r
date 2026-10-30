@@ -10,18 +10,10 @@ calculate_roster_batting_scores <- function(team_batting_df) {
                          'Z-Contact%', 'O-Contact%', 'Contact%', 'EV', 'LA')
   block_results    <- c('ISO', 'OPS', 'BABIP', 'AVG', 'OBP', 'SLG', 'wOBA', 'wRAA', 'wRC', 'wRC+')
   block_expected   <- c('xWOBA', 'xBA', 'xSLG', 'xISO', 'xBABIP')
-  block_vs_rhp <- c('RHP_ISO', 'RHP_OPS', 'RHP_BABIP', 'RHP_AVG', 'RHP_OBP', 'RHP_SLG',
-                    'RHP_BB%', 'RHP_K%', 'RHP_wOBA')
-  block_vs_lhp <- c('LHP_ISO', 'LHP_OPS', 'LHP_BABIP', 'LHP_AVG', 'LHP_OBP', 'LHP_SLG',
-                    'LHP_BB%', 'LHP_K%', 'LHP_wOBA')
-  block_fastballs  <- c('fastball_types_xWOBA', 'fastball_types_xSLG', 'fastball_types_xISO')
-  block_breaking   <- c('breakingball_types_xWOBA', 'breakingball_types_xSLG', 'breakingball_types_xISO')
   
   
   # Create a master list of all tracking stats to clean in the next step
-  all_stats_to_clean <- c(block_discipline, block_contact, block_expected, block_results,
-                          block_vs_rhp, block_vs_lhp, block_fastballs, block_breaking)
-  
+  all_stats_to_clean <- c(block_discipline, block_contact, block_results, block_expected)
   
   # 1. Combine all your block stats plus runs_scored into one master list
   all_numeric_cols <- c(all_stats_to_clean, 'R')
@@ -50,24 +42,19 @@ calculate_roster_batting_scores <- function(team_batting_df) {
     Discipline = block_discipline,
     Contact   = block_contact,
     Results    = block_results,
-    Expected   = block_expected,
-    VS_LHP     = block_vs_lhp,
-    VS_RHP     = block_vs_rhp,
-    Fastballs  = block_fastballs,
-    Breaking   = block_breaking
+    Expected   = block_expected
   )
   
   
   # 2. Define a master vector of stats where LOWER values are better.
   # Any stat NOT on this list will automatically be treated as "Positive/Higher is better".
   negative_stats <- c(
-    'K%', 'Chase%', 'Whiff%', "O-Swing%", 'GB%', 'IFFB%',
-    'RHP_K%', 'LHP_K%', 'GB/FB', 'O-Contact%')
+    'K%', 'Chase%', 'Whiff%', "O-Swing%", 'GB%', 'IFFB%', 'GB/FB', 'O-Contact%')
   
   # 3. Initialize a clean data frame to hold all our final team scores
   # We will start with just the team identifiers
   final_team_scores_df <- team_batting_df %>% 
-    select(team_id, team_name)
+    select(team_id, team_full_name)
   
   
   
