@@ -338,7 +338,7 @@ assign_team_batting_scores <- function(matchup_df, team_batting_df) {
   team_batting_df <- team_batting_df %>%
     select(
       -team_full_name,
-      -team_abbreviation
+      -team_abbreviation,
       -update_date
     )
   
@@ -596,69 +596,51 @@ calculate_betting_logic <- function(matchup_df, base_edge = 2.0, penalty_coeffic
   
   betting_df <- matchup_df %>%
     mutate(
-      # 1. Clean up edge inputs safely (on a 0-100 scale)
       Home_Team_Current_Edge = as.numeric(replace_na(Home_Team_Current_Edge, 0)),
       Home_Team_Open_Edge = as.numeric(replace_na(Home_Team_Open_Edge, 0)),
       Away_Team_Current_Edge = as.numeric(replace_na(Away_Team_Current_Edge, 0)),
       Away_Team_Open_Edge = as.numeric(replace_na(Away_Team_Open_Edge, 0)),
       
-      # 2. Explicitly flag who the sportsbook thinks is the favorite/underdog
-      Vegas_Open_Favorite = case_when(
-        home_open_odds < away_open_odds ~ Home_Team,
-        home_open_odds > away_open_odds ~ Away_Team,
-        TRUE ~ "Even"
-      ),
-      Vegas_Current_Favorite = case_when(
-        home_close_odds < away_close_odds ~ Home_Team,
-        home_close_odds > away_close_odds ~ Away_Team,
-        TRUE ~ "Even"
-      ),
+      Vegas_Open_Favorite = if_else(as.numeric(home_open_odds) < as.numeric(away_open_odds), Home_Team, Away_Team),
+      Vegas_Current_Favorite = if_else(as.numeric(home_close_odds) < as.numeric(away_close_odds), Home_Team, Away_Team),
       
-      home_team_threshold_edge = pmax(0.5, base_edge + ((54 - Home_Team_Model_Win_Probability) * penalty_coefficient)),
-      away_team_threshold_edge = pmax(0.5, base_edge + ((54 - Away_Team_Model_Win_Probability) * penalty_coefficient)),
+      # 1. NEW LOGIC FOR FAVORITES: Symmetrical baseline to capture high-confidence edges
+      home_fav_threshold = pmax(1.0, base_edge + (abs(50 - Home_Team_Model_Win_Probability) * -0.5)),
+      away_fav_threshold = pmax(1.0, base_edge + (abs(50 - Away_Team_Model_Win_Probability) * -0.5)),
       
-      # 3. Dynamic Threshold check for HOME team (Scale: 50.0)
-      Place_Bet_Home_Open = if_else(
-        Home_Team_Open_Edge >= home_team_threshold_edge, TRUE, FALSE
-      ),
-      Place_Bet_Home_Current = if_else(
-        Home_Team_Current_Edge >= home_team_threshold_edge, TRUE, FALSE
-      ),
-      Place_Bet_Away_Open = if_else(
-        Away_Team_Open_Edge >= away_team_threshold_edge, TRUE, FALSE
-      ),
-      Place_Bet_Away_Current = if_else(
-        Away_Team_Current_Edge >= away_team_threshold_edge, TRUE, FALSE
-      ),
+      # 2. OLD LOGIC FOR UNDERDOGS: Super-strict penalty constraint that isolates elite value
+      home_dog_threshold = pmax(0.5, base_edge + ((54 - Home_Team_Model_Win_Probability) * penalty_coefficient)),
+      away_dog_threshold = pmax(0.5, base_edge + ((54 - Away_Team_Model_Win_Probability) * penalty_coefficient)),
       
-
+      # 3. Dynamic assignment: Check if team is Vegas Favorite or Underdog to select correct threshold rule
+      home_open_threshold = if_else(Home_Team == Vegas_Open_Favorite, home_fav_threshold, home_dog_threshold),
+      away_open_threshold = if_else(Away_Team == Vegas_Open_Favorite, away_fav_threshold, away_dog_threshold),
+      
+      home_close_threshold = if_else(Home_Team == Vegas_Current_Favorite, home_fav_threshold, home_dog_threshold),
+      away_close_threshold = if_else(Away_Team == Vegas_Current_Favorite, away_fav_threshold, away_dog_threshold),
+      
+      # 4. Trigger evaluation boundaries using our custom rules
+      Place_Bet_Home_Open    = Home_Team_Open_Edge >= home_open_threshold,
+      Place_Bet_Home_Current = Home_Team_Current_Edge >= home_close_threshold,
+      Place_Bet_Away_Open    = Away_Team_Open_Edge >= away_open_threshold,
+      Place_Bet_Away_Current = Away_Team_Current_Edge >= away_close_threshold,
+      
+      # Build final betting selections
       Bet_Team_Open = case_when(
-        Place_Bet_Home_Open & Place_Bet_Away_Open ~ "No Bet", # Conflict shield
+        Place_Bet_Home_Open & Place_Bet_Away_Open ~ "No Bet",
         Place_Bet_Home_Open ~ Home_Team,
         Place_Bet_Away_Open ~ Away_Team,
         TRUE ~ "No Bet"
       ),
-      
-
       Bet_Team_Current = case_when(
-        Place_Bet_Home_Current & Place_Bet_Away_Current ~ "No Bet", # Conflict shield
+        Place_Bet_Home_Current & Place_Bet_Away_Current ~ "No Bet",
         Place_Bet_Home_Current ~ Home_Team,
         Place_Bet_Away_Current ~ Away_Team,
         TRUE ~ "No Bet"
       ),
       
-
-      Bet_Type_Open = case_when(
-        Bet_Team_Open == "No Bet" ~ "No Bet",
-        Bet_Team_Open == Vegas_Open_Favorite ~ "Favorite Bet",
-        TRUE ~ "Underdog Bet"
-      ),
-      
-      Bet_Type_Current = case_when(
-        Bet_Team_Current == "No Bet" ~ "No Bet",
-        Bet_Team_Current == Vegas_Current_Favorite ~ "Favorite Bet",
-        TRUE ~ "Underdog Bet"
-      )
+      Bet_Type_Open = if_else(Bet_Team_Open == Vegas_Open_Favorite, "Favorite Bet", "Underdog Bet"),
+      Bet_Type_Current = if_else(Bet_Team_Current == Vegas_Current_Favorite, "Favorite Bet", "Underdog Bet")
     )
   
   return(betting_df)
