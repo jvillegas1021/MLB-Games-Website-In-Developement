@@ -38,4 +38,6 @@ for (d in season_dates) {
   mlb_matchup_card_list[[length(mlb_matchup_card_list) + 1]] <- mlb_matchup_card
 }
 
+final_matchup_df <- bind_rows(mlb_matchup_card_list)
 
+#write_df_to_sql_replace('historical_matchup_df', final_matchup_df)
