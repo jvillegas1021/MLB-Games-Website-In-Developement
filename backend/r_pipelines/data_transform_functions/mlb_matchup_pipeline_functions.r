@@ -64,6 +64,10 @@ create_matchup_df <- function(games_table) {
       Home_Team_Is_Winner = teams.home.isWinner,
       Away_Team_Score = teams.away.score,
       Away_Team_Is_Winner = teams.away.isWinner
+    ) %>%
+    mutate(
+      Home_Team_ID = as.character(Home_Team_ID),
+      Away_Team_ID = as.character(Away_Team_ID)
     )
     
     time <- matchup_df$Game_Time
