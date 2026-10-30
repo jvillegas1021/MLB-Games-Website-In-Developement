@@ -30,7 +30,7 @@ mlb_matchup_card_pipeline <- function(game_date = as.Date(format(Sys.time(), tz 
   
   # team batting_data
   if (is.null(mlb_team_batting_scores) || nrow(mlb_team_batting_scores) == 0) {
-    team_batting_df <- get_data_from_database('mlb_team_batting_scores')
+    team_batting_df <- get_data_from_database('mlb_team_batting_scores_gameday')
   } else {
     team_batting_df <- mlb_team_batting_scores
   }
