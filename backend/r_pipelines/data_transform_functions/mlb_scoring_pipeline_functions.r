@@ -54,7 +54,7 @@ calculate_roster_batting_scores <- function(team_batting_df) {
   # 3. Initialize a clean data frame to hold all our final team scores
   # We will start with just the team identifiers
   final_team_scores_df <- team_batting_df %>% 
-    select(team_id, team_full_name)
+    select(team_id, team_full_name, team_abbreviation, game_date)
   
   
   
