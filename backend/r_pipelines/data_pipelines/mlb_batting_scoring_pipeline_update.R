@@ -1,12 +1,22 @@
 mlb_team_batting_scores_pipeline <- function(game_date = as.Date(format(Sys.time(), tz = "America/New_York")),
-                                             current_season = as.numeric(format(Sys.Date(), "%Y"))) {
+                                             current_season = as.numeric(format(Sys.Date(), "%Y")),
+                                             team_batting_database_df = NULL,
+                                             team_batting_fg_df = NULL) {
   
   current_gameday = game_date
   # extract data and merge
+  if (is.null(team_batting_database_df) || nrow(team_batting_database_df) == 0) {
+    team_batting_database_df = get_data_from_database('mlb_team_batting_stats_gameday')
+  } else {
+    team_batting_database_df <- team_batting_database_df
+  }
   
-  team_batting_database_df = get_data_from_database('mlb_team_batting_stats_gameday')
+  if (is.null(team_batting_fg_df) || nrow(team_batting_fg_df) == 0) {
+    team_batting_fg_df = fg_team_batter(startseason = current_season, endseason = current_season)
+  } else {
+    team_batting_fg_df <- team_batting_fg_df
+  }
   
-  team_batting_fg_df = fg_team_batter(startseason = current_season, endseason = current_season)
   team_batting_fg_df <- team_batting_fg_df %>%
     select(
     team_name_abb,
