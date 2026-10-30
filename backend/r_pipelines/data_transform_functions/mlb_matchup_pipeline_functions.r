@@ -333,52 +333,47 @@ assign_team_batting_scores <- function(matchup_df, team_batting_df) {
   
   team_batting_df <- team_batting_df %>%
     select(
-      -team_name,
+      -team_full_name,
+      -team_abbreviation
       -update_date
     )
   
   home_team_df <- matchup_df %>%
     select(
       Game_ID,
+      Game_Date,
       Home_Team_ID
     )
   
   away_team_df <- matchup_df %>%
     select(
       Game_ID,
+      Game_Date,
       Away_Team_ID
     )
   
   home_team_batting_scores_df <- home_team_df %>%
     left_join(
       team_batting_df,
-      by = c('Home_Team_ID' = 'team_id')
+      by = c('Home_Team_ID' = 'team_id', 'Game_Date' = 'game_date')
     ) %>%
     rename(
       Home_batting_discipline = score_discipline,
       Home_batting_contact = score_contact,
       Home_batting_expected = score_expected,
-      Home_batting_results = score_results,
-      Home_batting_vs_lhp = score_vs_lhp,
-      Home_batting_vs_rhp = score_vs_rhp,
-      Home_batting_fastballs = score_fastballs,
-      Home_batting_breaking = score_breaking
+      Home_batting_results = score_results
     )
   
   away_team_batting_scores_df <- away_team_df %>%
     left_join(
       team_batting_df,
-      by = c('Away_Team_ID' = 'team_id')
+      by = c('Away_Team_ID' = 'team_id', 'Game_Date' = 'game_date')
     ) %>%
     rename(
       Away_batting_discipline = score_discipline,
       Away_batting_contact = score_contact,
       Away_batting_expected = score_expected,
-      Away_batting_results = score_results,
-      Away_batting_vs_lhp = score_vs_lhp,
-      Away_batting_vs_rhp = score_vs_rhp,
-      Away_batting_fastballs = score_fastballs,
-      Away_batting_breaking = score_breaking
+      Away_batting_results = score_results
     )
   
   matchup_df_batting_scores_complete <- matchup_df %>%
