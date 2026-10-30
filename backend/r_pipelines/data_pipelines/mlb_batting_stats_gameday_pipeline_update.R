@@ -1,4 +1,4 @@
-update_mlb_teams_batting_stats_gameday <- function(game_date = as.Date(format(Sys.time(), tz = "America/New_York")),
+update_mlb_team_batting_stats_gameday <- function(game_date = as.Date(format(Sys.time(), tz = "America/New_York")),
                                                    current_season = as.numeric(format(Sys.Date(), "%Y")),
                                                    sports_id = 1,
                                                    mlb_batting_roster_gameday_df = NULL,
