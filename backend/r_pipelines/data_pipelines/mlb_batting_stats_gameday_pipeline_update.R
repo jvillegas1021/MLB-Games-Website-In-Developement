@@ -1,9 +1,9 @@
 update_mlb_teams_batting_stats_gameday <- function(game_date = as.Date(format(Sys.time(), tz = "America/New_York")),
                                                    current_season = as.numeric(format(Sys.Date(), "%Y")),
                                                    sports_id = 1,
-                                                   mlb_batting_roster_gameday_df,
-                                                   batter_stats_statcast_df,
-                                                   mlb_teams) {
+                                                   mlb_batting_roster_gameday_df = NULL,
+                                                   batter_stats_statcast_df = NULL,
+                                                   mlb_teams = NULL) {
   
   
   print(paste0("Processing ", game_date, ", ", current_season))
