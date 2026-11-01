@@ -1,50 +1,92 @@
-library(tidymodels)
-library(httr)
-library(jsonlite)
+#workbook
 library(tidyverse)
-library(DBI)
-library(RPostgres)
-install.packages("tidymodels")
-source("backend/r_pipelines/data_extract_functions/extract_data_from_database.r")
-source("backend/r_pipelines/data_transform_functions/mlb_prediction_results_pipeline_functions.r")
-source("backend/r_pipelines/data_load_functions/load_data_to_database.r")
-source("backend/r_pipelines/data_pipelines/mlb_games_prediction_results_pipeline_update.r")
+library(baseballr)
 
-# pull in data
-mlb_games_results_df <- get_data_from_database('mlb_games_results')
-historical_matchup_df <- get_data_from_database('historical_matchup_df')
-curated_results_df <- create_curated_results_df(mlb_games_results_df, historical_matchup_df)
-# 1. Prepare your machine learning dataset
-ml_data <- curated_results_df %>%
-  # Select your numerical predictors and your target variable
+stats_cast_2024_df <- 1
+
+statcast_2024_df <- read.csv("C:/Users/14088/Desktop/statcast_data/statcast_data_2024.csv")
+view(cleaned_statcast_df)
+
+# clean df - select only columns we need
+cleaned_statcast_df <- statcast_2024_df %>%
   select(
-    Home_Team_Is_Winner, # Your target (TRUE/FALSE or 1/0)
-    Home_pitcher_expected, Away_pitcher_expected,
-    Home_batting_contact, Away_batting_contact,
-    Net_Result_Margin, Master_Matchup_Score,
-    home_open_odds, away_open_odds
+    pitcher,
+    p_throws,
+    player_name,
+    batter,
+    game_date,
+    game_year,
+    events,
+    description,
+    zone,
+    pitch_number,
+    bb_type,
+    launch_speed,
+    launch_angle,
+    estimated_ba_using_speedangle,
+    estimated_woba_using_speedangle,
+    iso_value,
+    estimated_slg_using_speedangle,
+    babip_value
   ) %>%
-  # Convert target to a factor for classification modeling
-  mutate(Home_Team_Is_Winner = as.factor(Home_Team_Is_Winner)) %>%
-  na.omit()
+  mutate(
+    pitcher = as.character(pitcher),
+    batter = as.character(batter),
+    launch_angle = as.numeric(launch_angle),
+    iso_value = as.numeric(iso_value),
+    babip_value = as.numeric(babip_value)
+  )
 
-# 2. Split your historical data into Training (80%) and Testing (20%) sets
-set.seed(123)
-data_split <- initial_split(ml_data, prop = 0.80)
-train_data <- training(data_split)
-test_data  <- testing(data_split)
+# set events lists and zone
+strike_zone <- seq(1:9)
 
-# 3. Define a Random Forest Model
-rf_spec <- rand_forest(trees = 500, min_n = 10) %>%
-  set_engine("ranger", importance = "impurity") %>%
-  set_mode("classification")
+# Define a flag for pitches that actually finish a play
 
-# 4. Train (Fit) the model using your columns
-rf_fit <- rf_spec %>%
-  fit(Home_Team_Is_Winner ~ ., data = train_data)
+swinging_strike_event_list = c('swinging_strike', 'swinging_strike_blocked')
 
-# 5. Predict on your test data to see how it performs
-predictions <- predict(rf_fit, test_data, type = "prob") %>%
-  bind_cols(test_data)
+contact_event_list = c('foul', 'foul_tip', 'hit_into_play', 'foul_pitchout')
 
-print(predictions)
+strike_event_list = c('foul', 'foul_tip', 'hit_into_play', 'foul_pitchout',
+                     'swinging_strike', 'swinging_strike_blocked', 'called_strike')
+
+swing_event_list = c(contact_event_list, swinging_strike_event_list)
+
+strikeout_event_list = c('strikeout', 'strikeout_double_play')
+
+walk_event_list = c('walk', 'intent_walk')
+
+error_event_list = c('catcher_interf', 'field_error')
+
+field_out_event_list = c('grounded_into_double_play', 'field_out', 'force_out', 'sac_bunt',
+                        'fielders_choice', 'fielders_choice_out', 'double_play', 'triple_play',
+                        'sac_fly', 'sac_fly_double_play')
+
+out_event_list = c(strikeout_event_list, field_out_event_list)
+
+base_hit_event_list = c('single', 'double', 'triple', 'home_run')
+
+non_ab_event_list = c('walk', 'intent_walk', 'hit_by_pitch', 'sac_bunt',
+                     'sac_fly', 'sac_fly_double_play', 'catcher_interf')
+
+sacrifice_event_list = c('sac_bunt', 'sac_fly', 'sac_fly_double_play')
+
+fielders_choice_event_list = c('fielders_choice', 'fielders_choice_out')
+
+pitcher_statcast_df <- cleaned_statcast_df %>%
+  group_by(pitcher) %>%
+  summarise(
+    pitches = n(),
+    # denominators
+    plate_appearances = sum(!events == "", na.rm = TRUE),
+    srikeouts = sum(events %in% strikeout_event_list, na.rm = TRUE),
+    pitches_outside_zone = sum(!(zone %in% strike_zone), na.rm = TRUE),
+    pitches_inside_zone = sum(zone %in% strike_zone, na.rm = TRUE),
+    swings = sum(events %in% swing_event_list),
+    
+  )
+
+
+
+view(pitcher_statcast_df %>% filter(pitcher == 621111))
+statline_from_statcast(statcast_2024_df)
+     
