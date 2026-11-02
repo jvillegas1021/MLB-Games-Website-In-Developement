@@ -158,7 +158,7 @@ calculate_pitcher_scores <- function(pitcher_df) {
   
   # 1. define blocks
   block_control   <- c('BB%', 'K/9', 'BB/9', 'K%', 'Chase', 'CStr%', 'SwStr%',
-                       'Zone%', 'F-Strike%', 'C+SwStr%', 'K/BB', 'K-BB%')
+                       'Zone%', 'F-Strike%', 'C+SwStr%', 'K-BB%')
   block_contact   <- c('HardHit%', 'Barrel%', 'GB%', 'FB%', 'LD%', 'IFFB%',
                        'HR/FB', 'GB/FB', 'Contact%', 'Z-Contact%', 'O-Contact%',
                        'EV', 'LA')
