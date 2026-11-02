@@ -1,3 +1,5 @@
+library(httr)
+library(jsonlite)
 library(tidyverse)
 library(DBI)
 library(RPostgres)
