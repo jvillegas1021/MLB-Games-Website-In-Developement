@@ -160,9 +160,9 @@ calculate_pitcher_scores <- function(pitcher_df) {
   block_control   <- c('BB%', 'K%', 'K/9', 'BB/9', 'K-BB%' 'Chase%', Whiff%,
                        'Zone%', 'F-Strike%', 'CStr%', 'SwStr%', 'C+SwStr%')
   block_contact   <- c('GB%', 'FB%', 'LD%', 'PU%', 'GB/FB', 'HR/FB', 'IFFB%',
-                       'HardHit%', 'Barrel%', 'Z-Contact%', 'O-Contact%',
+                       'Barrel%', 'HardHit%', 'Z-Contact%', 'O-Contact%',
                        'Contact%', 'EV', 'LA')
-  block_expected  <- c('xBA', 'xWOBA', 'xSLG', 'xISO', 'xBABIP')
+  block_expected  <- c('xBA', 'xwOBA', 'xSLG', 'xISO', 'xBABIP')
   
   # Create a master list of all tracking stats to clean in the next step
   all_stats_to_clean <- c(block_control, block_contact, block_expected)
