@@ -1,4 +1,4 @@
-write_df_to_sql_replace <- function(table_name, df) {
+write_df_to_sql_replace <- function(df, table_name) {
     con <- dbConnect(
         RPostgres::Postgres(),
         host = Sys.getenv("DB_HOST"),
@@ -21,7 +21,7 @@ write_df_to_sql_replace <- function(table_name, df) {
     dbDisconnect(con)
 }
 
-write_df_to_sql_append <- function(table_name, df) {
+write_df_to_sql_append <- function(df, table_name) {
   con <- dbConnect(
     RPostgres::Postgres(),
     host = Sys.getenv("DB_HOST"),
