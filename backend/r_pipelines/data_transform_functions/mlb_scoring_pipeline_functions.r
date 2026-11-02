@@ -5,15 +5,14 @@ calculate_roster_batting_scores <- function(team_batting_df) {
   # create blocks
   
   # 1. CORE DISCIPLINE 
-  block_discipline <- c('K%', 'BB%', 'BB/K', 'O-Swing%', 'Z-Swing%', 'Chase%', 'Whiff%')
+  block_discipline <- c('K%', 'BB%', 'BB/K', 'Z-Swing%', 'Chase%', 'Whiff%')
   block_contact     <- c('GB%', 'FB%', 'LD%', 'GB/FB', 'HR/FB', 'IFFB%', 'Barrel%', 'HardHit%',
                          'Z-Contact%', 'O-Contact%', 'Contact%', 'EV', 'LA')
-  block_results    <- c('ISO', 'OPS', 'BABIP', 'AVG', 'OBP', 'SLG', 'wOBA', 'wRAA', 'wRC', 'wRC+')
   block_expected   <- c('xWOBA', 'xBA', 'xSLG', 'xISO', 'xBABIP')
   
   
   # Create a master list of all tracking stats to clean in the next step
-  all_stats_to_clean <- c(block_discipline, block_contact, block_results, block_expected)
+  all_stats_to_clean <- c(block_discipline, block_contact, block_expected)
   
   # 1. Combine all your block stats plus runs_scored into one master list
   all_numeric_cols <- c(all_stats_to_clean, 'R')
@@ -41,7 +40,6 @@ calculate_roster_batting_scores <- function(team_batting_df) {
   blocks_list <- list(
     Discipline = block_discipline,
     Contact   = block_contact,
-    Results    = block_results,
     Expected   = block_expected
   )
   
@@ -49,7 +47,7 @@ calculate_roster_batting_scores <- function(team_batting_df) {
   # 2. Define a master vector of stats where LOWER values are better.
   # Any stat NOT on this list will automatically be treated as "Positive/Higher is better".
   negative_stats <- c(
-    'K%', 'Chase%', 'Whiff%', "O-Swing%", 'GB%', 'IFFB%', 'GB/FB', 'O-Contact%')
+    'K%', 'Chase%', 'Whiff%', 'GB%', 'IFFB%', 'GB/FB', 'O-Contact%')
   
   # 3. Initialize a clean data frame to hold all our final team scores
   # We will start with just the team identifiers
@@ -159,21 +157,15 @@ calculate_pitcher_scores <- function(pitcher_df) {
   )
   
   # 1. define blocks
-  block_control   <- c('BB%', 'K/9', 'BB/9', 'K%', 'O-Swing%', 'CStr%', 'SwStr%',
+  block_control   <- c('BB%', 'K/9', 'BB/9', 'K%', 'Chase', 'CStr%', 'SwStr%',
                        'Zone%', 'F-Strike%', 'C+SwStr%', 'K/BB', 'K-BB%')
-  block_contact   <- c('DP%', 'HardHit%', 'Barrel%', 'GB%', 'FB%', 'LD%', 'IFFB%',
+  block_contact   <- c('HardHit%', 'Barrel%', 'GB%', 'FB%', 'LD%', 'IFFB%',
                        'HR/FB', 'GB/FB', 'Contact%', 'Z-Contact%', 'O-Contact%',
                        'EV', 'LA')
-  block_results   <- c('ERA', 'WHIP', 'FIP', 'AVG', 'SLG', 'ISO', 'BABIP', 'OBP',
-                       'OPS')
   block_expected  <- c('xBA', 'xWOBA', 'xSLG', 'xISO', 'xBABIP', 'xERA')
-  block_vs_rhb <- c('RHB_ISO', 'RHB_OPS', 'RHB_BABIP', 'RHB_AVG', 'RHB_OBP', 'RHB_SLG',
-                    'RHB_BB%', 'RHB_K%')
-  block_vs_lhb <- c('LHB_ISO', 'LHB_OPS', 'LHB_BABIP', 'LHB_AVG', 'LHB_OBP', 'LHB_SLG',
-                    'LHB_BB%', 'LHB_K%')
+  
   # Create a master list of all tracking stats to clean in the next step
-  all_stats_to_clean <- c(block_control, block_contact, block_results,
-                          block_expected, block_vs_lhb, block_vs_rhb)
+  all_stats_to_clean <- c(block_control, block_contact, block_expected)
   
   
   # 1. Combine all your block stats plus runs_scored into one master list
@@ -202,10 +194,7 @@ calculate_pitcher_scores <- function(pitcher_df) {
   blocks_list <- list(
     Control   = block_control,
     Contact   = block_contact,
-    Results   = block_results,
     Expected  = block_expected,
-    Vs_LHB    = block_vs_lhb,
-    Vs_RHB    = block_vs_rhb
   )
   
   
@@ -213,11 +202,7 @@ calculate_pitcher_scores <- function(pitcher_df) {
   # Any stat NOT on this list will automatically be treated as "Positive/Higher is better".
   negative_stats <- c(
     'BB%', 'BB/9', 'HardHit%', 'Barrel%', 'FB%', 'LD%', 'HR/FB', 'Contact%',
-    'Z-Contact%', 'EV', 'LA', 'ERA', 'WHIP', 'FIP', 'AVG', 'SLG', 'ISO', 'BABIP',
-    'OBP', 'OPS', 'xBA', 'xWOBA', 'xSLG', 'xISO', 'xBABIP', 'xERA',
-    'RHB_ISO', 'RHB_OPS', 'RHB_BABIP', 'RHB_AVG', 'RHB_OBP', 'RHB_SLG',
-    'RHB_BB%', 'LHB_ISO', 'LHB_OPS', 'LHB_BABIP', 'LHB_AVG', 'LHB_OBP', 'LHB_SLG',
-    'LHB_BB%'
+    'Z-Contact%', 'EV', 'LA', 'xBA', 'xWOBA', 'xSLG', 'xISO', 'xBABIP'
   )
   
   # 3. Initialize a clean data frame to hold all our final team scores
