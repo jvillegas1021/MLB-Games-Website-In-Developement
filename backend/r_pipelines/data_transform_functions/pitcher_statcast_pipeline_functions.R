@@ -1,6 +1,6 @@
 process_pitcher_statcast_counts <- function(statcast_df = NULL) {
   # clean df - select only columns we need
-  cleaned_statcast_df <- statcast_2024_df %>%
+  cleaned_statcast_df <- statcast_df %>%
     select(
       pitcher,
       p_throws,
@@ -147,43 +147,47 @@ process_pitcher_statcast_decay <- function(statcast_df = NULL, multiplier = 5) {
 }
 
 process_pitcher_statcast_stats <- function(statcast_df = NULL) {
-  processed_pitcher_statcast_df <- pitcher_statcast_df %>%
+  processed_pitcher_statcast_df <- statcast_df %>%
     group_by(pitcher) %>%
     summarise(
       # control block
-      `BB%` = if_else(plate_appearances == 0, 0, walks / plate_appearances),
-      `K%` = if_else(plate_appearances == 0, 0, strikeouts / plate_appearances),
-      `K/9` = if_else(innings_pitched == 0, 0, strikeouts * 9 / innings_pitched),
-      `BB/9` = if_else(innings_pitched == 0, 0, walks * 9 / innings_pitched),
-      `K-BB%` = `K%` - `BB%`,
-      `Chase%` = if_else(pitches_outside_zone == 0, 0, swings_outside_zone / pitches_outside_zone),
-      `Whiff%` = if_else(swings == 0, 0, whiffs / swings),
-      `Zone%` = pitches_inside_zone / pitches,
-      `F-Strike%` = if_else(plate_appearances == 0, 0, first_pitch_strikes / plate_appearances),
-      `CStr%` = called_strikes / pitches,
-      `SwStr%` = whiffs / pitches,
-      `C+SwStr%` = (called_strikes + whiffs) / pitches,
+      `BB%`       = if_else(sum(plate_appearances) == 0, 0, sum(walks) / sum(plate_appearances)),
+      `K%`        = if_else(sum(plate_appearances) == 0, 0, sum(strikeouts) / sum(plate_appearances)),
+      `K/9`       = if_else(sum(innings_pitched) == 0, 0, sum(strikeouts) * 9 / sum(innings_pitched)),
+      `BB/9`      = if_else(sum(innings_pitched) == 0, 0, sum(walks) * 9 / sum(innings_pitched)),
+      `K-BB%`     = `K%` - `BB%`,
+      `Chase%`    = if_else(sum(pitches_outside_zone) == 0, 0, sum(swings_outside_zone) / sum(pitches_outside_zone)),
+      `Whiff%`    = if_else(sum(swings) == 0, 0, sum(whiffs) / sum(swings)),
+      `Zone%`     = if_else(sum(pitches) == 0, 0, sum(pitches_inside_zone) / sum(pitches)),
+      `F-Strike%` = if_else(sum(plate_appearances) == 0, 0, sum(first_pitch_strikes) / sum(plate_appearances)),
+      `CStr%`     = if_else(sum(pitches) == 0, 0, sum(called_strikes) / sum(pitches)),
+      `SwStr%`    = if_else(sum(pitches) == 0, 0, sum(whiffs) / sum(pitches)),
+      `C+SwStr%`  = if_else(sum(pitches) == 0, 0, (sum(called_strikes) + sum(whiffs)) / sum(pitches)),
+      
       # contact
-      `GB%` = if_else(batted_balls == 0, 0, ground_balls / batted_balls),
-      `FB%` = if_else(batted_balls == 0, 0, fly_balls / batted_balls),
-      `LD%` = if_else(batted_balls == 0, 0, line_drives / batted_balls),
-      `PU%` = if_else(batted_balls == 0, 0, pop_ups / batted_balls),
-      `GB/FB` = if_else(fly_balls == 0, 0, ground_balls / fly_balls),
-      `HR/FB` = if_else(fly_balls == 0, 0, home_runs / fly_balls),
-      `IFFB%` = if_else(fly_balls == 0, 0, pop_ups / fly_balls),
-      `Barrel%` = if_else(batted_balls == 0, 0, barreled_balls / batted_balls),
-      `HardHit%` = if_else(batted_balls == 0, 0, hard_hits_balls / batted_balls),
-      `Z-Contact%` = if_else(swings_inside_zone == 0, 0, contacted_balls_inside_zone / swings_inside_zone),
-      `O-Contact%` = if_else(swings_outside_zone == 0, 0, contacted_balls_outside_zone / swings_outside_zone),
-      `Contact%` = if_else(swings == 0, 0, contacted_balls / swings),
-      `EV` = if_else(batted_balls == 0, 0, ev_sum / batted_balls),
-      `LA` = if_else(batted_balls == 0, 0, la_sum / batted_balls),
+      `GB%`       = if_else(sum(batted_balls) == 0, 0, sum(ground_balls) / sum(batted_balls)),
+      `FB%`       = if_else(sum(batted_balls) == 0, 0, sum(fly_balls) / sum(batted_balls)),
+      `LD%`       = if_else(sum(batted_balls) == 0, 0, sum(line_drives) / sum(batted_balls)),
+      `PU%`       = if_else(sum(batted_balls) == 0, 0, sum(pop_ups) / sum(batted_balls)),
+      `GB/FB`     = if_else(sum(fly_balls) == 0, 0, sum(ground_balls) / sum(fly_balls)),
+      `HR/FB`     = if_else(sum(fly_balls) == 0, 0, sum(home_runs) / sum(fly_balls)),
+      `IFFB%`     = if_else(sum(fly_balls) == 0, 0, sum(pop_ups) / sum(fly_balls)),
+      `Barrel%`   = if_else(sum(batted_balls) == 0, 0, sum(barreled_balls) / sum(batted_balls)),
+      `HardHit%`  = if_else(sum(batted_balls) == 0, 0, sum(hard_hits_balls) / sum(batted_balls)), 
+      `Z-Contact%` = if_else(sum(swings_inside_zone) == 0, 0, sum(contacted_balls_inside_zone) / sum(swings_inside_zone)),
+      `O-Contact%` = if_else(sum(swings_outside_zone) == 0, 0, sum(contacted_balls_outside_zone) / sum(swings_outside_zone)),
+      `Contact%`  = if_else(sum(swings) == 0, 0, sum(contacted_balls) / sum(swings)),
+      `EV`        = if_else(sum(batted_balls) == 0, 0, sum(ev_sum) / sum(batted_balls)),
+      `LA`        = if_else(sum(batted_balls) == 0, 0, sum(la_sum) / sum(batted_balls)),
+      
       # expected
-      `xBA` = if_else(batted_balls == 0, 0, estimated_ba_using_speedangle_bip / batted_balls),
-      `xwOBA` = if_else(batted_balls == 0, 0, estimated_woba_using_speedangle_bip / batted_balls),
-      `xSLG` = if_else(batted_balls == 0, 0, estimated_slg_using_speedangle_bip / batted_balls),
-      `xISO` = if_else(batted_balls == 0, 0, iso_value_bip / batted_balls),
-      `xBABIP` = if_else(batted_balls == 0, 0, babip_value_bip / batted_balls)
+      `xBA`       = if_else(sum(batted_balls) == 0, 0, sum(estimated_ba_using_speedangle_bip) / sum(batted_balls)),
+      `xwOBA`     = if_else(sum(batted_balls) == 0, 0, sum(estimated_woba_using_speedangle_bip) / sum(batted_balls)),
+      `xSLG`      = if_else(sum(batted_balls) == 0, 0, sum(estimated_slg_using_speedangle_bip) / sum(batted_balls)),
+      `xISO`      = if_else(sum(batted_balls) == 0, 0, sum(iso_value_bip) / sum(batted_balls)),
+      `xBABIP`    = if_else(sum(batted_balls) == 0, 0, sum(babip_value_bip) / sum(batted_balls)),
+      
+      .groups = "drop"
     )
   
   return(processed_pitcher_statcast_df)
