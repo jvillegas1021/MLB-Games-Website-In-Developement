@@ -15,7 +15,7 @@ source("backend/r_pipelines/data_pipelines/mlb_matchup_card_pipeline.r")
 season_dates <- seq(as.Date("2026-03-25"), as.Date("2026-10-28"), by = "day")
 
 # pitcher_data
-starting_pitcher_stats_df <- get_data_from_database('mlb_pitcher_scores')
+starting_pitcher_stats_df <- get_data_from_database('mlb_pitcher_scores_gameday')
 # pitcher_data
 starting_pitcher_stats_current_year_df <- get_data_from_database('active_pitcher_stats_current_year')
 # team batting_data
