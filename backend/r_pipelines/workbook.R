@@ -1,3 +1,5 @@
+
+
 library(httr)
 library(jsonlite)
 library(tidyverse)
@@ -5,72 +7,68 @@ library(DBI)
 library(RPostgres)
 library(baseballr)
 
+source("backend/r_pipelines/data_extract_functions/extract_data_from_database.r")
+source("backend/r_pipelines/data_transform_functions/pitcher_statcast_pipeline_functions.r")
 # test new function
 
-pitcher_statcast_df <- get_data_from_database('pitcher_statcast_counts_2023')
-pitcher_statsapi_df <- get_data_from_database('pitcher_statsapi_counts_2023')
+#current_year <- as.numeric(format(Sys.Date(), '%Y'))
+current_year <- 2025
+year_range <- seq(from = current_year, to = (current_year - 2))
 
-# going to evaluate using statsapi
+pitcher_stats_counts_df_list <- c()
 
-# join statsapi and statcast
-combined_pitcher_data <- pitcher_statsapi_df %>%
+# extract_ data
+current_year <- 2023
+
+statsapi_table <- paste0('pitcher_statsapi_counts_', current_year)
+statcast_table <- paste0('pitcher_statcast_counts_', current_year)
+
+
+pitcher_statsapi_df <- get_data_from_database(statsapi_table)
+pitcher_statcast_df <- get_data_from_database(statcast_table)
+
+pitcher_identifier_df <- create_pitcher_identifier_df(pitcher_statsapi_df)
+
+prepared_pitcher_stat_counts_df <- prepare_pitcher_stats_counts_df(pitcher_statsapi_df, pitcher_statcast_df)
+
+prepared_pitcher_stat_counts_df <- process_pitcher_statcast_small_sample_size_pitchers(prepared_pitcher_stat_counts_df)
+
+max_year <- 2025
+multiplier <- 5
+
+if (max_year - current_year == 2) {
+  multiplier <- 2
+} else if (max_year - current_year == 1) {
+  multiplier <- 3
+} else {
+  multiplier <- 5
+}
+
+prepared_pitcher_stat_counts_df <- process_pitcher_statcast_decay(prepared_pitcher_stat_counts_df, multiplier = multiplier)
+
+final_pitcher_stat_counts_df <- pitcher_identifier_df %>%
   inner_join(
-    pitcher_statcast_df,
-    by = c('xMLBAMID' = 'pitcher'),
-    relationship = 'one-to-one'
+    prepared_pitcher_stat_counts_df,
+    by = ('xMLBAMID')
   )
 
-pitcher_identifier_df <- cleaned_pitcher_data %>%
-  select(
-    xMLBAMID,
-    player_name,
-    season,
-    gamesStarted
-  )
 
-cleaned_pitcher_data <- combined_pitcher_data %>%
-  select(xMLBAMID,
-         runs,
-         strikeouts,
-         baseOnBalls,
-         intentionalWalks,
-         hits,
-         hitByPitch,
-         groundIntoDoublePlay,
-         totalBases,
-         sacBunts,
-         sacFlies,
-         pitches,
-         plate_appearances,
-         innings_pitched,
-         strikeouts,
-         walks,
-         pitches_outside_zone,
-         swings_outside_zone,
-         pitches_inside_zone,
-         swings_inside_zone,
-         whiffs,
-         swings,
-         first_pitch_strikes,
-         called_strikes,
-         batted_balls,
-         fly_balls,
-         ground_balls,
-         line_drives,
-         home_runs,
-         pop_ups,
-         barreled_balls,
-         hard_hits_balls,
-         contacted_balls,
-         contacted_balls_inside_zone,
-         contacted_balls_outside_zone,
-         ev_sum,
-         la_sum,
-         estimated_ba_using_speedangle_bip,
-         estimated_woba_using_speedangle_bip,
-         iso_value_bip,
-         estimated_slg_using_speedangle_bip,
-         babip_value_bip
-         )
-
+pitcher_stats_counts_df_list[[length(pitcher_stats_counts_df_list) + 1]] <- final_pitcher_stat_counts_df    
+    
+    
+pitcher_stats_counts_df_list  
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
 
