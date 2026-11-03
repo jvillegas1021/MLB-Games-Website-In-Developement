@@ -7,7 +7,7 @@ create_matchup_df <- function(games_table) {
                       "teams.home.probablePitcher.link", "rescheduleDate", "rescheduleGameDate", "status.reason",
                       "rescheduledFrom", "rescheduledFromDate", "resumeDate", "resumeGameDate",
                       "resumedFrom", "resumedFromDate")
-
+  
   missing_cols <- setdiff(check_col_list, colnames(games_table))
   
   if (length(missing_cols) > 0) {
@@ -20,9 +20,9 @@ create_matchup_df <- function(games_table) {
       isTie = ifelse(is.na(isTie), NA, as.logical(isTie)),
       teams.home.isWinner = ifelse(is.na(teams.home.isWinner), NA, as.logical(teams.home.isWinner)),
       teams.away.isWinner = ifelse(is.na(teams.away.isWinner), NA, as.logical(teams.away.isWinner)),
-      teams.away.probablePitcher.link = ifelse(is.na(teams.away.probablePitcher.link), NA_character_, as.character(teams.away.probablePitcher.link)),
       teams.home.probablePitcher.link = ifelse(is.na(teams.home.probablePitcher.link), NA_character_, as.character(teams.home.probablePitcher.link)),
-      teams.away.probablePitcher.id = ifelse(is.na(teams.away.probablePitcher.id), NA_character_, as.character(teams.away.probablePitcher.id)),
+      teams.away.probablePitcher.link = ifelse(is.na(teams.away.probablePitcher.link), NA_character_, as.character(teams.away.probablePitcher.link)),
+      teams.home.probablePitcher.id = ifelse(is.na(teams.home.probablePitcher.id), NA_character_, as.character(teams.home.probablePitcher.id)),
       teams.away.probablePitcher.id = ifelse(is.na(teams.away.probablePitcher.id), NA_character_, as.character(teams.away.probablePitcher.id)),
       teams.home.probablePitcher.fullName = ifelse(is.na(teams.home.probablePitcher.fullName), "TBD", as.character(teams.home.probablePitcher.fullName)),
       teams.away.probablePitcher.fullName = ifelse(is.na(teams.away.probablePitcher.fullName), "TBD", as.character(teams.away.probablePitcher.fullName)),
@@ -69,185 +69,181 @@ create_matchup_df <- function(games_table) {
       Home_Team_ID = as.character(Home_Team_ID),
       Away_Team_ID = as.character(Away_Team_ID)
     )
-    
-    time <- matchup_df$Game_Time
-    dt_utc <- ymd_hms(time, tz = 'UTC')
-    dt_est <- with_tz(dt_utc, tzone = 'America/New_York')
-    times_est <- format(dt_est, "%I:%M:%p")
-    
-    matchup_df$Game_Time <- times_est
-    matchup_df$Game_Time <- gsub(":(AM|PM)$", " \\1", matchup_df$Game_Time)
-    matchup_df$Game_Time_Stamp <- ymd_hms(games_table$gameDate, tz = 'UTC')
-    matchup_df$Game_Date_Time_Parsed <- matchup_df$Game_Time_Stamp
-
-    return(matchup_df)
-    }
+  
+  time <- matchup_df$Game_Time
+  dt_utc <- ymd_hms(time, tz = 'UTC')
+  dt_est <- with_tz(dt_utc, tzone = 'America/New_York')
+  times_est <- format(dt_est, "%I:%M:%p")
+  
+  matchup_df$Game_Time <- times_est
+  matchup_df$Game_Time <- gsub(":(AM|PM)$", " \\1", matchup_df$Game_Time)
+  matchup_df$Game_Time_Stamp <- ymd_hms(games_table$gameDate, tz = 'UTC')
+  matchup_df$Game_Date_Time_Parsed <- matchup_df$Game_Time_Stamp
+  
+  return(matchup_df)
+}
 ######################### ASSIGN ODDS TABLE ##############################
 
 assign_odds_and_win_probability_to_teams <- function(matchup_df, odds_df) {
-    
-    recent_odds_df <- odds_df %>%
-      group_by(game_id) %>%
-      slice_max(order_by = update_date, n = 1, with_ties = FALSE) %>% 
-      ungroup()
   
-    matchup_df <- matchup_df %>%
-      left_join(recent_odds_df,
+  recent_odds_df <- odds_df %>%
+    group_by(game_id) %>%
+    slice_max(order_by = update_date, n = 1, with_ties = FALSE) %>% 
+    ungroup()
+  
+  matchup_df <- matchup_df %>%
+    left_join(recent_odds_df,
               by=c('Game_ID' = 'game_id'),
               relationship = 'one-to-one') %>%
-      mutate(
-        Home_Open_Win_Probability = if_else(
-          home_open_odds < 0,
-          round((abs(home_open_odds) / (abs(home_open_odds) + 100)) * 100, 2),
-          round((100 / (home_open_odds + 100)) * 100, 2)
-        ),
-        Home_Current_Win_Probability = if_else(
-          home_close_odds < 0,
-          round((abs(home_close_odds) / (abs(home_close_odds) + 100)) * 100, 2),
-          round((100 / (home_close_odds + 100)) * 100, 2)
-        ),
-        Away_Open_Win_Probability = if_else(
-          away_open_odds < 0,
-          round((abs(away_open_odds) / (abs(away_open_odds) + 100)) * 100, 2),
-          round((100 / (away_open_odds + 100)) * 100, 2)
-        ),
-        Away_Current_Win_Probability = if_else(
-          away_close_odds < 0,
-          round((abs(away_close_odds) / (abs(away_close_odds) + 100)) * 100, 2),
-          round((100 / (away_close_odds + 100)) * 100, 2)
-        )
+    mutate(
+      Home_Open_Win_Probability = if_else(
+        home_open_odds < 0,
+        round((abs(home_open_odds) / (abs(home_open_odds) + 100)) * 100, 2),
+        round((100 / (home_open_odds + 100)) * 100, 2)
+      ),
+      Home_Current_Win_Probability = if_else(
+        home_close_odds < 0,
+        round((abs(home_close_odds) / (abs(home_close_odds) + 100)) * 100, 2),
+        round((100 / (home_close_odds + 100)) * 100, 2)
+      ),
+      Away_Open_Win_Probability = if_else(
+        away_open_odds < 0,
+        round((abs(away_open_odds) / (abs(away_open_odds) + 100)) * 100, 2),
+        round((100 / (away_open_odds + 100)) * 100, 2)
+      ),
+      Away_Current_Win_Probability = if_else(
+        away_close_odds < 0,
+        round((abs(away_close_odds) / (abs(away_close_odds) + 100)) * 100, 2),
+        round((100 / (away_close_odds + 100)) * 100, 2)
+      )
     )
-    return(matchup_df)
-    }
+  return(matchup_df)
+}
 
-    
+
 ########################## FILTER PITCHER STAT DATAFRAMES ###############################
 filter_pitchers_for_matchup <- function(matchup_df, pitcher_stats_df) {
-
-    valid_ids <- c(matchup_df$Home_Pitcher_ID, matchup_df$Away_Pitcher_ID)
-
-    pitcher_stats_df <- pitcher_stats_df %>%
-        filter(xMLBAMID %in% valid_ids)
-
-    return(pitcher_stats_df)
-    }
+  
+  valid_ids <- c(matchup_df$Home_Pitcher_ID, matchup_df$Away_Pitcher_ID)
+  
+  pitcher_stats_df <- pitcher_stats_df %>%
+    filter(xMLBAMID %in% valid_ids)
+  
+  return(pitcher_stats_df)
+}
 
 ############################ Guard for NA starting Pitchers  ##############################
 no_starting_pitchers_guard <- function(matchup_df) {
-    matchup_df <- matchup_df %>%
-        mutate(
-            Home_Pitcher_ID = as.character(Home_Pitcher_ID),
-            Away_Pitcher_ID = as.character(Away_Pitcher_ID),
-            Home_Pitcher = if_else(
-                is.na(Home_Pitcher_ID), paste0(Home_Team, '-Pitcher'), Home_Pitcher
-                ),
-            Home_Pitcher_ID = if_else(
-                is.na(Home_Pitcher_ID), paste0(Home_Team, '-Pitcher'), Home_Pitcher_ID
-                ),
-            Away_Pitcher = if_else(
-                is.na(Away_Pitcher_ID), paste0(Away_Team, '-Pitcher'), Away_Pitcher
-                ),
-            Away_Pitcher_ID = if_else(
-                is.na(Away_Pitcher_ID), paste0(Away_Team, '-Pitcher'), Away_Pitcher_ID
-                )
-            )
-    return(matchup_df)
-    }
+  matchup_df <- matchup_df %>%
+    mutate(
+      Home_Pitcher_ID = as.character(Home_Pitcher_ID),
+      Away_Pitcher_ID = as.character(Away_Pitcher_ID),
+      Home_Pitcher = if_else(
+        is.na(Home_Pitcher_ID), paste0(Home_Team, '-Pitcher'), Home_Pitcher
+      ),
+      Home_Pitcher_ID = if_else(
+        is.na(Home_Pitcher_ID), paste0(Home_Team, '-Pitcher'), Home_Pitcher_ID
+      ),
+      Away_Pitcher = if_else(
+        is.na(Away_Pitcher_ID), paste0(Away_Team, '-Pitcher'), Away_Pitcher
+      ),
+      Away_Pitcher_ID = if_else(
+        is.na(Away_Pitcher_ID), paste0(Away_Team, '-Pitcher'), Away_Pitcher_ID
+      )
+    )
+  return(matchup_df)
+}
 
 
 ########################### ASSIGN STARTING PITCHER THROWING HANDS ###########################
 assign_starting_pitcher_throwing_hands_wins_loses_era <- function(matchup_df, pitcher_stats_df, pitcher_stats_current_year_df) {
-    
-    matchup_df <- matchup_df %>%
+  
+  matchup_df <- matchup_df %>%
     mutate(
-        Home_Pitcher_ID = as.character(Home_Pitcher_ID),
-        Away_Pitcher_ID = as.character(Away_Pitcher_ID)
-        )
-        
-    pitcher_stats_df <- pitcher_stats_df %>%
+      Home_Pitcher_ID = as.character(Home_Pitcher_ID),
+      Away_Pitcher_ID = as.character(Away_Pitcher_ID)
+    )
+  
+  pitcher_stats_df <- pitcher_stats_df %>%
     mutate(
-        xMLBAMID = as.character(xMLBAMID)
-          ) %>%
+      xMLBAMID = as.character(xMLBAMID)
+    ) %>%
     select(
-        xMLBAMID
-        )
-
-    pitcher_stats_current_year_df <- pitcher_stats_current_year_df %>%
+      xMLBAMID
+    )
+  
+  pitcher_stats_current_year_df <- pitcher_stats_current_year_df %>%
     mutate(
-        xMLBAMID = as.character(xMLBAMID)
-          ) %>%
+      xMLBAMID = as.character(xMLBAMID)
+    ) %>%
     select(
-        xMLBAMID,
-        Wins,
-        Losses,
-        ERA
-        )
-    
-    home_pitcher_df <- matchup_df %>%
+      xMLBAMID,
+      Wins,
+      Losses,
+      ERA
+    )
+  
+  home_pitcher_df <- matchup_df %>%
     select(
-        Game_ID,
-        Home_Pitcher_ID
-        )
-    
-    home_pitcher_df <- home_pitcher_df %>%
+      Game_ID,
+      Home_Pitcher_ID
+    )
+  
+  home_pitcher_df <- home_pitcher_df %>%
     left_join(
-        pitcher_stats_df,
-        by=c('Home_Pitcher_ID' = 'xMLBAMID')
-        ) %>%
+      pitcher_stats_df,
+      by=c('Home_Pitcher_ID' = 'xMLBAMID')
+    ) %>%
     left_join(
-        pitcher_stats_current_year_df,
-        by=c('Home_Pitcher_ID' = 'xMLBAMID')
-        ) %>%
+      pitcher_stats_current_year_df,
+      by=c('Home_Pitcher_ID' = 'xMLBAMID')
+    ) %>%
     rename(
-        Home_Pitcher_Wins = Wins,
-        Home_Pitcher_Losses = Losses,
-        Home_Pitcher_ERA = ERA
-        ) %>%
+      Home_Pitcher_Wins = Wins,
+      Home_Pitcher_Losses = Losses,
+      Home_Pitcher_ERA = ERA
+    ) %>%
     select(
-        Game_ID,
-        Home_Pitcher_ID,
-        Home_Pitcher_Hand,
-        Home_Pitcher_Wins,
-        Home_Pitcher_Losses,
-        Home_Pitcher_ERA
-        )
-    
-    away_pitcher_df <- matchup_df %>%
+      Game_ID,
+      Home_Pitcher_ID,
+      Home_Pitcher_Wins,
+      Home_Pitcher_Losses,
+      Home_Pitcher_ERA
+    )
+  
+  away_pitcher_df <- matchup_df %>%
     select(
-        Game_ID,
-        Away_Pitcher_ID
-        )
-    
-    away_pitcher_df <- away_pitcher_df %>%
+      Game_ID,
+      Away_Pitcher_ID
+    )
+  
+  away_pitcher_df <- away_pitcher_df %>%
     left_join(
-        pitcher_stats_df,
-        by=c('Away_Pitcher_ID' = 'xMLBAMID')
-        ) %>%
+      pitcher_stats_df,
+      by=c('Away_Pitcher_ID' = 'xMLBAMID')
+    ) %>%
     left_join(
-        pitcher_stats_current_year_df,
-        by=c('Away_Pitcher_ID' = 'xMLBAMID')
-        ) %>%
+      pitcher_stats_current_year_df,
+      by=c('Away_Pitcher_ID' = 'xMLBAMID')
+    ) %>%
     rename(
-        Away_Pitcher_Wins = Wins,
-        Away_Pitcher_Losses = Losses,
-        Away_Pitcher_ERA = ERA
-        ) %>%
+      Away_Pitcher_Wins = Wins,
+      Away_Pitcher_Losses = Losses,
+      Away_Pitcher_ERA = ERA
+    ) %>%
     select(
-        Game_ID,
-        Away_Pitcher_ID,
-        Away_Pitcher_Hand,
-        Away_Pitcher_Wins,
-        Away_Pitcher_Losses,
-        Away_Pitcher_ERA
-        )
-
-    matchup_df <- matchup_df %>%
+      Game_ID,
+      Away_Pitcher_ID,
+      Away_Pitcher_Wins,
+      Away_Pitcher_Losses,
+      Away_Pitcher_ERA
+    )
+  
+  matchup_df <- matchup_df %>%
     left_join(home_pitcher_df, by = c("Game_ID", "Home_Pitcher_ID")) %>%
-    relocate(Home_Pitcher_Hand, .after = Home_Pitcher_ID) %>%
-    left_join(away_pitcher_df, by = c("Game_ID", "Away_Pitcher_ID")) %>%
-    relocate(Away_Pitcher_Hand, .after = Away_Pitcher_ID)
-    
-    return(matchup_df)
+    left_join(away_pitcher_df, by = c("Game_ID", "Away_Pitcher_ID"))
+  
+  return(matchup_df)
 }
 
 ######################## ASSIGN STARTING PITCHER SCORES ###########################
@@ -264,7 +260,7 @@ assign_pitcher_scores <- function(matchup_df, pitcher_df) {
     mutate(
       xMLBAMID = as.character(xMLBAMID)
     )
- 
+  
   home_pitcher_df <- matchup_df %>%
     select(
       Game_ID,
@@ -377,16 +373,16 @@ assign_team_batting_scores <- function(matchup_df, team_batting_df) {
 
 ######### PROABABLE PITCHER & PITCHER STATS & LINE UP HYDRATION FLAGS##################################
 probable_pitcher_and_lineup_hydration_flags <- function(matchup_df, starting_pitcher_df) {
-    
-    matchup_df <- matchup_df %>%
-        mutate(
-            Home_Pitcher_Stats_Available = Home_Pitcher_ID %in% starting_pitcher_df$xMLBAMID,
-            Away_Pitcher_Stats_Available = Away_Pitcher_ID %in% starting_pitcher_df$xMLBAMID,
-            Pitcher_Stats_Available = Home_Pitcher_Stats_Available & Away_Pitcher_Stats_Available
-        )
-
-    return(matchup_df)
-    }
+  
+  matchup_df <- matchup_df %>%
+    mutate(
+      Home_Pitcher_Stats_Available = Home_Pitcher_ID %in% starting_pitcher_df$xMLBAMID,
+      Away_Pitcher_Stats_Available = Away_Pitcher_ID %in% starting_pitcher_df$xMLBAMID,
+      Pitcher_Stats_Available = Home_Pitcher_Stats_Available & Away_Pitcher_Stats_Available
+    )
+  
+  return(matchup_df)
+}
 ########################## CALCULATE MATCHUP SCORE ###############################
 calculate_matchup_score <- function(matchup_df) {
   
@@ -426,84 +422,84 @@ calculate_matchup_score <- function(matchup_df) {
 
 ############################# CALCULATE FATIGUE SCORE ####################################
 calculate_team_travel_fatigue_score <- function(matchup_df, team_travel_df) {
-
-    team_travel_df <- team_travel_df %>%
-        mutate(
-            fatigue_score = replace_na(fatigue_score, 0)
-            )
+  
+  team_travel_df <- team_travel_df %>%
+    mutate(
+      fatigue_score = replace_na(fatigue_score, 0)
+    )
+  
+  matchup_df <- matchup_df %>%
+    left_join(
+      team_travel_df %>% select(team_name, fatigue_score),
+      by = c("Home_Team" = "team_name")
+    ) %>%
+    rename(Home_Fatigue_Score = fatigue_score) %>%
     
-    matchup_df <- matchup_df %>%
-        left_join(
-            team_travel_df %>% select(team_name, fatigue_score),
-            by = c("Home_Team" = "team_name")
-        ) %>%
-        rename(Home_Fatigue_Score = fatigue_score) %>%
-        
-        left_join(
-            team_travel_df %>% select(team_name, fatigue_score),
-            by = c("Away_Team" = "team_name")
-        ) %>%
-        rename(Away_Fatigue_Score = fatigue_score) %>%
-        
-        # Add fatigue into context scores
-        mutate(
-            Home_Fatigue_Adjust = pmax(pmin(Home_Fatigue_Score, 1), -1),
-            Away_Fatigue_Adjust = pmax(pmin(Away_Fatigue_Score, 1), -1),
-        
-            Home_Context_Score = Home_Context_Score - Home_Fatigue_Adjust,
-            Away_Context_Score = Away_Context_Score - Away_Fatigue_Adjust
-        ) %>%
- 
-        # Drop the temporary fatigue columns
-        select(-Home_Fatigue_Score, -Away_Fatigue_Score)
+    left_join(
+      team_travel_df %>% select(team_name, fatigue_score),
+      by = c("Away_Team" = "team_name")
+    ) %>%
+    rename(Away_Fatigue_Score = fatigue_score) %>%
     
-    return(matchup_df)
+    # Add fatigue into context scores
+    mutate(
+      Home_Fatigue_Adjust = pmax(pmin(Home_Fatigue_Score, 1), -1),
+      Away_Fatigue_Adjust = pmax(pmin(Away_Fatigue_Score, 1), -1),
+      
+      Home_Context_Score = Home_Context_Score - Home_Fatigue_Adjust,
+      Away_Context_Score = Away_Context_Score - Away_Fatigue_Adjust
+    ) %>%
+    
+    # Drop the temporary fatigue columns
+    select(-Home_Fatigue_Score, -Away_Fatigue_Score)
+  
+  return(matchup_df)
 }
 
 
 ##################### CALCULATE WIN PROB AND PREDICTION #####################
 calculate_win_prob_prediction <- function(matchup_df,
                                           probability_model) {
-    
+  
   matchup_df <- matchup_df %>%
-  mutate(
+    mutate(
       Predicted_Winner = if_else(Master_Matchup_Score >= 0, Home_Team, Away_Team),
       Predicted_Loser = if_else(Predicted_Winner == Home_Team, Away_Team, Home_Team),
       Win_Probability = round((predict(probability_model, newdata = matchup_df, type = "response") * 100), 2),
       Win_Probability = if_else(Master_Matchup_Score < 0,
                                 100 - Win_Probability,
                                 Win_Probability)
-      )
+    )
   
   matchup_df <- matchup_df %>%
     mutate(
       Win_Probability = if_else(
-      !Pitcher_Stats_Available,
-      NA_real_,
-      Win_Probability
+        !Pitcher_Stats_Available,
+        NA_real_,
+        Win_Probability
       ),
       Predicted_Winner = if_else(
-          !Pitcher_Stats_Available,
-          "No Prediction",
-          Predicted_Winner
+        !Pitcher_Stats_Available,
+        "No Prediction",
+        Predicted_Winner
       ),
       Predicted_Loser = if_else(
-          !Pitcher_Stats_Available,
-          "No Prediction",
-          Predicted_Loser
+        !Pitcher_Stats_Available,
+        "No Prediction",
+        Predicted_Loser
       )
     )
-      
+  
   matchup_df <- matchup_df %>%
-      mutate(
-          Prediction_Status = case_when(
-              !Pitcher_Stats_Available ~ "No Prediction",
-              TRUE ~ "Full Prediction"
-          )
+    mutate(
+      Prediction_Status = case_when(
+        !Pitcher_Stats_Available ~ "No Prediction",
+        TRUE ~ "Full Prediction"
       )
-
+    )
+  
   return(matchup_df)
-  }
+}
 ################## CALCULATE MODEL ODDS AND EDGE ################################
 calculate_model_odds_and_edge <- function(matchup_df) {
   
@@ -519,12 +515,12 @@ calculate_model_odds_and_edge <- function(matchup_df) {
       Away_Team_Model_Win_Probability = if_else(
         Predicted_Winner == Away_Team, winner_win_prob, loser_win_prob
       ),
-
-    
+      
+      
       # fair probabilities (0–1)
       p_fair = winner_win_prob / 100,
       q_fair = loser_win_prob  / 100,
-    
+      
       winner_odds_int = if_else(
         p_fair > 0.5,
         -(p_fair / (1 - p_fair)) * 100,          # favorite
@@ -535,7 +531,7 @@ calculate_model_odds_and_edge <- function(matchup_df) {
         -(q_fair / (1 - q_fair)) * 100,          # favorite (rare for "loser")
         ((1 - q_fair) / q_fair) * 100            # underdog
       ),
-
+      
       # assign numeric odds to teams
       Home_Odds_Num = if_else(
         Predicted_Winner == Home_Team,
@@ -566,7 +562,7 @@ calculate_model_odds_and_edge <- function(matchup_df) {
       Home_Team_Current_Edge = round(Home_Team_Model_Win_Probability - Home_Current_Win_Probability, 2),
       Away_Team_Open_Edge = round(Away_Team_Model_Win_Probability - Away_Open_Win_Probability, 2),
       Away_Team_Current_Edge = round(Away_Team_Model_Win_Probability - Away_Current_Win_Probability, 2)
-
+      
     )
   
   return(matchup_df)
@@ -648,5 +644,4 @@ add_update_date <- function(matchup_df) {
   
   return(matchup_df)
 }
-
 
