@@ -1,6 +1,5 @@
 mlb_matchup_card_pipeline <- function(game_date = as.Date(format(Sys.time(), tz = "America/New_York")),
                                       mlb_pitcher_scores = NULL,
-                                      mlb_pitcher_stats_current_year = NULL,
                                       mlb_team_batting_scores = NULL,
                                       win_prob_model = NULL,
                                       mlb_odds_df = NULL
@@ -16,16 +15,9 @@ mlb_matchup_card_pipeline <- function(game_date = as.Date(format(Sys.time(), tz 
   
   # pitcher_data
   if (is.null(mlb_pitcher_scores) || nrow(mlb_pitcher_scores) == 0) {
-  starting_pitcher_stats_df <- get_data_from_database('mlb_pitcher_scores')
+  starting_pitcher_stats_df <- get_data_from_database('mlb_pitcher_scores_gameday')
   } else {
     starting_pitcher_stats_df <- mlb_pitcher_scores
-  }
-  
-  # pitcher_data
-  if (is.null(mlb_pitcher_stats_current_year) || nrow(mlb_pitcher_stats_current_year) == 0) {
-    starting_pitcher_stats_current_year_df <- get_data_from_database('active_pitcher_stats_current_year')
-  } else {
-    starting_pitcher_stats_current_year_df <- mlb_pitcher_stats_current_year
   }
   
   # team batting_data
@@ -57,11 +49,8 @@ mlb_matchup_card_pipeline <- function(game_date = as.Date(format(Sys.time(), tz 
   matchup_df <- assign_odds_and_win_probability_to_teams(matchup_df, mlb_games_odds_df)
   ####### filter pitchers data #############
   starting_pitcher_filtered_df <- filter_pitchers_for_matchup(matchup_df, starting_pitcher_stats_df)
-  starting_pitcher_current_year_filtered_df <- filter_pitchers_for_matchup(matchup_df, starting_pitcher_stats_current_year_df)
   ############################ Guard for NA starting Pitchers  ##############################
   matchup_df <- no_starting_pitchers_guard(matchup_df)
-  ########################## ADD PITCHER THROWING HANDS / WINS / LOSES / ERA###################################
-  matchup_df <- assign_starting_pitcher_throwing_hands_wins_loses_era(matchup_df, starting_pitcher_filtered_df, starting_pitcher_current_year_filtered_df)
   ##################### ADD PITCHER SCORES #########################################
   matchup_df <- assign_pitcher_scores(matchup_df, starting_pitcher_filtered_df)
   ################### ADD BATTING LINEUPS LIST PLUS HYDRATION STATUS ###################################
