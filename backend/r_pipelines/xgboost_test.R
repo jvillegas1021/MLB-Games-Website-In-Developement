@@ -11,7 +11,7 @@ source("backend/r_pipelines/data_transform_functions/mlb_prediction_results_pipe
 source("backend/r_pipelines/data_load_functions/load_data_to_database.r")
 source("backend/r_pipelines/data_pipelines/mlb_games_prediction_results_pipeline_update.r")
 
-historical_matchup_df <- get_data_from_database('historical_matchup_df')
+historical_matchup_df <- get_data_from_database('mlb_matchup_history')
 
 
 
@@ -25,10 +25,12 @@ max(historical_matchup_df $Game_Date)
 
 
 training_df <- historical_matchup_df %>%
-  filter(Game_Date <= '2026-08-31')
+  filter(Game_Date <= '2026-08-31') %>%
+  drop_na(Win_Probability)
 
 testing_df <- historical_matchup_df %>%
-  filter(Game_Date > '2026-08-31')
+  filter(Game_Date > '2026-08-31') %>%
+  drop_na(Win_Probability)
 
 feature_columns <- c(
   "Net_Discipline_Margin", "Net_Power_Margin", "Net_Expected_Margin", 
@@ -78,18 +80,16 @@ testing_df <- testing_df %>%
   )
 
 results_df <- testing_df %>%
-  select(Game_Date,
-         Home_Team,
-         Away_Team,
+  drop_na(Win_Probability) %>%
+  select(
          Predicted_Winner,
          Win_Probability,
-         Original_Home_Win_Prob,
+         new_model_pick,
          XGB_Win_Probability,
          Winner,
-         Home_Team_Is_Winner,
          old_model_correct,
          new_model_correct)
-
+results_df
 
 new_model_avg = mean(results_df$new_model_correct)
 old_model_avg = mean(results_df$old_model_correct)
