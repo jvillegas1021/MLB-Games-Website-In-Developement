@@ -148,7 +148,7 @@ process_pitcher_statcast_decay <- function(statcast_df = NULL, multiplier = 5) {
 
 process_pitcher_statcast_stats <- function(statcast_df = NULL) {
   processed_pitcher_statcast_df <- statcast_df %>%
-    group_by(pitcher) %>%
+    group_by(xMLBAMID) %>%
     summarise(
       # control block
       `BB%`       = if_else(sum(plate_appearances) == 0, 0, sum(walks) / sum(plate_appearances)),
@@ -191,4 +191,72 @@ process_pitcher_statcast_stats <- function(statcast_df = NULL) {
     )
   
   return(processed_pitcher_statcast_df)
+}
+
+create_pitcher_identifier_df <- function(pitcher_df) {
+  pitcher_identifier_df <- pitcher_df %>%
+    select(
+      xMLBAMID,
+      player_name,
+      gamesStarted
+    )
+  return(pitcher_identifier_df)
+}
+
+prepare_pitcher_stats_counts_df <- function(statsapi_df, statcast_df) {
+  
+  # join statsapi and statcast
+  combined_pitcher_data <- statsapi_df %>%
+    inner_join(
+      statcast_df,
+      by = c('xMLBAMID' = 'pitcher'),
+      relationship = 'one-to-one'
+    )
+  
+  cleaned_pitcher_data <- combined_pitcher_data %>%
+    select(xMLBAMID,
+           runs,
+           strikeouts,
+           baseOnBalls,
+           intentionalWalks,
+           hits,
+           hitByPitch,
+           groundIntoDoublePlay,
+           totalBases,
+           sacBunts,
+           sacFlies,
+           pitches,
+           plate_appearances,
+           innings_pitched,
+           strikeouts,
+           walks,
+           pitches_outside_zone,
+           swings_outside_zone,
+           pitches_inside_zone,
+           swings_inside_zone,
+           whiffs,
+           swings,
+           first_pitch_strikes,
+           called_strikes,
+           batted_balls,
+           fly_balls,
+           ground_balls,
+           line_drives,
+           home_runs,
+           pop_ups,
+           barreled_balls,
+           hard_hits_balls,
+           contacted_balls,
+           contacted_balls_inside_zone,
+           contacted_balls_outside_zone,
+           ev_sum,
+           la_sum,
+           estimated_ba_using_speedangle_bip,
+           estimated_woba_using_speedangle_bip,
+           iso_value_bip,
+           estimated_slg_using_speedangle_bip,
+           babip_value_bip
+    )
+  
+  return(cleaned_pitcher_data)
 }
