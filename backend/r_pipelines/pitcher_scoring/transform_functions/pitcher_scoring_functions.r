@@ -123,7 +123,6 @@ calculate_pitcher_scores <- function(pitcher_statcast_df, game_date = NULL) {
   }
   
   final_pitcher_scores_df <- final_pitcher_scores_df %>%
-    rename(xMLBAMID = pitcher) %>%
     mutate(
       game_date = game_date,
       update_date = Sys.time()
