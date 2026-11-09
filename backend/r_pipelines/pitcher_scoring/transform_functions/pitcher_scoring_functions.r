@@ -132,16 +132,17 @@ calculate_pitcher_scores <- function(pitcher_statcast_df, game_date = NULL) {
   return(final_pitcher_scores_df)
 }
 
-process_pitcher_statcast_counts <- function(statcast_df = NULL) {
+process_pitcher_statcast_counts <- function(statcast_df) {
+  
   # clean df - select only columns we need
   cleaned_statcast_df <- statcast_df %>%
     select(
-      pitcher,
+      xMLBAMID = pitcher,
+      season = game_year,
       p_throws,
       player_name,
       batter,
       game_date,
-      game_year,
       events,
       description,
       zone,
@@ -156,7 +157,7 @@ process_pitcher_statcast_counts <- function(statcast_df = NULL) {
       babip_value
     ) %>%
     mutate(
-      pitcher = as.character(pitcher),
+      xMLBAMID = as.character(xMLBAMID),
       batter = as.character(batter),
       launch_angle = as.numeric(launch_angle),
       iso_value = as.numeric(iso_value),
@@ -208,7 +209,7 @@ process_pitcher_statcast_counts <- function(statcast_df = NULL) {
   fielders_choice_event_list = c('fielders_choice', 'fielders_choice_out')
   
   pitcher_statcast_df <- cleaned_statcast_df %>%
-    group_by(pitcher) %>%
+    group_by(xMLBAMID, season) %>%
     summarise(
       pitches = n(),
       # discipline block 'K%', 'BB%', 'BB/K', 'Z-Swing%', 'Chase%', 'Whiff%'
@@ -244,7 +245,8 @@ process_pitcher_statcast_counts <- function(statcast_df = NULL) {
       estimated_woba_using_speedangle_bip = sum(estimated_woba_using_speedangle, na.rm = TRUE),
       iso_value_bip = sum(iso_value, na.rm = TRUE),
       estimated_slg_using_speedangle_bip = sum(estimated_slg_using_speedangle, na.rm = TRUE),
-      babip_value_bip = sum(babip_value, na.rm = TRUE)
+      babip_value_bip = sum(babip_value, na.rm = TRUE),
+      .groups = 'drop'
     )
   
   return(pitcher_statcast_df)
