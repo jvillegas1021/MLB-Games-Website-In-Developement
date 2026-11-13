@@ -1,4 +1,4 @@
-get_all_pitchers <- function() {
+get_all_active_mlb_pitchers <- function() {
   
   url = "https://statsapi.mlb.com/api/v1/sports/1/players"
   players_df <- GET(url)
