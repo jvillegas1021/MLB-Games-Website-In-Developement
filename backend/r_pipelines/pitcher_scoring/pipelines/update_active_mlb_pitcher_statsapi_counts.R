@@ -2,10 +2,10 @@ update_active_mlb_pitcher_statsapi_counts <- function(current_year = format(Sys.
   
   table_year <- current_year
   historical_table_name <- paste0('pitcher_statsapi_counts_', table_year)
-  active_pitcher_table_name <- paste0('mlb_pitchers_', table_year)
+  active_pitcher_table_name <- paste0('active_mlb_pitchers_', table_year)
   #extract data 
   active_mlb_pitchers_df <- get_data_from_database(active_pitcher_table_name)
-  historical_mlb_pitcher_statsapi_counts_df <- (historical_table_name)
+  historical_mlb_pitcher_statsapi_counts_df <- get_data_from_database(historical_table_name)
   
   # update pitcher statsapi counts
   
