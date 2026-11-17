@@ -1,0 +1,7 @@
+
+.env
+.Renviron
+.Rhistory
+.RData
+__pycache__/
+node_modules/

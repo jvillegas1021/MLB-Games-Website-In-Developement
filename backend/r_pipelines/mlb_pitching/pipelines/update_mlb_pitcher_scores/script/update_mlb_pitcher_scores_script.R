@@ -1,0 +1,15 @@
+library(baseballr)
+library(tidyverse)
+library(httr)
+library(jsonlite)
+library(DBI)
+library(RPostgres)
+library(glmnet)
+
+source("backend/r_pipelines/mlb_pitching/pipelines/update_mlb_pitcher_scores/extract_functions/extract_data_from_database.r")
+source("backend/r_pipelines/mlb_pitching/pipelines/update_mlb_pitcher_scores/load_functions/load_data_to_database.r")
+source("backend/r_pipelines/mlb_pitching/pipelines/update_mlb_pitcher_scores/pipeline/update_mlb_pitcher_scores.R")
+source("backend/r_pipelines/mlb_pitching/pipelines/update_mlb_pitcher_scores/transform_functions/pitcher_scoring_functions.r")
+
+mlb_pitcher_scores_pipeline()
+print(paste0("Updated pitcher scores for ", Sys.Date()))
