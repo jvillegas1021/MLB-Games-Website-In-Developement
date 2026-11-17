@@ -1,9 +1,9 @@
-process_pitcher_statcast_counts <- function(statcast_df) {
+process_batter_statcast_counts <- function(statcast_df) {
 
   # clean df - select only columns we need
   cleaned_statcast_df <- statcast_df %>%
     select(
-      xMLBAMID = pitcher,
+      xMLBAMID = batter,
       season = game_year,
       batter,
       game_date,
@@ -22,7 +22,6 @@ process_pitcher_statcast_counts <- function(statcast_df) {
     ) %>%
     mutate(
       xMLBAMID = as.character(xMLBAMID),
-      batter = as.character(batter),
       launch_angle = as.numeric(launch_angle),
       iso_value = as.numeric(iso_value),
       babip_value = as.numeric(babip_value),
@@ -72,7 +71,7 @@ process_pitcher_statcast_counts <- function(statcast_df) {
   
   fielders_choice_event_list = c('fielders_choice', 'fielders_choice_out')
   
-  pitcher_statcast_df <- cleaned_statcast_df %>%
+  batter_statcast_df <- cleaned_statcast_df %>%
     group_by(xMLBAMID, season) %>%
     summarise(
       pitches = n(),
@@ -111,7 +110,10 @@ process_pitcher_statcast_counts <- function(statcast_df) {
       estimated_slg_using_speedangle_bip = sum(estimated_slg_using_speedangle, na.rm = TRUE),
       babip_value_bip = sum(babip_value, na.rm = TRUE),
       .groups = 'drop'
+    ) %>%
+    mutate(
+      update_date = Sys.Date()
     )
   
-  return(pitcher_statcast_df)
+  return(batter_statcast_df)
 }

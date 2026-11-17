@@ -111,6 +111,9 @@ process_pitcher_statcast_counts <- function(statcast_df) {
       estimated_slg_using_speedangle_bip = sum(estimated_slg_using_speedangle, na.rm = TRUE),
       babip_value_bip = sum(babip_value, na.rm = TRUE),
       .groups = 'drop'
+    ) %>%
+    mutate(
+      update_date = Sys.Date()
     )
   
   return(pitcher_statcast_df)

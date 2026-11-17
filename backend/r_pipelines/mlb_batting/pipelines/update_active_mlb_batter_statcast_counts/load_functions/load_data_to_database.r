@@ -47,7 +47,7 @@ write_df_to_sql_append <- function(df, table_name) {
   dbDisconnect(con)
 }
 
-delete_pitcher_stats_from_df <- function(table_name, pitcher_ids) {
+delete_batter_stats_from_df <- function(table_name, pitcher_ids) {
   con <- dbConnect(
     RPostgres::Postgres(),
     host = Sys.getenv("DB_HOST"),
