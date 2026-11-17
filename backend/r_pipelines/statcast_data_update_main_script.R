@@ -1,4 +1,3 @@
-library(here)
 
 scripts_to_run <- list(
   "Statcast Data Update"  = "backend/r_pipelines/statcast_data/pipelines/update_statcast_data/script/update_statcast_data_script.R"

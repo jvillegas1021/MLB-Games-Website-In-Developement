@@ -1,4 +1,4 @@
-get_all_batters <- function() {
+get_all_active_mlb_batters <- function() {
   
   url = "https://statsapi.mlb.com/api/v1/sports/1/players"
   players_df <- GET(url)
@@ -6,7 +6,7 @@ get_all_batters <- function() {
   players_df <- parsed$people
   
   batter_df <- players_df %>%
-    filter((primaryPosition.type != 'batter' |
+    filter((primaryPosition.type != 'Pitcher' |
               primaryPosition.type == 'Two-Way Player'),
            active == TRUE)
   
