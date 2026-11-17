@@ -5,3 +5,4 @@
 .RData
 __pycache__/
 node_modules/
+.Rproj.user
