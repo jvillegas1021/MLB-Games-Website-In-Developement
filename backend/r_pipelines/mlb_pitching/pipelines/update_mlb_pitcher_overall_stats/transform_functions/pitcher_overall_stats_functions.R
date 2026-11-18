@@ -1,11 +1,33 @@
-create_pitcher_identifier_df <- function(pitcher_df) {
-  pitcher_identifier_df <- pitcher_df %>%
+convert_ip_to_decimal <- function(ip) {
+  ip_num <- as.numeric(ip)
+  whole_innings <- floor(ip_num)
+  outs <- round((ip_num - whole_innings) * 10)
+  return(whole_innings + (outs / 3))
+}
+
+create_pitcher_identifier_df <- function(statsapi_df, statcast_df) {
+  
+  pitcher_statsapi_identifier_df <- statsapi_df %>%
     select(
       xMLBAMID,
       player_name,
       gamesStarted,
       gamesPitched
     )
+  
+  pitcher_statcast_identifier_df <- statcast_df %>%
+    select(
+      xMLBAMID,
+      raw_plate_appearances = plate_appearances
+    )
+  
+  pitcher_identifier_df <- pitcher_statsapi_identifier_df %>%
+    inner_join(
+      pitcher_statcast_identifier_df,
+      by = c('xMLBAMID' = 'xMLBAMID'),
+      relationship = 'one-to-one'
+    )
+  
   return(pitcher_identifier_df)
 }
 
@@ -23,6 +45,7 @@ prepare_pitcher_stats_counts_df <- function(statsapi_df, statcast_df) {
     select(xMLBAMID,
            runs,
            earnedRuns,
+           plate_appearances,
            atBats,
            homeRuns,
            strikeouts,
@@ -36,9 +59,7 @@ prepare_pitcher_stats_counts_df <- function(statsapi_df, statcast_df) {
            sacBunts,
            sacFlies,
            pitches,
-           plate_appearances,
            innings_pitched,
-           strikeouts,
            walks,
            pitches_outside_zone,
            swings_outside_zone,
@@ -66,26 +87,34 @@ prepare_pitcher_stats_counts_df <- function(statsapi_df, statcast_df) {
            iso_value_bip,
            estimated_slg_using_speedangle_bip,
            babip_value_bip
+    ) %>%
+    mutate(
+        inningsPitched = convert_ip_to_decimal(inningsPitched)
     )
   
   return(cleaned_pitcher_data)
 }
 
-
-process_pitcher_statcast_small_sample_size_pitchers <- function(statcast_df = NULL) {
+process_pitcher_statcast_small_sample_size_pitchers <- function(statcast_df = NULL, threshold = 150) {
   
-  numeric_cols <- names(statcast_df %>% select(where(function(x) is.numeric(x))))
+  static_cols <- c('xMLBAMID', 'player_name', 'season_count', 'total_games_started', 
+                   'total_games_pitched', 'total_plate_appearances', 'update_date')
+  
+  average_cols <- setdiff(names(statcast_df), static_cols)
   
   league_averages_df <- statcast_df %>%
-    summarise(across(all_of(numeric_cols), ~mean(.x, na.rm = TRUE)))
+    filter(total_plate_appearances >= threshold) %>%
+    summarise(across(all_of(average_cols), ~mean(.x, na.rm = TRUE)))
   
   curated_statcast_df <- statcast_df %>%
     mutate(
+      sample_weight = pmin(total_plate_appearances / threshold, 1),
       across(
-        all_of(numeric_cols),
-        ~ if_else(plate_appearances < 50, league_averages_df[[cur_column()]], .x)
+        all_of(average_cols),
+        ~ (sample_weight * .x) + ((1 - sample_weight) * league_averages_df[[cur_column()]])
       )
-    )
+    ) %>%
+    select(-sample_weight)
   
   return(curated_statcast_df)
 }
@@ -118,6 +147,7 @@ process_pitcher_statcast_stats <- function(statcast_df = NULL) {
       season_count = n(),
       total_games_started = sum(gamesStarted),
       total_games_pitched = sum(gamesPitched),
+      total_plate_appearances = sum(raw_plate_appearances),
       # Control block
       `BB%`       = if_else(sum(plate_appearances) == 0, 0, sum(walks) / sum(plate_appearances)),
       `K%`        = if_else(sum(plate_appearances) == 0, 0, sum(strikeouts) / sum(plate_appearances)),
